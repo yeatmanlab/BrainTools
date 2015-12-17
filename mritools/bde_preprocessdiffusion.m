@@ -18,23 +18,27 @@ end
 pe_mat = [0 1 0;0 -1 0];
 % Directory to save everything
 outdir64 = fullfile(basedir,'dmri64');
-% Pre process
+% Pre process: This is mostly done with command line calls to FSL
 fsl_preprocess(dMRI64Files, bvecs64, bvals64, pe_mat, outdir64);
-% Now run dtiInit
-params = dtiInitParams;
-dtEddy = fullfile(outdir64,'eddy','data.nii.gz');
-params.bvalsFile = fullfile(outdir64,'eddy','bvals');
-params.bvecsFile = fullfile(outdir64,'eddy','bvecs');
-params.eddyCorrect=-1;
+% Now run dtiInit. We turn off motion and eddy current correction because
+% that was take care of by FSL
+params = dtiInitParams; % Set up parameters for controlling dtiInit
+dtEddy = fullfile(outdir64,'eddy','data.nii.gz'); % Path to the data
+params.bvalsFile = fullfile(outdir64,'eddy','bvals'); % Path to bvals
+params.bvecsFile = fullfile(outdir64,'eddy','bvecs'); % Path to the bvecs
+params.eddyCorrect=-1; % This turns off eddy current and motion correction
 %params.outDir = fullfile(basedir,'dti64');
-params.rotateBvecsWithCanXform=1;
-params.phaseEncodeDir=2;
-params.clobber=1;
-t1 = fullfile(t1dir,'t1_acpc.nii.gz');
-dt6FileName = dtiInit(dtEddy,t1,params);
+params.rotateBvecsWithCanXform=1; % Phillips data requires this to be 1
+params.phaseEncodeDir=2; % AP phase encode
+params.clobber=1; % Overwrite anything previously done
+t1 = fullfile(t1dir,'t1_acpc.nii.gz'); % Path to the t1-weighted image
+dt6FileName = dtiInit(dtEddy,t1,params); % Run dtiInit to preprocess data
 
 %% Run AFQ
+
+% To run AFQ using mrtrix for tractography
 %afq = AFQ_Create('sub_dirs',fileparts(dt6FileName{1}),'sub_group',0,'computeCSD',1);
+% To run AFQ in test mode so it will go quickly
 afq = AFQ_Create('sub_dirs',fileparts(dt6FileName{1}),'sub_group',0,'run_mode','test');
 afq = AFQ_run([],[],afq);
 
