@@ -12,7 +12,7 @@
 % Each stimulus category will be shown 4 times per run.
 % and two tasks.
 
-nstim = 120 %The total number of stimuli needed for each category
+nstim = 180 %The total number of stimuli needed for each category
 sorttype = 'UN3_F';% The header category to sort based on
 
 % Load in excel spreadsheet (high freq words)
@@ -62,11 +62,11 @@ for c = 1:4
     st(:,c) = st(r,c);
 end
 %% render the stimuli
-clevels = [255 136 131]
-bg = 128;
-stimcon(1:40, 1:4)   = 1;
-stimcon(41:80, 1:4)  = 2;
-stimcon(81:120, 1:4) = 3;
+clevels = [254 135 131]
+bg = 127;
+stimcon(1:nstim/3, 1:4)   = 1;
+stimcon(nstim/3+1:2*nstim/3, 1:4)  = 2;
+stimcon(2*nstim/3+1:nstim, 1:4) = 3;
 c = 0; % counter
 for ii = 1:size(st,1)
     for jj = 1:size(st,2)
@@ -86,7 +86,7 @@ stimcat = sl + (sc-1).*4
 
 %% Decide on the frame order
 nreps = 5; %number of times that each stimulus category will be repeated in a run
-nruns = 8; %number of runs to make
+nruns = 12; %number of runs to make
 nblank = 10; %number of blanks in a run
 cnums = unique(stimcat); %all the stimulus category numbers
 for rn = 1:nruns
@@ -99,8 +99,36 @@ for rn = 1:nruns
     stimorder(rn,:) = Shuffle(horzcat(tmp, zeros(1,nblank)));
 end
 
+% Turn stimorder into frameorder denoting blank frames etc that are part of
+% a trial
+frameorder = makeFrameOrder(stimorder, 10, 10)
+
 %% Save it out
-desc = 'img is the image stack, sc denotes the contrast of each image and sl denotes the lexicality level and stimcat denotes the category'
-save img sc sl stimcat desc
+desc = ' img is the image stack \n sc denotes the contrast of each image\n sl denotes the lexicality level\n stimcat denotes the category\n stimorder gives the order of the stimulus for each run\n'
+save LexicalityExp img sc sl stimcat desc stimorder frameorder
+
+return
+
+%% run experiment
+% setup
+skipsync = 1
+offset = [];  % [] means no translation of the stimuli
+movieflip = [0 0];  % [0 0] means no flips.  [1 0] is necessary for flexi mirror to show up right-side up
+frameduration = 12;  % number of monitor frames for one unit.  60/5 = 12
+ptonparams = {[],[],0,skipsync};  % don't change resolution
+
+% Size of fixation
+fixationsize = [12 0];
+grayval = uint8(127);
+scfactor = 1;  % scale images bigger or smaller
+%tfun = [];
 
 
+% Show instructions
+oldclut = pton(ptonparams{:});
+[timeframes,timekeys,digitrecord,trialoffsets] = ...
+    ptviewmovie(permute(img,[1 2 4 3]), ...
+    frameorder,[],frameduration,[],[], ...
+    fixationsize,grayval,[],[],offset,[],movieflip,scfactor,[], ...
+    [],[],[],'5',[],[]);
+ptoff(oldclut);
