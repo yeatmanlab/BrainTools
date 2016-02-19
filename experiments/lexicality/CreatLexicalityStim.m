@@ -103,13 +103,17 @@ end
 % a trial
 frameorder = makeFrameOrder(stimorder, 10, 10)
 
+%% Creat fixation task
+[fixorder, fixcolor] = CreateFixationTask(size(frameorder,2));
+
 %% Save it out
 desc = ' img is the image stack \n sc denotes the contrast of each image\n sl denotes the lexicality level\n stimcat denotes the category\n stimorder gives the order of the stimulus for each run\n'
-save LexicalityExp img sc sl stimcat desc stimorder frameorder
+save LexicalityExp img sc sl stimcat desc stimorder frameorder fixorder fixcolor
 
 return
 
 %% run experiment
+
 % setup
 run = 1; %First run
 skipsync = 1
@@ -119,7 +123,7 @@ frameduration = 12;  % number of monitor frames for one unit.  60/5 = 12
 ptonparams = {[],[],0,skipsync};  % don't change resolution
 
 % Size of fixation
-fixationsize = [12 0];
+fixationsize = [8 0];
 grayval = uint8(127);
 scfactor = 1;  % scale images bigger or smaller
 %tfun = [];
@@ -128,7 +132,7 @@ scfactor = 1;  % scale images bigger or smaller
 oldclut = pton(ptonparams{:});
 [timeframes,timekeys,digitrecord,trialoffsets] = ...
     ptviewmovie(reshape(img,[size(img,1), size(img,2), 1 , size(img,3)]), ...
-    frameorder(run,:),[],frameduration,[],[], ...
+    frameorder(run,:),[],frameduration,fixorder,fixcolor, ...
     fixationsize,grayval,[],[],offset,[],movieflip,scfactor,[], ...
     [],[],[],'5',[],[]);
 ptoff(oldclut);
