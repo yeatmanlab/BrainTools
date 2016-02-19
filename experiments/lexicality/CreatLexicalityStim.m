@@ -123,7 +123,7 @@ end
 
 %% Save it out
 desc = ' img is the image stack \n sc denotes the contrast of each image\n sl denotes the lexicality level\n stimcat denotes the category\n stimorder gives the order of the stimulus for each run\n'
-save LexicalityExp img sc sl stimcat desc stimorder frameorder fixorder fixcolor
+save LexicalityExp img sc sl stimcat desc stimorder stimorder_cat frameorder fixorder fixcolor
 
 return
 
@@ -139,27 +139,3 @@ for ii = 1:length(imcat)
    caxis([0 255]);
    print('-dpng',sprintf('StimCategory_%d',ii))
 end
-
-%% run experiment
-
-run = 1; %First run.
-skipsync = 1
-offset = [];  % [] means no translation of the stimuli
-movieflip = [0 0];  % [0 0] means no flips.  [1 0] is necessary for flexi mirror to show up right-side up
-frameduration = 12;  % number of monitor frames for one unit.  60/5 = 12
-ptonparams = {[],[],0,skipsync};  % don't change resolution
-
-% Size of fixation
-fixationsize = [8 0];
-grayval = uint8(127);
-scfactor = 1;  % scale images bigger or smaller
-%tfun = [];
-
-% Show instructions
-oldclut = pton(ptonparams{:});
-[timeframes,timekeys,digitrecord,trialoffsets] = ...
-    ptviewmovie(reshape(img,[size(img,1), size(img,2), 1 , size(img,3)]), ...
-    frameorder(run,:),[],frameduration,fixorder,fixcolor, ...
-    fixationsize,grayval,[],[],offset,[],movieflip,scfactor,[], ...
-    [],[],[],'5',[],[]);
-ptoff(oldclut);
