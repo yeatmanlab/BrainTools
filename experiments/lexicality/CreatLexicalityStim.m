@@ -101,7 +101,22 @@ end
 
 % Turn stimorder into frameorder denoting blank frames etc that are part of
 % a trial
-frameorder = makeFrameOrder(stimorder, 10, 10)
+frameorder = makeFrameOrder(stimorder, 10, 10);
+
+% The variable stimorder tell us the image index (into img) that will be
+% shown on each trail. stimorder_cat will be a matrix with teh same
+% dimensions saying the category of each of these images. This will be what
+% we use to set up our glm. We do this as a loop because we have stim
+% category 0
+for ii = 1:size(stimorder,1)
+    for jj = 1:size(stimorder,2)
+        if stimorder(ii,jj) == 0
+            timorder_cat(ii,jj) = 0;
+        else
+            stimorder_cat(ii,jj) = stimcat(stimorder(ii,jj));
+        end
+    end
+end
 
 %% Creat fixation task
 [fixorder, fixcolor] = CreateFixationTask(size(frameorder,2));
@@ -112,10 +127,22 @@ save LexicalityExp img sc sl stimcat desc stimorder frameorder fixorder fixcolor
 
 return
 
+%% Save out .png files showing the montage of images that make up each stimulus category
+imcat = cell(1,12)
+for ii = 1:prod(size(stimorder))
+    if stimorder(ii) ~=0
+        imcat{stimorder_cat(ii)} = cat(3,imcat{stimorder_cat(ii)},img(:,:,stimorder(ii)));
+    end
+end
+for ii = 1:length(imcat)
+   showMontage(imcat{ii});
+   caxis([0 255]);
+   print('-dpng',sprintf('StimCategory_%d',ii))
+end
+
 %% run experiment
 
-% setup
-run = 1; %First run
+run = 1; %First run.
 skipsync = 1
 offset = [];  % [] means no translation of the stimuli
 movieflip = [0 0];  % [0 0] means no flips.  [1 0] is necessary for flexi mirror to show up right-side up
