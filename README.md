@@ -1,2 +1,3 @@
 # BrainTools
-Usefull tools for analyzing neuroimaging data
+Useful tools for analyzing neuroimaging data
+
