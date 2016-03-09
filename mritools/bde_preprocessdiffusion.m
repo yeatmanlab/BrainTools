@@ -73,8 +73,10 @@ dt6FileName{2} = dtiInit(dtEddy,t1,params); % Run dtiInit to preprocess data
 
 % Cell array with paths to the dt6 directories
 dt6dirs = horzcat(fileparts(dt6FileName{1}), fileparts(dt6FileName{2}));
+afq = AFQ_Create('sub_dirs',dt6dirs,'sub_group',[0 0],'clip2rois',0);
 % To run AFQ in test mode so it will go quickly
-afq = AFQ_Create('sub_dirs',dt6dirs,'sub_group',[0 0],'run_mode','test');
+% afq = AFQ_Create('sub_dirs',dt6dirs,'sub_group',[0 0],'run_mode','test');
+
 % To run AFQ using mrtrix for tractography
 % afq = AFQ_Create('sub_dirs',fileparts(dt6FileName{1}),'sub_group',0,'computeCSD',1);
 afq = AFQ_run([],[],afq);
