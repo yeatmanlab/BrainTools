@@ -65,8 +65,8 @@ dt6FileName{1} = dtiInit(dtEddy,t1,params); % Run dtiInit to preprocess data
 
 % Then for 32 dir data
 dtEddy = fullfile(outdir32,'eddy','data.nii.gz'); % Path to the data
-params.bvalsFile = fullfile(outdir64,'eddy','bvals'); % Path to bvals
-params.bvecsFile = fullfile(outdir64,'eddy','bvecs'); % Path to the bvecs
+params.bvalsFile = fullfile(outdir32,'eddy','bvals'); % Path to bvals
+params.bvecsFile = fullfile(outdir32,'eddy','bvecs'); % Path to the bvecs
 dt6FileName{2} = dtiInit(dtEddy,t1,params); % Run dtiInit to preprocess data
 
 %% Run AFQ
