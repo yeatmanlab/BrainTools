@@ -1,27 +1,41 @@
-function bde_preprocessdiffusion(basedir, t1dir)
+function bde_preprocessdiffusion(basedir, t1dir, doMakeNifti, doPreProc)
 % BDE lab preprocessing for diffusion data
 %
 % This is essoteric to our current diffusion acquisition which includes a
 % 32 direction acquisition (*DWI64_*.nii.gz) and a 64 direction acquisition
 % (*DWI64_*.nii.gz), and B0 images with a reversed phase encode
-% (*DWI6_*.nii.gz)
+% (*PA_*.nii.gz)
+%
+% Inputs
+% basedir     - path to the base directory with the raw data
+% t1dir       - path to the ac-pc aligned t1. Everything will be
+%               coregistered to this
+% doMakeNifti - Logical. Whether or not to make niftis from par/rec files
+% doPreProc   - logical. Whether or not to do preprocessing
+%
 % Example:
 %
 % basedir = '/mnt/diskArray/projects/MRI/NLR_204_AM'
 % t1dir = '/mnt/diskArray/projects/anatomy/NLR_204_AM'
-% bde_preprocessdiffusion(basedir, t1dir)
-
+%
 % t1dir = '/home/ehuber/analysis/anatomy/NLR_206_LM/';
 % basedir = '/home/ehuber/analysis/MRI/NLR_206_LM/20151119_CSD/';
-
+%
+% bde_preprocessdiffusion(basedir, t1dir)
 % TO DO: streamline multi subs, par to nifti function, sge, dim error
 
-doMakeNifti = 0; % convert parrec files in raw directory to nifti (or =0, skip if these files already exist)
-doPreProc = 0; % skip pre-processing in FSL if these files already exist
+%% Argument checking
+if ~exist('doMakeNifti','var') || isempty(doMakeNifti)
+    % convert parrec files in raw directory to nifti (or =0, skip if these files already exist)
+    doMakeNifti = 0;
+end
+if ~exist('doPreProc','var') || isempty(doPreProc)
+    doPreProc = 0; % skip pre-processing in FSL if these files already exist
+end
 
 %% Set up directories and find files
 rawdir = fullfile(basedir,'raw');
-if ~exist(rawdir), mkdir(rawdir), end
+if ~exist(rawdir, 'dir'), mkdir(rawdir), end
 
 % create nii.gz files from par/rec - do to: put this in a separate function
 if doMakeNifti
