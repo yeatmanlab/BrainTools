@@ -11,13 +11,38 @@ function bde_preprocessdiffusion(basedir, t1dir)
 % t1dir = '/mnt/diskArray/projects/anatomy/NLR_204_AM'
 % bde_preprocessdiffusion(basedir, t1dir)
 
+% t1dir = '/home/ehuber/analysis/anatomy/NLR_206_LM/';
+% basedir = '/home/ehuber/analysis/MRI/NLR_206_LM/20151119_CSD/';
+
+% TO DO: streamline multi subs, par to nifti function, sge, dim error
+
+doMakeNifti = 0; % convert parrec files in raw directory to nifti (or =0, skip if these files already exist)
+doPreProc = 0; % skip pre-processing in FSL if these files already exist
+
 %% Set up directories and find files
 rawdir = fullfile(basedir,'raw');
+if ~exist(rawdir), mkdir(rawdir), end
+
+% create nii.gz files from par/rec - do to: put this in a separate function
+if doMakeNifti
+    parFiles=dir(fullfile(rawdir,'*DWI*.PAR'));
+    for nn=1:length(parFiles)
+        inFile=fullfile(rawdir,parFiles(nn).name);
+        cmd = sprintf('parrec2nii --bvs -c --scaling=%s --store-header --output-dir=%s --overwrite %s', ...
+            'dv', rawdir, inFile);
+        system(cmd);
+    end
+end
+
 d64 = dir(fullfile(rawdir,'*DWI64_*.nii.gz'));
 d32 = dir(fullfile(rawdir,'*DWI32_*.nii.gz'));
-b0 = dir(fullfile(rawdir,'*DWI6_*.nii.gz'));
-dMRI64Files{1}=fullfile(rawdir,d64.name);
-dMRI32Files{1}=fullfile(rawdir,d32.name);
+b0 = dir(fullfile(rawdir,'*PA_*.nii.gz')); % grab post-anterior encoded file 
+% b0 = dir(fullfile(rawdir,'*DWI6_*.nii.gz'));
+
+% temp: note that this pulls only 1 of each file type, some subjects have
+% e.g. repeated measures for 64 or 32 dir data in a session
+dMRI64Files{1}=fullfile(rawdir,d64(1).name);
+dMRI32Files{1}=fullfile(rawdir,d32(1).name);
 
 % Add the b0 with the reversed phase encode
 for ii = 1:length(b0)
@@ -36,15 +61,19 @@ end
 % Phase encode matrix. This denotes, for each volume, which direction is
 % the phase encode
 %pe_mat = [0 1 0; 0 1 0; 0 -1 0];
-pe_mat = [0 1 0;0 -1 0];
+pe_mat = [0 1 0; 0 -1 0];
 
 % Directory to save everything
 outdir64 = fullfile(basedir,'dmri64');
 outdir32 = fullfile(basedir,'dmri32');
 
+% break
+
 %% Pre process: This is mostly done with command line calls to FSL
-fsl_preprocess(dMRI64Files, bvecs64, bvals64, pe_mat, outdir64);
-fsl_preprocess(dMRI32Files, bvecs32, bvals32, pe_mat, outdir32);
+if doPreProc
+    fsl_preprocess(dMRI64Files, bvecs64, bvals64, pe_mat, outdir64);
+    fsl_preprocess(dMRI32Files, bvecs32, bvals32, pe_mat, outdir32);
+end
 
 %% Run dtiInit to fit tensor model
 % Now run dtiInit. We turn off motion and eddy current correction because
@@ -60,6 +89,7 @@ params.eddyCorrect=-1; % This turns off eddy current and motion correction
 params.rotateBvecsWithCanXform=1; % Phillips data requires this to be 1
 params.phaseEncodeDir=2; % AP phase encode
 params.clobber=1; % Overwrite anything previously done
+params.fitMethod='rt'; % 'ls, or 'rt' for robust tensor fitting (longer)
 t1 = fullfile(t1dir,'t1_acpc.nii.gz'); % Path to the t1-weighted image
 dt6FileName{1} = dtiInit(dtEddy,t1,params); % Run dtiInit to preprocess data
 
@@ -72,8 +102,9 @@ dt6FileName{2} = dtiInit(dtEddy,t1,params); % Run dtiInit to preprocess data
 %% Run AFQ
 
 % Cell array with paths to the dt6 directories
-dt6dirs = horzcat(fileparts(dt6FileName{1}), fileparts(dt6FileName{2}));
-afq = AFQ_Create('sub_dirs',dt6dirs,'sub_group',[0 0],'clip2rois',0);
+% % dt6dirs = horzcat(fileparts(dt6FileName{1}), fileparts(dt6FileName{2}));
+dt6dirs = horzcat({fileparts(dt6FileName{1}{1})}, {fileparts(dt6FileName{2}{1})});
+afq = AFQ_Create('sub_dirs',dt6dirs,'sub_group',[0 0],'clip2rois', 0);
 % To run AFQ in test mode so it will go quickly
 % afq = AFQ_Create('sub_dirs',dt6dirs,'sub_group',[0 0],'run_mode','test');
 
@@ -81,4 +112,8 @@ afq = AFQ_Create('sub_dirs',dt6dirs,'sub_group',[0 0],'clip2rois',0);
 % afq = AFQ_Create('sub_dirs',fileparts(dt6FileName{1}),'sub_group',0,'computeCSD',1);
 afq = AFQ_run([],[],afq);
 
+% TO DO: integrate parallel version:
+% afq = AFQ_run_sge_LH(afq, 2, 3); %tmp
+
+save(fullfile(basedir, 'afqOut'), 'afq')
 
