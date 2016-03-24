@@ -12,52 +12,13 @@ Ss 102_rs No matching events found for word_c254_p50_dot (event id 102)
 #
 # License: BSD (3-clause)
 
-
-def nlr_organizeMEG_mnefun():
-
-    import os
-    import shutil
-    import glob
-    
-    # define subjects and sessions
-    raw_dir = '/mnt/diskArray/projects/MEG/nlr/mnetest'
-    sub = ['202_dd', '203_am']
-    sess = [['150827', '150919', '151013', '151103'], ['150831', '150922', '151009', '151029']]
-    adir = '/mnt/diskArray/projects/MEG/nlr/mnetest/mneanalysis/'
-    subjects = []
-    subject_run_indices = []
-    for n, s in enumerate(sub):
-        for ss in sess[n]:
-            # Make a new directory for the subject-session combo
-            sdir = os.path.join(adir,s+ss)
-            rfifdir = os.path.join(sdir,'raw_fif')
-            subjects.append(s+ss)
-            if not os.path.isdir(sdir):
-                os.mkdir(sdir)
-            if not os.path.isdir(rfifdir):
-                os.mkdir(rfifdir)
-            # List all directory files
-            fiflist=glob.glob(os.path.join(raw_dir,s,ss,'*_raw.fif'))
-            fiflist.sort()
-            for fnum, fname in enumerate(fiflist):
-                fifdest = os.path.join(rfifdir,s+ss+fiflist[fnum][-10:])
-                if not os.path.isfile(fifdest):
-                    shutil.copy(os.path.join(raw_dir,s,ss,fiflist[0]), fifdest)
-                else:
-                    print(fifdest + ' already exists: Skpping')
-                prebad = os.path.join(rfifdir,s+ss+'_prebad.txt')
-                if not os.path.isfile(prebad):
-                    open(prebad,'w').close()
-    return(subjects)                    
-
-
-
-
+          
 import numpy as np
 import mnefun
 import os
 os.chdir('/home/jyeatman/git/BrainTools/projects/NLR_MEG')
 from score import score
+from nlr_organizeMEG_mnefun import nlr_organizeMEG_mnefun
 os.chdir('/mnt/diskArray/projects/MEG/nlr/mnetest/mneanalysis')
 
 params = mnefun.Params(tmin=-0.05, tmax=1.0, t_adjust=-39e-3, n_jobs=18,
@@ -65,19 +26,21 @@ params = mnefun.Params(tmin=-0.05, tmax=1.0, t_adjust=-39e-3, n_jobs=18,
                        n_jobs_fir='cuda', n_jobs_resample='cuda',
                        filter_length='5s', epochs_type='fif', lp_cut=40.,
                        bmin=-0.05, auto_bad=15., plot_raw=False, bem_type = '5120')
-
+                     
+params.sss_type = 'python'
 params.subjects = nlr_organizeMEG_mnefun()
-params.subject_indices = [0]#range(len(params.subjects))
+params.subject_indices = [0, 1, 2, 3, 4, 5, 6, 7]#range(len(params.subjects))
+params.subject_indices = [4]
 params.structurals =[None] * len(params.subjects)
 params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4', '%s_5', '%s_6', '%s_7', '%s_8']
-params.subject_run_indices = [[0, 1, 2, 3], [0, 1, 2, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 5,], [0, 1, 2, 3, 4, 5, 6, 7]
+params.subject_run_indices = [[0, 1, 2, 3], [0, 1, 2, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6, 7]
 ,None,None,None,None]
 
 params.dates = [(2014, 0, 00)] * len(params.subjects)
 #params.subject_indices = [0]
 params.score = score  # scoring function to use
 params.plot_drop_logs = False
-
+params.on_missing = 'warning'
 params.acq_ssh = 'kambiz@minea.ilabs.uw.edu'  # minea - 172.28.161.8
 params.acq_dir = '/sinuhe/data03/jason_words'
 params.sws_ssh = 'kam@kasga.ilabs.uw.edu'  # kasga - 172.28.161.8
@@ -86,7 +49,7 @@ params.acq_ssh = 'jason@minea.ilabs.uw.edu'  # minea - 172.28.161.8
 params.acq_dir = '/sinuhe/data03/jason_words'
 params.sws_ssh = 'jason@kasga.ilabs.uw.edu'  # kasga - 172.28.161.8
 params.sws_dir = '/data05/jason/NLR'
-params.tsss_dur = 4.
+params.tsss_dur = 6.
 params.mf_args = '-hpie 30 -hpig .8 -hpicons'
 # epoch rejection criterion
 params.reject = dict(grad=3000e-13, mag=4.0e-12)
@@ -142,8 +105,8 @@ params.must_match = [
 mnefun.do_processing(
     params,
     fetch_raw=False,
-    do_score=False,
-    push_raw=False,
+    do_score=True,
+    push_raw=True,
     do_sss=True,
     fetch_sss=True,
     do_ch_fix=True,
