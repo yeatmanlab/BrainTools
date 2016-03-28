@@ -17,10 +17,10 @@ import mnefun
 from score import score
 
 params = mnefun.Params(tmin=-0.05, tmax=1.0, t_adjust=-39e-3, n_jobs=18,
-                       decim=2, n_jobs_mkl=1, proj_sfreq=250,
+                       decim=2, proj_sfreq=250,
                        n_jobs_fir='cuda', n_jobs_resample='cuda',
-                       filter_length='5s', epochs_type='fif', lp_cut=40.,
-                       bmin=-0.05, auto_bad=15., plot_raw=False, bem_type = '5120')
+                       filter_length='5s', lp_cut=40.,
+                       bmin=-0.05, auto_bad=15.)
 
 params.subjects = ['101_lg', '102_rs', '103_ac', '105_bb', '903_im', '106_km',
                    '107_tm','108_lg','109_kt','110_hh', '111_jh', '112_ar', 
@@ -42,7 +42,12 @@ params.dates = [(2014, 0, 00)] * len(params.subjects)
 params.subject_indices = [19]
 params.score = score  # scoring function to use
 params.plot_drop_logs = False
-
+# SSS options
+params.sss_type = 'python'
+params.sss_regularize = 'svd'
+params.tsss_dur = 6.
+params.st_correlation = .9
+#TODO What is this about?
 params.acq_ssh = 'kambiz@minea.ilabs.uw.edu'  # minea - 172.28.161.8
 params.acq_dir = '/sinuhe/data03/jason_words'
 params.sws_ssh = 'kam@kasga.ilabs.uw.edu'  # kasga - 172.28.161.8
@@ -51,8 +56,6 @@ params.acq_ssh = 'jason@minea.ilabs.uw.edu'  # minea - 172.28.161.8
 params.acq_dir = '/sinuhe/data03/jason_words'
 params.sws_ssh = 'jason@kasga.ilabs.uw.edu'  # kasga - 172.28.161.8
 params.sws_dir = '/data05/jason/NLR'
-params.tsss_dur = 4.
-params.mf_args = '-hpie 30 -hpig .8 -hpicons'
 # epoch rejection criterion
 params.reject = dict(grad=3000e-13, mag=4.0e-12)
 params.flat = dict(grad=1e-13, mag=1e-15)
@@ -60,7 +63,7 @@ params.auto_bad_reject = params.reject
 # params.auto_bad_flat = params.flat
 params.ssp_eog_reject = dict(grad=3000e-13, mag=4.0e-12, eog=np.inf)
 params.ssp_ecg_reject = dict(grad=3000e-13, mag=4.0e-12, eog=np.inf)
-# params.bem_type = '5120'
+params.bem_type = '5120'
 params.cov_method = 'shrunk'
 params.get_projs_from = range(len(params.run_names))
 params.inv_names = ['%s']
