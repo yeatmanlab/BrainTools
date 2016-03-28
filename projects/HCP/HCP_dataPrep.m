@@ -1,4 +1,4 @@
-function HCP_dataPrep(subjectDir, dwParams)
+function [diff, t1, dwParams] = HCP_dataPrep(subjectDir, dwParams)
 % BDE lab preprocessing for HCP data
 % 
 % Esoteric to dtiInit processing of files unzipped from 'Diffusion
@@ -58,6 +58,6 @@ dlmwrite(fullfile(diffDir,'data.bvals'),b,'\t')
 dwParams.bvecsFile = fullfile(diffDir,'data.bvecs');
 dwParams.bvalsFile = fullfile(diffDir,'data.bvals');
 
-dtiInit(diff, t1, dwParams)
+
 
 
