@@ -38,14 +38,12 @@ end
 %% Set up directories and find files
 diffDir = fullfile(subjectDir, 'Diffusion');
 t1 = fullfile(subjectDir, 'T1w_acpc_dc_restore_1.25.nii.gz'); % in future, may point to .7mm T1 data
-b = fullfile(diffDir, 'bvals');
-bv = fullfile(diffDir, 'bvecs');
+b = dlmread(fullfile(diffDir, 'bvals'));
+bv = dlmread(fullfile(diffDir, 'bvecs'));
 diff = fullfile(diffDir, 'data.nii.gz'); 
 
-% Load in T1 nifti, bvals, & bvecs
+% Load in diffusion nifti
 diff = readFileNifti(diff);
-b = dlmread(b);
-bv  = dlmread(bv);
 
 % bvals below 10 are rounded to 0, as b=0 necessary for dtiInit
 b(b<10) = 0;
@@ -53,34 +51,32 @@ b(b<10) = 0;
 % Flip bvecs over x axis to correct orientation
 bv(1,:) = bv(1,:).*-1;
 
-% Reorientate bvecs and bvals for operation (necessary?)
-% if size(bv,2) > size(bv,1)
-%     bv = bv';
-% end
-% if size(b,2) > size(b,1)
-%     b = b';
-% end
+% Reorientate bvecs and bvals for operation
+bv = bv';
+b = b';
 
 %% Find dMRI volumes with bvalues in the specified range (or equal to zero)
 v = (b > bRange(1) & b < bRange(2)) | b == 0;
 % Extract image volumes and corresponding bvals
-diff.data = diff.data(:,:,:,v); diff.dim(4)=sum(v); diff.fname = [outname '.nii.gz'];
+diff.data = diff.data(:,:,:,v); diff.dim(4)=sum(v); diff.fname = fullfile(diffDir, [outname '.nii.gz']);
 b = b(v); bv = bv(v,:);
 
 % Write the bvecs out with new formatting
-dlmwrite(fullfile(diffDir, [outname '.bvecs']), bv, '\t')
+dlmwrite(fullfile(diffDir, [outname '.bvecs']), bv', '\t')
 
 % write the bvals out with new formatting
-dlmwrite(fullfile(diffDir, [outname '.bvals']),b,'\t')
+dlmwrite(fullfile(diffDir, [outname '.bvals']),b','\t')
 
+% Write new nifti
+writeFileNifti(diff)
 
 %% Define subParams, define bvals and bvecs
 
 subParams = dwParams;
 
-subParams.bvecsFile = fullfile(diffDir,'data.bvecs');
-subParams.bvalsFile = fullfile(diffDir,'data.bvals');
-
+subParams.bvecsFile = fullfile(diffDir, [outname '.bvecs']);
+subParams.bvalsFile = fullfile(diffDir, [outname '.bvals']);
+diff = fullfile(diffDir, [outname '.nii.gz']);
 
 
 

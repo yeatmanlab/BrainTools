@@ -7,7 +7,10 @@ for ii = 1:20
 end
 
 % Render the arcuate for each subject
-for ii = 1:nsubs, fg = fgRead(afq.files.fibers.clean{ii}),AFQ_RenderFibers(fg(19), 'numfibers', 100, 'color',c(ii,:));end
+for ii = 1:length(afq.files.fibers.clean)
+    fg = fgRead(afq.files.fibers.clean{ii});
+    AFQ_RenderFibers(fg(19), 'numfibers', 100, 'color',c(ii,:))
+end
 % Plot out fa values for the arcuate for each subject
 plot(afq.vals.fa{19}')
 

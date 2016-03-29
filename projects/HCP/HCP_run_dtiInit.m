@@ -1,4 +1,4 @@
-function sub_dirs = HCP_run_dtiInit(baseDir, numCores, shell)
+function afq = HCP_run_dtiInit(baseDir, shell)
 % Checks to see if multiple or single subjects are being run, sets
 % parameters for dtiInit, corrects data and formatting for dtiInit
 % analyses, runs dtiInit for all subjects.
@@ -16,7 +16,7 @@ function sub_dirs = HCP_run_dtiInit(baseDir, numCores, shell)
 % but as file structure should be consistent across formats, should be
 % compatible--confirmation feedback appreciated!)
 %
-% numCores - number of cores to run it on
+% % numCores - number of cores to run it on
 %
 % shell - Shell to be analyzed. Defaults to inner shell (1). HCP
 % data has 3 shells, with approximate bvals of 1000, 2000, and 3000; 0 is
@@ -43,11 +43,14 @@ function sub_dirs = HCP_run_dtiInit(baseDir, numCores, shell)
 % sub_dirs = HCP_run_dtiInit(baseDir, numCores, shell)
 % 
 
+% %% Clock for testing
+% startTime = datestr(now);
+
 %% Argument checking
 % Defaults to 6 core parallel processing if undefined
-if ~exist('numCores', 'var') || isempty(numCores)
-    numCores = 6;
-end
+% if ~exist('numCores', 'var') || isempty(numCores)
+%     numCores = 6;
+% end
 
 % Defaults to single shell analysis if undefined
 if ~exist('shell', 'var') || isempty(shell)
@@ -66,37 +69,31 @@ dwParams = HCP_params;
 sub_dirs = cell(1, numel(dirList));
 
 %% Run each subject
+% This is the workhorse of the function.
 
 % In parallel
-if numCores > 1
-    pool = parpool(numCores);
-    % This is the workhorse of the function.
-    parfor ii = 1:numel(dirList), pool
+% if numCores > 1
+    parfor ii = 1:numel(dirList)
         subjectDir = fullfile(baseDir,dirList{ii},'T1w');
         [diff, t1, subParams] = HCP_dataPrep(subjectDir, dwParams, shell);
         % Run dtiInit, record file outputs and return
-        sub_dirs{ii} = fileparts(dtiInit(diff, t1, subParams));
+        [dt6FileName, ~] = dtiInit(diff, t1, subParams);
+        [sub_dirs{ii}, ~, ~] = fileparts(char(dt6FileName));
     end
-else
-    % Non parallel version
-    for ii = 1:numel(dirList)
-        subjectDir = fullfile(baseDir,dirList{ii},'T1w');
-        [diff, t1, subParams] = HCP_dataPrep(subjectDir, dwParams, shell);
-        % Run dtiInit, record file outputs and return
-        sub_dirs{ii} = fileparts(dtiInit(diff, t1, subParams));
-    end
-end
-
-return
+% else
+%     % Non parallel version
+%     for ii = 1:numel(dirList)
+%         subjectDir = fullfile(baseDir,dirList{ii},'T1w');
+%         [diff, t1, subParams] = HCP_dataPrep(subjectDir, dwParams, shell);
+%         % Run dtiInit, record file outputs and return
+%         sub_dirs{ii}([dt6FileName, outBaseDir]) = dtiInit(diff, t1, subParams);
+%     end
+% end
 
 %% run AFQ
-afq = AFQ_Create('sub_dirs', sub_dirs, 'sub_group', ones(length(sub_dirs,1)));
+afq = AFQ_Create('sub_dirs', sub_dirs, 'sub_group', ones(length(sub_dirs),1), 'seedVoxelOffsets', .5);
 afq = AFQ_run_sge(afq,[],3);
 
-%% to extract a single bvalue
-if exist('bvalue', 'var') && ~isempty(bvalue)
-    for ii = 1:length(subs)
-        % To extract a single bvalue
-        dtiExtractSingleShell(dMRI, bvecs, bvals, brange, outname)
-    end
-end
+% %% Clock for testing
+% stopTime = datestr(now);
+
