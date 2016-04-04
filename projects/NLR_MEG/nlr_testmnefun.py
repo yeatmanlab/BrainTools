@@ -19,7 +19,8 @@ import os
 os.chdir('/home/jyeatman/git/BrainTools/projects/NLR_MEG')
 from score import score
 from nlr_organizeMEG_mnefun import nlr_organizeMEG_mnefun
-os.chdir('/mnt/diskArray/projects/MEG/nlr/mnetest/mneanalysis')
+out_dir = '/mnt/diskArray/scratch/NLR_MEG'
+os.chdir(out_dir)
 
 params = mnefun.Params(tmin=-0.05, tmax=1.0, t_adjust=-39e-3, n_jobs=18,
                        decim=2, n_jobs_mkl=1, proj_sfreq=250,
@@ -28,13 +29,12 @@ params = mnefun.Params(tmin=-0.05, tmax=1.0, t_adjust=-39e-3, n_jobs=18,
                        bmin=-0.05, auto_bad=15., plot_raw=False, bem_type = '5120')
                      
 params.sss_type = 'python'
-params.subjects = nlr_organizeMEG_mnefun()
-params.subject_indices = [0, 1, 2, 3, 4, 5, 6, 7]#range(len(params.subjects))
-params.subject_indices = [4]
+params.subjects = nlr_organizeMEG_mnefun(out_dir=out_dir)
+params.subject_indices = np.arange(len(params.subjects))
 params.structurals =[None] * len(params.subjects)
 params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4', '%s_5', '%s_6', '%s_7', '%s_8']
-params.subject_run_indices = [[0, 1, 2, 3], [0, 1, 2, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6, 7]
-,None,None,None,None]
+#params.subject_run_indices = [[0, 1, 2, 3], [0, 1, 2, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6, 7]
+#,None,None,None,None]
 
 params.dates = [(2014, 0, 00)] * len(params.subjects)
 #params.subject_indices = [0]
