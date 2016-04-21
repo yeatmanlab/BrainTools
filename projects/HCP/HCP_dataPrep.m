@@ -1,4 +1,4 @@
-function [diff, t1, dwParams] = HCP_dataPrep(subjectDir, dwParams)
+function [diff, t1, subParams] = HCP_dataPrep(subjectDir, dwParams, shell)
 % BDE lab preprocessing for HCP data
 % 
 % Esoteric to dtiInit processing of files unzipped from 'Diffusion
@@ -19,45 +19,64 @@ function [diff, t1, dwParams] = HCP_dataPrep(subjectDir, dwParams)
 %
 % subjectDir = '/home/user/Documents/HCP/103414/T1w';
 % dwParams = HCP_params;
-% HCP_dataPrep(basedir, dwParams)
+% [diff, t1, subParams] = HCP_dataPrep(basedir, dwParams, shell)
+
+%% Define shell parameters
+% Set range for b value for selected shell
+if shell == 1
+    bRange = [900 1100];
+    outname = 'shell1';
+elseif shell == 2
+    bRange = [1900 2100];
+    outname = 'shell2';
+elseif shell == 3
+    bRange = [2900 3100];
+    outname = 'shell3';
+end
+
 
 %% Set up directories and find files
 diffDir = fullfile(subjectDir, 'Diffusion');
 t1 = fullfile(subjectDir, 'T1w_acpc_dc_restore_1.25.nii.gz'); % in future, may point to .7mm T1 data
-bvalsR = fullfile(diffDir, 'bvals');
-bvecsR = fullfile(diffDir, 'bvecs');
+b = dlmread(fullfile(diffDir, 'bvals'));
+bv = dlmread(fullfile(diffDir, 'bvecs'));
 diff = fullfile(diffDir, 'data.nii.gz'); 
 
-% Read in bvecs file, flip over X axis, write in correct format
+% Load in diffusion nifti
+diff = readFileNifti(diff);
 
-% Load in bvecs text file
-bve_xflip  = dlmread(bvecsR);
-
-% Flip over x axis
-bve_xflip(1,:) = bve_xflip(1,:).*-1;
-
-% Write the file out with new formatting
-dlmwrite(fullfile(diffDir,'data.bvecs'), bve_xflip, '\t')
-
-
-% Read in a .bvals file and round bvalues, write in correct format
 % bvals below 10 are rounded to 0, as b=0 necessary for dtiInit
-
-% Load in bvals text file
-b = dlmread(bvalsR);
-
-% We're only dealing with the b=0 volumes for now
 b(b<10) = 0;
 
-% write the file out with new formatting
-dlmwrite(fullfile(diffDir,'data.bvals'),b,'\t')
+% Flip bvecs over x axis to correct orientation
+bv(1,:) = bv(1,:).*-1;
 
+% Reorientate bvecs and bvals for operation
+bv = bv';
+b = b';
 
-%% Define bvals and bvecs and run dtiInit
+%% Find dMRI volumes with bvalues in the specified range (or equal to zero)
+v = (b > bRange(1) & b < bRange(2)) | b == 0;
+% Extract image volumes and corresponding bvals
+diff.data = diff.data(:,:,:,v); diff.dim(4)=sum(v); diff.fname = fullfile(diffDir, [outname '.nii.gz']);
+b = b(v); bv = bv(v,:);
 
-dwParams.bvecsFile = fullfile(diffDir,'data.bvecs');
-dwParams.bvalsFile = fullfile(diffDir,'data.bvals');
+% Write the bvecs out with new formatting
+dlmwrite(fullfile(diffDir, [outname '.bvecs']), bv', '\t')
 
+% write the bvals out with new formatting
+dlmwrite(fullfile(diffDir, [outname '.bvals']),b','\t')
+
+% Write new nifti
+writeFileNifti(diff)
+
+%% Define subParams, define bvals and bvecs
+
+subParams = dwParams;
+
+subParams.bvecsFile = fullfile(diffDir, [outname '.bvecs']);
+subParams.bvalsFile = fullfile(diffDir, [outname '.bvals']);
+diff = fullfile(diffDir, [outname '.nii.gz']);
 
 
 
