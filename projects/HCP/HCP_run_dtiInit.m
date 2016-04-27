@@ -1,4 +1,4 @@
-function afq = HCP_run_dtiInit(baseDir, shell)
+function afq = HCP_run_dtiInit(baseDir, shell, num_subs)
 % Checks to see if multiple or single subjects are being run, sets
 % parameters for dtiInit, corrects data and formatting for dtiInit
 % analyses, runs dtiInit for all subjects.
@@ -43,8 +43,8 @@ function afq = HCP_run_dtiInit(baseDir, shell)
 % sub_dirs = HCP_run_dtiInit(baseDir, numCores, shell)
 % 
 
-% %% Clock for testing
-% startTime = datestr(now);
+%% Clock for testing
+tic
 
 %% Argument checking
 % Defaults to 6 core parallel processing if undefined
@@ -60,6 +60,9 @@ end
 %% Autodetect all subject directories
 % Returns cell vector of subject directory names in baseDir
 dirList = HCP_autoDir(baseDir);
+
+%% Set dirList to predetermined length
+dirList = dirList(1:num_subs); % Commented off to run all, fix later!
 
 %% Set dwParams
 % HCP_params sets dwParams for dtiInit to correctly handle HCP data
@@ -91,9 +94,9 @@ sub_dirs = cell(1, numel(dirList));
 % end
 
 %% run AFQ
-afq = AFQ_Create('sub_dirs', sub_dirs, 'sub_group', ones(length(sub_dirs),1), 'seedVoxelOffsets', .5);
+afq = AFQ_Create('sub_dirs', sub_dirs, 'sub_group', ones(length(sub_dirs),1), 'sub_names', dirList, 'seedVoxelOffsets', .5, 'clip2rois', 0);
 afq = AFQ_run_sge(afq,[],3);
 
-% %% Clock for testing
-% stopTime = datestr(now);
+%% Clock for testing
+toc
 
