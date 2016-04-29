@@ -45,6 +45,19 @@ time     = vertcat(data{1:end,4});
 hours    = vertcat(data{1:end,5});
 beh_data = vertcat(data{1:end,column});
 
+%% Select group of Subjects
+% read data from Desktop
+[tmp, ~, data] = xlsread('/home/pdonnelly/Desktop/NLR_Scores.xlsx');
+% gather column headings
+data_ref = data(1,:);
+% remove data headers from data
+data = data(2:end,:);
+% create array of subjects of interest
+subs = {'201_GS', '202_DD', '203_AM', '204_AM', '205_AC', '206_LM'};
+% 
+
+
+
 %% Now plot change in the behavioral measure
 
 % get unique subject ids
