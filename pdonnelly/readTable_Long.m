@@ -18,6 +18,21 @@ function [m, m_demeaned, se_rm] = plotLongitudinalData(data, usesubs, sessions, 
 % column = 'WJ_BASIC_READING_SKILLS'
 % [m, m_demeaned, se_rm] = plotLongitudinalData(data, usesubs, sessions, column);
 
+%% Read Table Example
+
+subs = {'201_GS', '202_DD', '203_AM', '204_AM', '205_AC', '206_LM'};
+usesubs = [];
+T = readtable('/home/pdonnelly/Desktop/NLR_Scores.xlsx');
+for ii = 1:numel(subs)
+    thisSub = find(strcmp(subs(ii), T.Subject_));
+    usesubs = vertcat(usesubs,thisSub);
+end
+
+% Build a new struct
+data = table2struct(T(usesubs,:));
+
+
+
 %% Argument checking
 if ~exist('data','var') || isempty(data)
     [~, ~, data] =  xlsread('/home/pdonnelly/Desktop/NLR_Scores', 'Sheet2', 'A2:AO24');
@@ -60,40 +75,14 @@ for ii = 1:numel(usesubs)
     subSesh = find(strcmp(s(ii), sid));
     % loop over the measurements sessions for that subject
     for jj = 1:numel(subSesh)
-        plot(jj, beh_data(subSesh(jj)), '-o', ...
+        plot(jj, beh_data(subSesh(jj)), 'ko', ...
             'markerfacecolor',c(ii,:), 'markersize',8);
         % put data into a matrix
                 m(ii,jj) = beh_data(subSesh(jj));
     end
 end
 
-%% Figure in hours
-
-figure; hold;
-c = jet(length(usesubs));
-
-m_hours = nan(length(usesubs), length(sessions));
-
-for subj = 1:numel(usesubs)
-    subSesh = find(strcmp(s(subj), sid));    
-    for sesh = 1: numel(subSesh)
-%        plot(hours(subSesh(sesh)), beh_data(subSesh(sesh)), '-o', ...
-%         'markerfacecolor', c(subj,:), 'markersize', 8);
-    m_hours(subj,sesh) = hours(subSesh(sesh));
-    
-    end
-end
-
-figure; hold;
-
-plot(m_hours', m');
-
-% format the plot nicely
-colname(strfind(colname, '_')) = ' ';
-ylabel(sprintf(colname)); xlabel('Hours');
-grid('on')
-
-%% Calculate means, standard error
+%% To make a separate section
 % calculate column means
 mn = nanmean(m);
 % calculate mean and standard error (after de-meaning each subject)
@@ -109,32 +98,4 @@ set(gca,'xtick',sessions);
 axis('tight')
 grid('on')
 
-%% Calculate means, standard error for HOURS
-
-mn = nanmean(m);
-
-n = length(usesubs);
-m_demeaned = m - repmat(nanmean(m,2),1,length(sessions));
-se_rm = nanstd(m_demeaned)./sqrt(n);
-errorbar(mn, se_rm, '-ko', 'markerfacecolor', [0 0 0], ...
-    'linewidth',2);
-
-% format the plot nicely
-colname(strfind(colname, '_')) = ' ';
-ylabel(sprintf(colname)); xlabel('Hours');
-set(gca,'xtick',sessions);
-axis('tight')
-grid('on')
-
-%% fit plot
-
-f = fit(m_hours, m, 'lowess');
-plot(f, m_hours, m);
-
-% format the plot nicely
-colname(strfind(colname, '_')) = ' ';
-ylabel(sprintf(colname)); xlabel('Hours');
-
-axis auto;
-grid('on')
-
+return
