@@ -1,4 +1,4 @@
-function afq = HCP_run_dtiInit(baseDir, shell, num_subs)
+function afq = HCP_AFQonly(baseDir)
 % Checks to see if multiple or single subjects are being run, sets
 % parameters for dtiInit, corrects data and formatting for dtiInit
 % analyses, runs dtiInit for all subjects.
@@ -46,27 +46,11 @@ function afq = HCP_run_dtiInit(baseDir, shell, num_subs)
 %% Clock for testing
 tic
 
-%% Argument checking
-% Defaults to 6 core parallel processing if undefined
-% if ~exist('numCores', 'var') || isempty(numCores)
-%     numCores = 6;
-% end
-
-% Defaults to single shell analysis if undefined
-if ~exist('shell', 'var') || isempty(shell)
-    shell = 1;
-end
 
 %% Autodetect all subject directories
 % Returns cell vector of subject directory names in baseDir
 dirList = HCP_autoDir(baseDir);
 
-%% Set dirList to predetermined length
-dirList = dirList(1:num_subs); % Commented off to run all, fix later!
-
-%% Set dwParams
-% HCP_params sets dwParams for dtiInit to correctly handle HCP data
-dwParams = HCP_params;
 
 %% Set sub_dirs for speed
 sub_dirs = cell(1, numel(dirList));
@@ -76,12 +60,8 @@ sub_dirs = cell(1, numel(dirList));
 
 % In parallel
 % if numCores > 1
-    parfor ii = 1:numel(dirList)
-        subjectDir = fullfile(baseDir,dirList{ii},'T1w');
-        [diff, t1, subParams] = HCP_dataPrep(subjectDir, dwParams, shell);
-        % Run dtiInit, record file outputs and return
-        [dt6FileName, ~] = dtiInit(diff, t1, subParams);
-        [sub_dirs{ii}, ~, ~] = fileparts(char(dt6FileName));
+    for ii = 1:numel(dirList)
+        sub_dirs{ii} = horzcat('/mnt/scratch/HCP900/', char(dirList{ii}), '/T1w/dti90trilin');
     end
 % else
 %     % Non parallel version
@@ -93,6 +73,7 @@ sub_dirs = cell(1, numel(dirList));
 %     end
 % end
 
+tic
 %% run AFQ
 afq = AFQ_Create('sub_dirs', sub_dirs, 'sub_group', ones(length(sub_dirs),1), 'sub_names', dirList, 'seedVoxelOffsets', .5, 'clip2rois', 0);
 afq = AFQ_run_sge(afq,[],3);
