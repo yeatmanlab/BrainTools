@@ -20,7 +20,7 @@ function [m, m_demeaned, se_rm] = plotLongitudinalData(data, usesubs, sessions, 
 
 %% Argument checking
 if ~exist('data','var') || isempty(data)
-    [~, ~, data] =  xlsread('/home/pdonnelly/Desktop/NLR_Scores', 'Sheet2', 'A2:AO24');
+    [~, ~, data] =  xlsread('~/Desktop/NLR_Scores');
 end
 % designate which subjects and sessions to use
 if ~exist('usesubs','var') || isempty(usesubs)
