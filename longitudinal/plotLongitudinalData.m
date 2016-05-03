@@ -20,7 +20,7 @@ function [m, m_demeaned, se_rm] = plotLongitudinalData(data, usesubs, sessions, 
 
 %% Argument checking
 if ~exist('data','var') || isempty(data)
-    [~, ~, data] =  xlsread('/home/pdonnelly/Desktop/NLR_Scores', 'Sheet2', 'A2:AO24');
+    [~, ~, data] =  xlsread('~/Desktop/NLR_Scores');
 end
 % designate which subjects and sessions to use
 if ~exist('usesubs','var') || isempty(usesubs)
@@ -38,7 +38,10 @@ elseif ischar(column)
     colname = column;
     column = strcmp(colname, data(1,:));
 end
+
+
 %% Pull out subject id session numbers and the desired data if xlsread
+% vertcat each variable of interest
 sid      = data(1:end,1);
 sessnum  = vertcat(data{1:end,2});
 time     = vertcat(data{1:end,4});
@@ -47,15 +50,19 @@ beh_data = vertcat(data{1:end,column});
 
 %% Select group of Subjects
 % read data from Desktop
-[tmp, ~, data] = xlsread('/home/pdonnelly/Desktop/NLR_Scores.xlsx');
+[tmp, ~, data] = xlsread('~/Desktop/NLR_Scores.xlsx');
 % gather column headings
 data_ref = data(1,:);
 % remove data headers from data
 data = data(2:end,:);
 % create array of subjects of interest
 subs = {'201_GS', '202_DD', '203_AM', '204_AM', '205_AC', '206_LM'};
-% 
+% find all rows for subjects of interest
+for ii = 1:numel(subs)
+    data_indx = find(strcmp(data(:, strcmp(data_ref, 'Subject')), subs(ii))
 
+sub = '201_GS';
+data_indx = find(strcmp(data(:, strcmp(data_ref, 'Subject')), sub));
 
 
 %% Now plot change in the behavioral measure
