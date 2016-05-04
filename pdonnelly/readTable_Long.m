@@ -1,28 +1,15 @@
-function [m, m_demeaned, se_rm] = plotLongitudinalData(data, usesubs, sessions, column)
-% Make a plot of longitudinal data
-%
-% [m, m_demeaned, se_rm] = plotLongitudinalData(data, usesubs, sessions, column)
-%
-% Inputs:
-%
-% data
-% usesubs
-% sessions
-% column   - Either the column number with the behavioral data or a string
-%            of the column name. Either is fine
-% Outputs:
-%
-% Example:
-%
-% data =[]; usesubs = 1:4; sessions = 1:4;
-% column = 'WJ_BASIC_READING_SKILLS'
-% [m, m_demeaned, se_rm] = plotLongitudinalData(data, usesubs, sessions, column);
 
-%% Read Table Example
 
-subs = {'201_GS', '202_DD', '203_AM', '204_AM', '205_AC', '206_LM'};
-usesubs = [];
-T = readtable('/home/pdonnelly/Desktop/NLR_Scores.xlsx');
+%% Read Table 
+% upload data to table
+data_raw = readtable('~/Desktop/NLR_Scores.xlsx', 'Scores');
+% upload text file of subjects as table
+subs = readtable('~/LMB.dat');
+
+% Inner join table with subjects of interest
+data = innerjoin(data_raw, subs);
+
+
 for ii = 1:numel(subs)
     thisSub = find(strcmp(subs(ii), T.Subject_));
     usesubs = vertcat(usesubs,thisSub);
