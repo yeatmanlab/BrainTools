@@ -36,7 +36,7 @@ if nargin < 2
 end
 
 % Define scores for test
-if iscell(test)
+if iscell(test) % for future support of multiple tests
     score = cell(1, numel(test));
     for ii = 1:numel(test)
         score{ii} = AFQ_get(afq, 'metadata', test{ii});
@@ -81,71 +81,82 @@ end
 for ii = 1:numel(tractNum)
     tract = tractNum(ii);
     if ischar(diffProp)
-        assignin('caller', diffProp, AFQ_get(afq, fgnames{tract}, diffProp));
+        assignin('caller', diffProp, afq.vals.(diffProp){tract}(:, tractRange));
     elseif iscell(diffProp)
         for jj = 1:numel(diffProp)
-        assignin('caller', horzcat(diffProp{jj}, tract), AFQ_get(afq, fgnames{tract}, diffProp{jj}));
+        assignin('caller', strcat(diffProp{jj}, num2str(tract)), afq.vals.(diffProp{jj}){tract}(:, tractRange));
         end
     end
 end
-    fa = AFQ_get(afq, fgnames{tract}, 'fa');
-    md = AFQ_get(afq, fgnames{fgnum}, 'md');
-    % plot them out
-    figure;
-    subplot(1,2,1);
-    plot(mean(fa, 2), r, 'ko', 'markerfacecolor', [.8 0 0]);lsline
-    xlabel(sprintf('%s (tract num %d) FA', fgnames{fgnum}, fgnum),...
-        'fontsize', 14, 'fontname', 'times')
-    ylabel('Reading score','fontsize', 14, 'fontname', 'times')
-    subplot(1,2,2);
-    plot(mean(md, 2), r, 'ko', 'markerfacecolor', [0 0 .8]);lsline
-    xlabel(sprintf('%s (tract num %d) MD', fgnames{fgnum}, fgnum),...
-        'fontsize', 14, 'fontname', 'times')
-    ylabel('Reading score','fontsize', 14, 'fontname', 'times')
     
-    % Average tract profiles
-    h   = r>=120;
-    p   = r<=80;
-    g   = r>80 & r<120;
-    m1  = nanmean(fa(g==1, :));
-    m2  = nanmean(fa(p==1, :));
-    m3  = nanmean(fa(h==1, :));
+switch numGroups % expand more later
+    case 1
+    case 2
+        poor = find(score <= boundary);
+        good = find(score > boundary);
+    case 3
+        poor = find(score <= boundary(1));
+        average = find(score > boundary(1) & score < boundary(2));
+        good = find(score >= boundary(2));
+end
+
     
-
-    % NOTE THAT WE SHOULD CALCULATE SE BASED ON THE NUMBER OF NON NAN SUBS
-    se1 = nanstd(fa(g==1, :))./sqrt(size(fa(g==1, :),1));
-    se2 = nanstd(fa(p==1, :))./sqrt(size(fa(p==1, :),1));
-    se3 = nanstd(fa(h==1, :))./sqrt(size(fa(h==1, :),1));
-    
-
-    % plot them
-    figure; hold('on');
-    patch([1:100 fliplr(1:100)],[m1 - se1, fliplr(m1 + se1)],[.8 0 0],...
-        'facealpha',.5, 'edgealpha', .8, 'edgecolor', [.8 0 0]);
-    plot(1:100, m1, '-', 'color', [.8 0 0], 'linewidth',3);
-    patch([1:100 fliplr(1:100)],[m2 - se2, fliplr(m2 + se2)],[0 0 .8],...
-        'facealpha',.5, 'edgealpha', .8, 'edgecolor', [0 0 .8]);
-    plot(1:100, m2, '-', 'color', [0 0 .8], 'linewidth',3);
-    patch([1:100 fliplr(1:100)],[m3 - se3, fliplr(m3 + se3)],[0 .8 0],...
-        'facealpha',.5, 'edgealpha', .8, 'edgecolor', [0 0 .8]);
-    plot(1:100, m3, '-', 'color', [0 .8 0], 'linewidth',3);
-
-    md1  = nanmean(md(g==1, :));
-    md2  = nanmean(md(p==1, :));
-    md3  = nanmean(md(h==1, :));
-
-    semd1 = nanstd(md(g==1, :))./sqrt(size(md(g==1, :),1));
-    semd2 = nanstd(md(p==1, :))./sqrt(size(md(p==1, :),1));
-    semd3 = nanstd(md(h==1, :))./sqrt(size(md(h==1, :),1));
-
-    figure; hold('on');
-    patch([1:100 fliplr(1:100)],[md1 - semd1, fliplr(md1 + semd1)],[.8 0 0],...
-        'facealpha',.5, 'edgealpha', .8, 'edgecolor', [.8 0 0]);
-    plot(1:100, md1, '-', 'color', [.8 0 0], 'linewidth',3);
-    patch([1:100 fliplr(1:100)],[md2 - semd2, fliplr(md2 + semd2)],[0 0 .8],...
-        'facealpha',.5, 'edgealpha', .8, 'edgecolor', [0 0 .8]);
-    plot(1:100, md2, '-', 'color', [0 0 .8], 'linewidth',3);
-    patch([1:100 fliplr(1:100)],[md3 - semd3, fliplr(md3 + semd3)],[0 .8 0],...
-        'facealpha',.5, 'edgealpha', .8, 'edgecolor', [0 0 .8]);
-    plot(1:100, md3, '-', 'color', [0 .8 0], 'linewidth',3);
+%     % plot them out
+%     figure;
+%     subplot(1,2,1);
+%     plot(mean(fa, 2), r, 'ko', 'markerfacecolor', [.8 0 0]);lsline
+%     xlabel(sprintf('%s (tract num %d) FA', fgnames{fgnum}, fgnum),...
+%         'fontsize', 14, 'fontname', 'times')
+%     ylabel('Reading score','fontsize', 14, 'fontname', 'times')
+%     subplot(1,2,2);
+%     plot(mean(md, 2), r, 'ko', 'markerfacecolor', [0 0 .8]);lsline
+%     xlabel(sprintf('%s (tract num %d) MD', fgnames{fgnum}, fgnum),...
+%         'fontsize', 14, 'fontname', 'times')
+%     ylabel('Reading score','fontsize', 14, 'fontname', 'times')
+%     
+%     % Average tract profiles
+%     h   = r>=120;
+%     p   = r<=80;
+%     g   = r>80 & r<120;
+%     m1  = nanmean(fa(g==1, :));
+%     m2  = nanmean(fa(p==1, :));
+%     m3  = nanmean(fa(h==1, :));
+%     
+% 
+%     % NOTE THAT WE SHOULD CALCULATE SE BASED ON THE NUMBER OF NON NAN SUBS
+%     se1 = nanstd(fa(g==1, :))./sqrt(size(fa(g==1, :),1));
+%     se2 = nanstd(fa(p==1, :))./sqrt(size(fa(p==1, :),1));
+%     se3 = nanstd(fa(h==1, :))./sqrt(size(fa(h==1, :),1));
+%     
+% 
+%     % plot them
+%     figure; hold('on');
+%     patch([1:100 fliplr(1:100)],[m1 - se1, fliplr(m1 + se1)],[.8 0 0],...
+%         'facealpha',.5, 'edgealpha', .8, 'edgecolor', [.8 0 0]);
+%     plot(1:100, m1, '-', 'color', [.8 0 0], 'linewidth',3);
+%     patch([1:100 fliplr(1:100)],[m2 - se2, fliplr(m2 + se2)],[0 0 .8],...
+%         'facealpha',.5, 'edgealpha', .8, 'edgecolor', [0 0 .8]);
+%     plot(1:100, m2, '-', 'color', [0 0 .8], 'linewidth',3);
+%     patch([1:100 fliplr(1:100)],[m3 - se3, fliplr(m3 + se3)],[0 .8 0],...
+%         'facealpha',.5, 'edgealpha', .8, 'edgecolor', [0 0 .8]);
+%     plot(1:100, m3, '-', 'color', [0 .8 0], 'linewidth',3);
+% 
+%     md1  = nanmean(md(g==1, :));
+%     md2  = nanmean(md(p==1, :));
+%     md3  = nanmean(md(h==1, :));
+% 
+%     semd1 = nanstd(md(g==1, :))./sqrt(size(md(g==1, :),1));
+%     semd2 = nanstd(md(p==1, :))./sqrt(size(md(p==1, :),1));
+%     semd3 = nanstd(md(h==1, :))./sqrt(size(md(h==1, :),1));
+% 
+%     figure; hold('on');
+%     patch([1:100 fliplr(1:100)],[md1 - semd1, fliplr(md1 + semd1)],[.8 0 0],...
+%         'facealpha',.5, 'edgealpha', .8, 'edgecolor', [.8 0 0]);
+%     plot(1:100, md1, '-', 'color', [.8 0 0], 'linewidth',3);
+%     patch([1:100 fliplr(1:100)],[md2 - semd2, fliplr(md2 + semd2)],[0 0 .8],...
+%         'facealpha',.5, 'edgealpha', .8, 'edgecolor', [0 0 .8]);
+%     plot(1:100, md2, '-', 'color', [0 0 .8], 'linewidth',3);
+%     patch([1:100 fliplr(1:100)],[md3 - semd3, fliplr(md3 + semd3)],[0 .8 0],...
+%         'facealpha',.5, 'edgealpha', .8, 'edgecolor', [0 0 .8]);
+%     plot(1:100, md3, '-', 'color', [0 .8 0], 'linewidth',3);
 end
