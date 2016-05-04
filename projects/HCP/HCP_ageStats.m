@@ -38,36 +38,54 @@ af36sd = nanstd(af36);
 %% 
 
 % Scatter plots
+agebins = [24 28 32];
 for fgnum = 1:20;
     fgnames = afq.fgnames{fgnum};
     
     fa22 = nanmean(afq.vals.fa{fgnum}(afq.age == 22, :),2);
     fa26 = nanmean(afq.vals.fa{fgnum}(afq.age == 26, :),2);
     fa31 = nanmean(afq.vals.fa{fgnum}(afq.age == 31, :),2);
-%     fa36 = nanmean(afq.vals.fa{fgnum}(afq.age == 36, :),2);
+    faall = nanmean(afq.vals.fa{fgnum}(afq.age == 22 | afq.age == 26 | afq.age == 31, :), 2);
+    %     fa36 = nanmean(afq.vals.fa{fgnum}(afq.age == 36, :),2);
     
     md22 = nanmean(afq.vals.md{fgnum}(afq.age == 22, :),2);
     md26 = nanmean(afq.vals.md{fgnum}(afq.age == 26, :),2);
     md31 = nanmean(afq.vals.md{fgnum}(afq.age == 31, :),2);
-%     md36 = nanmean(afq.vals.fa{fgnum}(afq.age == 36, :),2);
-
-% Concatenate means
-
+    mdall = nanmean(afq.vals.md{fgnum}(afq.age == 22 | afq.age == 26 | afq.age == 31, :), 2);
+    %     md36 = nanmean(afq.vals.fa{fgnum}(afq.age == 36, :),2);
+    
+    % Concatenate means
+    
     fa = vertcat(nanmean(fa22), nanmean(fa26), nanmean(fa31));
     md = vertcat(nanmean(md22), nanmean(md26), nanmean(md31));
-
+    
+    % Concatenate standard errors
+    sefa = vertcat(nanstd(fa22)./sqrt(numel(fa22)), nanstd(fa26)./sqrt(numel(fa26)), nanstd(fa31)./sqrt(numel(fa31)));
+    semd = vertcat(nanstd(md22)./sqrt(numel(md22)), nanstd(md26)./sqrt(numel(md26)), nanstd(md31)./sqrt(numel(md31)));
+    
     % plot them out
-    figure;
-    subplot(1,2,1); hold on;
-    plot(fa, 'ko', 'markerfacecolor', [.8 0 0]);lsline
+    figure(1);
+    subplot(4,5,fgnum); hold on;
+    errorbar(agebins, fa, 2.*sefa, 'ko', 'markerfacecolor', [.8 0 0]);%lsline
+    plot(agebins, repmat(nanmean(faall),1,3), '--k');
     xlabel('Age Bins', 'fontsize', 14, 'fontname', 'times');
     ylabel(sprintf('%s (tract num %d) FA', fgnames, fgnum),'fontsize', 14, 'fontname', 'times')
+    title(fgnames)
+    %axis([1 3 .39 .64])
+    axis('tight')
+    set(gca,'xlim',[20 35])
     
-    subplot(1,2,2); hold on;
-    plot(md, 'ko', 'markerfacecolor', [0 0 .8]);lsline
+    figure(2)
+    subplot(4,5,fgnum); hold on;
+    errorbar(agebins, md, 2.*semd, 'ko', 'markerfacecolor', [0 0 .8]);%lsline
+    plot(agebins, repmat(nanmean(mdall),1,3), '--k');
     xlabel('Age Bins', 'fontsize', 14, 'fontname', 'times');
     ylabel(sprintf('%s (tract num %d) MD', fgnames, fgnum),'fontsize', 14, 'fontname', 'times')
-    
+    title(fgnames)
+    %axis([1 3 .72 .81])
+    axis('tight')
+        set(gca,'xlim',[20 35])
+
 %     % Average tract profiles
 %     g   = r>85;
 %     m1  = nanmean(fa(g==1, :));
