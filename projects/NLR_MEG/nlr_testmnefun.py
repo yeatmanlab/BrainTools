@@ -32,6 +32,20 @@ params = mnefun.Params(tmin=-0.05, tmax=1.0, t_adjust=-39e-3, n_jobs=18,
 params.trans_to = (0., 0., .04)     
 params.sss_type = 'python'
 params.subjects = nlr_organizeMEG_mnefun(out_dir=out_dir)
+# REMOVE BAD SUBJECTS
+# 103_ac150609 svd does not converge [3]
+# 121_gg150904 ERROR: continuous HPI was not active in this file! [10]
+# 101_lg150618 SSS error [16]
+# 202_dd15091 SVD does not converge [20]
+# 201_gs150824 corrupted file [24]
+# 201_gs150729 chpi not active [26]
+badsubs = ['103_ac150609','121_gg150904','101_lg150618','202_dd150919','201_gs150824','201_gs150729']
+for n, s in enumerate(badsubs):
+    subnum = params.subjects.index(s)
+    print('Removing subject ' + str(subnum) + ' ' + params.subjects[subnum])
+    params.subjects.remove(s)
+print("Running " + str(len(params.subjects)) + ' Subjects') 
+print("\n".join(params.subjects))
 params.subject_indices = np.arange(len(params.subjects))
 # BAD subjects 
 # 103_ac150609 svd does not converge [3]
@@ -40,9 +54,9 @@ params.subject_indices = np.arange(len(params.subjects))
 # 202_dd15091 SVD does not converge [20]
 # 201_gs150824 corrupted file [24]
 # 201_gs150729 chpi not active [26]
-params.subject_indices = np.concatenate((np.arange(0,3), np.arange(4,10), np.arange(11,16), np.arange(17,20),
-                                         np.arange(21, 24),[25], np.arange(27,len(params.subjects)))
-                                         , axis=0)
+#params.subject_indices = np.concatenate((np.arange(0,3), np.arange(4,10), np.arange(11,16), np.arange(17,20),
+#                                         np.arange(21, 24),[25], np.arange(27,len(params.subjects)))
+#                                         , axis=0)
 #params.subject_indices = np.arange(27,len(params.subjects))
 params.structurals =[None] * len(params.subjects)
 params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4', '%s_5', '%s_6', '%s_7', '%s_8']
@@ -118,12 +132,12 @@ params.must_match = [
 mnefun.do_processing(
     params,
     fetch_raw=False,
-    do_score=False,
+    do_score=True,
     push_raw=False,
-    do_sss=False,
+    do_sss=True,
     fetch_sss=False,
     do_ch_fix=False,
-    gen_ssp=True,
+    gen_ssp=False,
     apply_ssp=False,
     write_epochs=False,
     plot_psd=False,
