@@ -174,8 +174,8 @@ for fgnum = 1:20;
     ylabel('Reading score','fontsize', 14, 'fontname', 'times')
     
     % Average tract profiles
-    h   = r>119;
-    p   = r<81;
+    h   = r>=120;
+    p   = r<=80;
     g   = r>80 & r<120;
     m1  = nanmean(fa(g==1, :));
     m2  = nanmean(fa(p==1, :));
@@ -220,6 +220,49 @@ for fgnum = 1:20;
     plot(1:100, md3, '-', 'color', [0 .8 0], 'linewidth',3);
 end
 
+
+%% Isolated mean of Arcuate tracts at place of greatest diversion
+
+
+    fgnames = AFQ_get(afq, 'fgnames');
+    r = AFQ_get(afq, 'metadata', 'ReadEng_AgeAdj');
+    fa = AFQ_get(afq, fgnames{fgnum}, 'fa');
+    md = AFQ_get(afq, fgnames{fgnum}, 'md');
+
+    % Average tract profiles
+    h   = r>=120;
+    p   = r<=80;
+    g   = r>80 & r<120;
+    m1  = nanmean(fa(g==1, 45:70));
+    m2  = nanmean(fa(p==1, 45:70));
+    m3  = nanmean(fa(h==1, 45:70));
+
+    % NOTE THAT WE SHOULD CALCULATE SE BASED ON THE NUMBER OF NON NAN SUBS
+    se1 = nanstd(fa(g==1, 45:70))./sqrt(size(fa(g==1, 45:70),1));
+    se2 = nanstd(fa(p==1, 45:70))./sqrt(size(fa(p==1, 45:70),1));
+    se3 = nanstd(fa(h==1, 45:70))./sqrt(size(fa(h==1, 45:70),1));
+    
+    % plot them
+    figure; hold('on');
+    patch([1:length(m1) fliplr(1:length(m1))],[m1 - se1, fliplr(m1 + se1)],[.8 0 0],...
+        'facealpha',.5, 'edgealpha', .8, 'edgecolor', [.8 0 0]);
+    plot(1:length(m1), m1, '-', 'color', [.8 0 0], 'linewidth',3);
+    patch([1:length(m1) fliplr(1:length(m1))],[m2 - se2, fliplr(m2 + se2)],[0 0 .8],...
+        'facealpha',.5, 'edgealpha', .8, 'edgecolor', [0 0 .8]);
+    plot(1:length(m1), m2, '-', 'color', [0 0 .8], 'linewidth',3);
+    patch([1:length(m1) fliplr(1:length(m1))],[m3 - se3, fliplr(m3 + se3)],[0 .8 0],...
+        'facealpha',.5, 'edgealpha', .8, 'edgecolor', [0 .8 0]);
+    plot(1:length(m1), m3, '-', 'color', [0 .8 0], 'linewidth',3);
+    
+    % plot them out
+    figure; hold on;
+    plot(fa(g, 57), r(g), 'ko', 'markerfacecolor', [.8 0 0]);lsline
+    plot(fa(p, 57), r(p), 'ko', 'markerfacecolor', [0 0 .8]);lsline
+    plot(fa(h, 57), r(h), 'ko', 'markerfacecolor', [0 .8 0]);lsline
+    xlabel(sprintf('%s (tract num %d) FA', fgnames{fgnum}, fgnum),...
+        'fontsize', 14, 'fontname', 'times')
+    ylabel('Reading score','fontsize', 14, 'fontname', 'times')
+    
 
 
 

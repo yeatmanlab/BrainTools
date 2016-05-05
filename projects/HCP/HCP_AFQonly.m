@@ -60,9 +60,10 @@ sub_dirs = cell(1, numel(dirList));
 
 % In parallel
 % if numCores > 1
-    for ii = 1:numel(dirList)
-        sub_dirs{ii} = horzcat('/mnt/scratch/HCP900/', char(dirList{ii}), '/T1w/dti90trilin');
-    end
+for ii = 1:numel(dirList)
+    temp = dir(horzcat(baseDir, '/', dirList{ii}, '/T1w/dti*trilin'));
+    sub_dirs{ii} = horzcat(char(baseDir), '/', char(dirList{ii}), '/T1w/', temp.name);
+end
 % else
 %     % Non parallel version
 %     for ii = 1:numel(dirList)
