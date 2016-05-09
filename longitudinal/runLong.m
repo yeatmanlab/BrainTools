@@ -26,7 +26,7 @@ test_name = input('What test will you be using? ');
 [lme, lme2, data_table] = lmeLongitudinaldata(sid, hours, test_name, reading_score);
 [sub_mat, s] = lmeLongitudinalplot(subs, sid, hours, test_name, reading_score, lme, lme2, data_table);
 
-
+% [m, m_demeaned, se_rm] = plotLongitudinalData(data, data_indx, sessions, reading_score);
 
 
 
