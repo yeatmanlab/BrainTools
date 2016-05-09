@@ -41,7 +41,7 @@ for subj = 1:length(s)
        sub_mat(visit, 2) = plot_table.reading_score{visit_indx(visit)};
 %         plot(plot_table.hours(visit_indx(visit)), plot_table.reading_score{visit_indx(visit)}, '-o');
    end 
-   plot(sub_mat(:,1), sub_mat(:,2));
+   plot(sub_mat(:,1), sub_mat(:,2),'-o');
 end
 
 
@@ -49,6 +49,11 @@ end
 % colname(strfind(test_name, '_')) = ' ';
 ylabel(test_name); xlabel('Hours'); title('LMB pilot 6'); legend(subs);
 grid('on')
+
+%% Add in the best fit line
+xx = [0, 24];
+y = polyval(flipud(lme.Coefficients.Estimate),xx);
+plot(xx,y,'--k','linewidth',2);
 
 
 
