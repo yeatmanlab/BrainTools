@@ -1,5 +1,6 @@
-function [] = lmeLongitudinalplot(sid, hours, test_name, reading_score, lme, lme2, data_table)
-% [] = lmeLongitudinalplot(sid, hours, test_name, reading_score, lme, lme2, data_table)
+function [sub_mat, s] = lmeLongitudinalplot(subs, sid, hours, test_name, reading_score, lme, lme2, data_table)
+% [] = lmeLongitudinalplot(sid, hours, test_name, reading_score, lme, lme2,
+% data_table);
 % 
 % Function: plots the behavioral data and overlays lme curve
 % 
@@ -19,35 +20,35 @@ function [] = lmeLongitudinalplot(sid, hours, test_name, reading_score, lme, lme
 % [sid, hours, reading_score] = prepLongitudinaldata(data, subs, ...
 % test_name);
 % [lme, lme2, data_table] = lmeLongitudinaldata(sid, hours, test_name, reading_score);
-% [] = lmeLongitudinalplot(sid, hours, test_name, reading_score, lme, lme2, ...
-% data_table);
+% [sub_mat, s] = lmeLongitudinalplot(subs, sid, hours, test_name, reading_score, lme, lme2, data_table);
+
+plot_table = table(sid, hours, reading_score);
+
 
 
 s = unique(sid);
 
-
-plot_matrix = nan(length(hours), length(reading_score)); 
-
-for subj = 1:length(sid)
-   visit_indx = find(strcmp(s(subj), sid)); 
-   
-   for visit = 1:length(visit_indx)
-        
-      
-     
-   end
-    
-end
-
-c = jet(length(sid));
+% 
+plot_matrix = nan(length(hours), length(s)); 
 
 figure; hold;
+% c = jet(length(s));
+for subj = 1:length(s)
+   visit_indx = find(strcmp(s(subj), sid));
+    sub_mat = [];
+   for visit = 1:length(visit_indx)
+       sub_mat(visit, 1) = plot_table.hours(visit_indx(visit));
+       sub_mat(visit, 2) = plot_table.reading_score{visit_indx(visit)};
+%         plot(plot_table.hours(visit_indx(visit)), plot_table.reading_score{visit_indx(visit)}, '-o');
+   end 
+   plot(sub_mat(:,1), sub_mat(:,2));
+end
+
 
 % format the plot nicely
 % colname(strfind(test_name, '_')) = ' ';
-ylabel(test_name); xlabel('Hours');
-% grid('on')
-
+ylabel(test_name); xlabel('Hours'); title('LMB pilot 6'); legend(subs);
+grid('on')
 
 
 
