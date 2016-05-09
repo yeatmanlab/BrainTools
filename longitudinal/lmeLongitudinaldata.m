@@ -24,6 +24,26 @@ function [lme, lme2, data_table] = lmeLongitudinaldata(sid, hours, test_name, re
 
 %% Create Variations for Model Testing
 
+% Individual de-meaned data set
+s = unique(sid);
+
+hours_sq_indiv = nan(length(hours), 1);
+
+for ii = 1:length(s)
+   index = find(strcmp(s(ii),sid));
+   sum = 0;
+   for jj = 1:length(index)
+       sum = plus(sum, hours(index(jj))); 
+   end
+   avg = sum/length(index);
+   
+   for kk = 1:length(index);
+       hours_sq_unique(index(kk), 1) = hours(index(kk)) - avg;
+   end
+   
+end
+
+
 % I think we should "center" each variable (ie remove the mean)
 hours = hours - nanmean(hours); % CHECK THIS! i'M NOT SURE THAT i'M CENTERING PROPERLY
 hours_sq = hours.^2;
