@@ -24,6 +24,8 @@ function [lme, lme2, data_table] = lmeLongitudinaldata(sid, hours, test_name, re
 
 %% Create Variations for Model Testing
 
+% I think we should "center" each variable (ie remove the mean)
+hours = hours - nanmean(hours); % CHECK THIS! i'M NOT SURE THAT i'M CENTERING PROPERLY
 hours_sq = hours.^2;
 
 %% Create DataSet
