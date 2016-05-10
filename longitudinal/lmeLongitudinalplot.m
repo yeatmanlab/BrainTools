@@ -51,7 +51,7 @@ ylabel(test_name); xlabel('Hours'); title('LMB pilot 6'); legend(subs);
 grid('on')
 
 %% Add in the best fit line
-xx = [0, 24];
+xx = [0, 60, 120];
 y = polyval(flipud(lme.Coefficients.Estimate),xx);
 plot(xx,y,'--k','linewidth',2);
 

@@ -22,7 +22,8 @@ function [sid, hours, test_name, reading_score] = prepLongitudinaldata(data, sub
 
 %% Argument Checking
 if ~exist('data', 'var') || isempty(data)
-    [~, ~, data] = xlsread('~/Desktop/NLR_Scores.xlsx');
+    %[~, ~, data] = xlsread('~/Desktop/NLR_Scores.xlsx');
+    [~, ~, data] = xlsread('C:\Users\Patrick\Desktop/NLR_Scores.xlsx');
 end
 
 if ~exist('subs', 'var') || isempty(subs)
