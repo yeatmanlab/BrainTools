@@ -1,14 +1,10 @@
-function [sub_mat, s] = lmeLongitudinalplot(subs, sid, hours, test_name, reading_score, lme, lme2, data_table)
-% [] = lmeLongitudinalplot(sid, hours, test_name, reading_score, lme, lme2,
-% data_table);
+function [subs] = lmeLongitudinalplot(stats, test_names, subs);
+% [subs] = lmeLongitudinalplot(stats, test_names, subs);
 % 
 % Function: plots the behavioral data and overlays lme curve
 % 
 % Inputs:
-% sid
-% hours
-% test_name
-% reading_score
+% stats: in the form of a struct
 % 
 % Outputs:
 % 
@@ -16,47 +12,91 @@ function [sub_mat, s] = lmeLongitudinalplot(subs, sid, hours, test_name, reading
 % 
 % Example:
 %
-% data = []; subs = {'...', '...', '...'}; test_name = 'WJ_BRS';
-% [sid, hours, reading_score] = prepLongitudinaldata(data, subs, ...
-% test_name);
-% [lme, lme2, data_table] = lmeLongitudinaldata(sid, hours, test_name, reading_score);
-% [sub_mat, s] = lmeLongitudinalplot(subs, sid, hours, test_name, reading_score, lme, lme2, data_table);
-
-plot_table = table(sid, hours, reading_score);
 
 
+%% Plot Data
+for ii = 1:length(test_names)
+    % Create table for individual test
+    plot_table = table(stats(ii).data_table.sid, stats(ii).data_table.hours, stats(ii).data_table.score);
+    % Name variables in plot table
+    plot_table.Properties.VariableNames = {'sid', 'hours', 'score'};
+    % find the number of individual subjects
+    s = unique(stats(ii).data_table.sid);
+    % Create plot matrix
+    plot_matrix = nan(length(plot_table.hours), length(s)); 
 
-s = unique(sid);
+    % intialize and fix figure    
+    figure; hold;
+    % loop over each subject over sessions
+    for subj = 1:length(s)
+         % find the sessions for each subject
+         visit_indx = find(plot_table.sid == s(subj));
+         % create empty array for individual subject 
+         sub_mat = [];
+         % loop over each visit
+         for visit = 1:length(visit_indx)
+             % assign session values to plot array
+             sub_mat(visit, 1) = plot_table.hours(visit_indx(visit));
+             sub_mat(visit, 2) = plot_table.score(visit_indx(visit));
+         end
+         % plot the scores, hours v. score
+         plot(sub_mat(:,1), sub_mat(:,2),'-o');
+    end
 
-% 
-plot_matrix = nan(length(hours), length(s)); 
+    % format the plot nicely
+    ylabel(test_names(ii)); xlabel('Hours'); 
+    legend(subs, 'Location', 'eastoutside');
+    grid('on')
 
-figure; hold;
-% c = jet(length(s));
-for subj = 1:length(s)
-   visit_indx = find(strcmp(s(subj), sid));
-    sub_mat = [];
-   for visit = 1:length(visit_indx)
-       sub_mat(visit, 1) = plot_table.hours(visit_indx(visit));
-       sub_mat(visit, 2) = plot_table.reading_score{visit_indx(visit)};
-%         plot(plot_table.hours(visit_indx(visit)), plot_table.reading_score{visit_indx(visit)}, '-o');
-   end 
-   plot(sub_mat(:,1), sub_mat(:,2),'-o');
+    % Add line of best fit
+%     xx = [min(plot_table.hours), max(plot_table.hours)];
+      xx = [0 50 100 150 200];
+    y = polyval(flipud(stats(ii).lme1.Coefficients.Estimate),xx);
+    plot(xx,y,'--k','linewidth',2);
+
 end
 
+% Plot Centered
+for ii = 1:length(test_names)
+    % Create table for individual test
+    plot_table = table(stats(ii).data_table.sid, stats(ii).data_table.hours, stats(ii).data_table.score_adj);
+    % Name variables in plot table
+    plot_table.Properties.VariableNames = {'sid', 'hours', 'score'};
+    % find the number of individual subjects
+    s = unique(stats(ii).data_table.sid);
+    % Create plot matrix
+    plot_matrix = nan(length(plot_table.hours), length(s)); 
 
-% format the plot nicely
-% colname(strfind(test_name, '_')) = ' ';
-ylabel(test_name); xlabel('Hours'); title('LMB pilot 6'); legend(subs);
-grid('on')
+    % intialize and fix figure    
+    figure; hold;
+    % loop over each subject over sessions
+    for subj = 1:length(s)
+         % find the sessions for each subject
+         visit_indx = find(plot_table.sid == s(subj));
+         % create empty array for individual subject 
+         sub_mat = [];
+         % loop over each visit
+         for visit = 1:length(visit_indx)
+             % assign session values to plot array
+             sub_mat(visit, 1) = plot_table.hours(visit_indx(visit));
+             sub_mat(visit, 2) = plot_table.score(visit_indx(visit));
+         end
+         % plot the scores, hours v. score
+         plot(sub_mat(:,1), sub_mat(:,2),'-o');
+    end
 
-%% Add in the best fit line
-xx = [0, 24];
-y = polyval(flipud(lme.Coefficients.Estimate),xx);
-plot(xx,y,'--k','linewidth',2);
+    % format the plot nicely
+    ylabel(test_names(ii)); xlabel('Hours'); 
+    legend(subs, 'Location', 'eastoutside');
+    grid('on')
 
+    % Add line of best fit
+%     xx = [min(plot_table.hours), max(plot_table.hours)];
+    xx = [0 50 100 150 200];
+    y = polyval(flipud(stats(ii).lme2.Coefficients.Estimate),xx);
+    plot(xx,y,'--k','linewidth',2);
 
-
+end
 
 
 
