@@ -1,7 +1,8 @@
-function [sid, hours, test_name, reading_score] = prepLongitudinaldata(data, subs, test_name)
+function [sid, hours, time, test_name, reading_score] = prepLongitudinaldata(data, subs, test_name)
+
 % Prepares data for lmeLongitudinaldata and plotLongitudinaldata
 % 
-% [lme, lme2, data_table] = lmeLongitudinaldata(data, test_name, subs)
+% [sid, hours, time, test_name, reading_score] = prepLongitudinaldata(data, subs, test_name)
 % 
 % Inputs: 
 % data
@@ -40,6 +41,8 @@ end
 
 % gather column headings
 data_ref = data(1,:);
+% add '\' preceding each "_" for nicer looking titles/formatting
+data_ref = strrep(data_ref, '_', '\_');
 % remove data headers from data
 data = data(2:end,:);
 % find all rows for subjects of interest
