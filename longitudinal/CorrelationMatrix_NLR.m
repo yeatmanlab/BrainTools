@@ -8,7 +8,7 @@
 %[~, ~, data] = xlsread('C:\Users\Patrick\Desktop/NLR_Scores.xlsx');
 
 %% Select group of Subjects
-
+subs = {'152_TC', '201_GS', '202_DD', '203_AM', '204_AM', '205_AC', '206_LM'};
 % gather column headings
 data_ref = data(1,:);
 % add '\' preceding each "_" for nicer looking titles/formatting
@@ -24,7 +24,7 @@ for subj = 1:numel(subs)
 end
 % create refined data array for data of interest
 % initialize empty arrays
-sid = []; sessnum = []; time = []; hours = [];
+lwid = []; wa = []; brs = []; rf = []; swe = []; pde = []; twre = []; wasi = []; elision = []; pa = []; rapid = [];
 % vertcat each reading test variable
 for subj = 1:numel(data_indx)
     lwid       = vertcat(lwid, data(data_indx(subj), strcmp(data_ref, 'WJ\_LWID\_SS')));
@@ -41,21 +41,21 @@ for subj = 1:numel(data_indx)
 end
 
 %% Concatenate data into column vectors
-dl_wid         = vertcat(data{2:end,5});
-dl_wa          = vertcat(data{2:end,7});
-dl_or          = vertcat(data{2:end,9});
-dl_srf         = vertcat(data{2:end,11});
-dl_wj_brs      = vertcat(data{2:end,12});
-dl_wj_rf       = vertcat(data{2:end,13});
-dl_twre        = vertcat(data{2:end,19});
-dl_ctopp_ran   = vertcat(data{2:end,43});
-dl_ctopp_elds  = vertcat(data{2:end,45});
-
-X(:,1) = dl_wj_brs;
-X(:,2) = dl_wj_rf;
-X(:,3) = dl_twre;
-X(:,4) = dl_ctopp_elds;
-X(:,5) = dl_ctopp_ran;
+% dl_wid         = vertcat(data{2:end,5});
+% dl_wa          = vertcat(data{2:end,7});
+% dl_or          = vertcat(data{2:end,9});
+% dl_srf         = vertcat(data{2:end,11});
+% dl_wj_brs      = vertcat(data{2:end,12});
+% dl_wj_rf       = vertcat(data{2:end,13});
+% dl_twre        = vertcat(data{2:end,19});
+% dl_ctopp_ran   = vertcat(data{2:end,43});
+% dl_ctopp_elds  = vertcat(data{2:end,45});
+% 
+% X(:,1) = dl_wj_brs;
+% X(:,2) = dl_wj_rf;
+% X(:,3) = dl_twre;
+% X(:,4) = dl_ctopp_elds;
+% X(:,5) = dl_ctopp_ran;
 %
 
 % Create Correlation Matrix

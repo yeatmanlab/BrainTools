@@ -24,11 +24,13 @@ stats = struct;
 % LMB
 subs = {'152_TC', '201_GS', '202_DD', '203_AM', '204_AM', '205_AC', '206_LM'};
 %% Test Selection
-test_names = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_RF'};
+test_names = {'TWRE_SWE_SS', 'TWRE_PDE_SS', 'TWRE_INDEX'};
+% 'TWRE_SWE_SS', 'TWRE_PDE_SS'
+% 'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_RF'
 test_names = strrep(test_names, '_', '\_');
 %% Time Selection
 % hours = 1; days = 2
-time_course = 2;
+time_course = 1;
 
 %% Optional input format
 % subs = input('What subjects will you be using? Enter as {..., ..., ...} ');

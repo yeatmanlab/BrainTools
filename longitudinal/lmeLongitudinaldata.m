@@ -31,11 +31,11 @@ score = cell2mat(reading_score);
 % de-mean each individual's reading scores
 for ii = 1:length(s)
    index = find(strcmp(s(ii),sid));
-   sum = 0;
+   total = 0;
    for jj = 1:length(index)
-       sum = plus(sum, score(index(jj))); 
+       total = plus(total, score(index(jj))); 
    end
-   avg = sum/length(index);
+   avg = total/length(index);
    
    for kk = 1:length(index);
        score_sq_unique(index(kk), 1) = score(index(kk)) - avg;
@@ -60,11 +60,11 @@ end
 % Centering of time course variable
 for ii = 1:length(s)
    index = find(strcmp(s(ii),sid));
-   sum = 0;
+   total = 0;
    for jj = 1:length(index)
-       sum = plus(sum, long_var(index(jj))); 
+       total = plus(total, long_var(index(jj))); 
    end
-   avg = sum/length(index);
+   avg = total/length(index);
    
    for kk = 1:length(index);
        long_var_adj(index(kk), 1) = long_var(index(kk)) - avg;

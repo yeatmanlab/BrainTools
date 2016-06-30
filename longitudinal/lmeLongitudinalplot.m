@@ -162,23 +162,23 @@ for ii = 1:length(test_names)
 end
 
 
-<<<<<<< HEAD
-=======
-% format the plot nicely
-% colname(strfind(test_name, '_')) = ' ';
-ylabel(test_name); xlabel('Hours'); title('LMB pilot 6'); legend(subs);
-grid('on')
 
-%% Add in the best fit line
-xx = [0, 60, 120];
-y = polyval(flipud(lme.Coefficients.Estimate),xx);
-plot(xx,y,'--k','linewidth',2);
+% 
+% % format the plot nicely
+% % colname(strfind(test_name, '_')) = ' ';
+% ylabel(test_name); xlabel('Hours'); title('LMB pilot 6'); legend(subs);
+% grid('on')
 
-
+% %% Add in the best fit line
+% xx = [0, 60, 120];
+% y = polyval(flipud(lme.Coefficients.Estimate),xx);
+% plot(xx,y,'--k','linewidth',2);
 
 
 
->>>>>>> ceb79ecf75ba95039e588c9ea974341002218fc8
+
+
+
 
 return
 
