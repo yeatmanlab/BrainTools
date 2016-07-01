@@ -1,4 +1,4 @@
-function [m, m_demeaned, se_rm] = plotLongitudinalData(data, data_indx, sessions, column)
+function [m, m_demeaned, se_rm] = plotLongitudinalData(data, data_indx, sessions, reading_score)
 % Make a plot of longitudinal data
 %
 % [m, m_demeaned, se_rm] = plotLongitudinalData(data, usesubs, sessions, column)
@@ -19,34 +19,34 @@ function [m, m_demeaned, se_rm] = plotLongitudinalData(data, data_indx, sessions
 % [m, m_demeaned, se_rm] = plotLongitudinalData(data, usesubs, sessions, column);
 
 %% Argument checking
-if ~exist('data','var') || isempty(data)
-    [~, ~, data] =  xlsread('~/Desktop/NLR_Scores');
-end
-% designate which subjects and sessions to use
-if ~exist('usesubs','var') || isempty(data_indx)
-    data_indx = [1 2 3 4 5 6];
-end
-if ~exist('sessions','var') || isempty(sessions)
-    sessions = [1 2 3 4 5];
-end
-
-% Column can be either the name of the behavioral measure or the column
-% number and we will sort this out
-if isnumeric(column)
-    colname  = data{1,column};
-elseif ischar(column)
-    colname = column;
-    column = strcmp(colname, data(1,:));
-end
+% if ~exist('data','var') || isempty(data)
+%     [~, ~, data] =  xlsread('~/Desktop/NLR_Scores');
+% end
+% % designate which subjects and sessions to use
+% if ~exist('usesubs','var') || isempty(data_indx)
+%     data_indx = [1 2 3 4 5 6];
+% end
+% if ~exist('sessions','var') || isempty(sessions)
+%     sessions = [1 2 3 4 5];
+% end
+% 
+% % Column can be either the name of the behavioral measure or the column
+% % number and we will sort this out
+% if isnumeric(column)
+%     colname  = data{1,column};
+% elseif ischar(column)
+%     colname = column;
+%     column = strcmp(colname, data(1,:));
+% end
 
 
 %% Pull out subject id session numbers and the desired data if xlsread
 % vertcat each variable of interest
-sid      = data(1:end,1);
-sessnum  = vertcat(data{1:end,2});
-time     = vertcat(data{1:end,4});
-hours    = vertcat(data{1:end,5});
-beh_data = vertcat(data{1:end,column});
+% sid      = data(1:end,1);
+% sessnum  = vertcat(data{1:end,2});
+% time     = vertcat(data{1:end,4});
+% hours    = vertcat(data{1:end,5});
+% beh_data = vertcat(data{1:end,column});
 
 %% Now plot change in the behavioral measure
 
@@ -69,32 +69,6 @@ for ii = 1:numel(data_indx)
                 m(ii,jj) = beh_data(subSesh(jj));
     end
 end
-
-%% Figure in hours
-
-figure; hold;
-c = jet(length(data_indx));
-
-m_hours = nan(length(data_indx), length(sessions));
-
-for subj = 1:numel(data_indx)
-    subSesh = find(strcmp(s(subj), sid));    
-    for sesh = 1: numel(subSesh)
-%        plot(hours(subSesh(sesh)), beh_data(subSesh(sesh)), '-o', ...
-%         'markerfacecolor', c(subj,:), 'markersize', 8);
-    m_hours(subj,sesh) = hours(subSesh(sesh));
-    
-    end
-end
-
-figure; hold;
-
-plot(m_hours', m');
-
-% format the plot nicely
-colname(strfind(colname, '_')) = ' ';
-ylabel(sprintf(colname)); xlabel('Hours');
-grid('on')
 
 %% Calculate means, standard error
 % calculate column means
