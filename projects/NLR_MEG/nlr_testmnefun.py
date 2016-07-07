@@ -29,7 +29,7 @@ params = mnefun.Params(tmin=-0.05, tmax=1.0, t_adjust=-39e-3, n_jobs=18,
                        bmin=-0.05, auto_bad=15., plot_raw=False, 
                        bem_type = '5120')
           
-params.trans_to = (0., 0., .04)     
+params.trans_to = (0., 0., .04) # Align each subject to a common reference frame
 params.sss_type = 'python'
 params.auto_bad_meg_thresh = 30 # THIS SHOULD NOT BE SO HIGH!
 params.subjects = nlr_organizeMEG_mnefun(out_dir=out_dir)
