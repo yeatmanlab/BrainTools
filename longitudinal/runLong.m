@@ -61,6 +61,7 @@ end
 % Plot histogram of growth estimates with error bars
 [stats] = lmeGrowthplot(stats, test_names, subs, time_course);
 
-
+% plot Correlation matrix
+[stats] = plotCorr(stats, data, subs);
 
 return

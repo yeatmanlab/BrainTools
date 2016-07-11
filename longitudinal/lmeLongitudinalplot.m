@@ -92,7 +92,23 @@ end
 % end
 
 % Plot Centered
+% figure; hold;
+% determine subplot dimensions
+% l = length(test_names);
+% if (l < 4)
+%     m = 1;
+%     n = l;
+% elseif (l >= 4 && l <= 8)
+%     m = 2;
+%     n = l/2;
+% elseif (l > 8)
+%     m = 1;
+%     n = l;
+% end
+
+% Create plots
 for ii = 1:length(test_names)
+%     subplot(m,n,ii);
     % Create table for individual test
     plot_table = table(stats(ii).data_table.sid, stats(ii).data_table.long_var, ...
          stats(ii).data_table.score_adj);
@@ -103,7 +119,6 @@ for ii = 1:length(test_names)
     % Create plot matrix
     plot_matrix = nan(length(plot_table.sid), length(s)); 
 
-    % intialize and fix figure    
     figure; hold;
     % loop over each subject over sessions
     for subj = 1:length(s)
