@@ -27,7 +27,9 @@ for ii = 1:length(test_names)
     text(ii-.25, 0.02, num2str(stats(ii).lme_linear.Coefficients.pValue(2)))
 end
 
-
+% Save image
+    fname = sprintf('~/Desktop/figures/LMB/linearGrowthEst-%s.png', date);
+    print(fname, '-dpng'); 
 
 %% Quadratic
 figure; hold;
@@ -52,7 +54,10 @@ for ii = 1:length(test_names)
 end
 
     
-
+% Save image
+    fname = sprintf('~/Desktop/figures/LMB/quadGrowthEst-%s.png', date);
+    print(fname, '-dpng'); 
+    
         
 
 end

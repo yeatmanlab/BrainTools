@@ -21,9 +21,8 @@ subs = {'102_RS', '110_HH', '145_AC', '150_MG', '151_RD', '152_TC', ...
         '179_GM', '180_ZD', '201_GS', '202_DD', '203_AM', '204_AM', '205_AC', '206_LM', ...
         '207_AH', '208_LH', '210_SB', '211_LB'};
 %% Test Selection
-test_names = {'WJ_BRS'};
-% 'TWRE_SWE_SS', 'TWRE_PDE_SS', 'TWRE_INDEX'
-% 'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_RF'
+test_names = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_RF', ...
+                'TWRE_SWE_SS', 'TWRE_PDE_SS', 'TWRE_INDEX'};
 test_names = strrep(test_names, '_', '\_');
 %% Time Selection
 % hours = 1; days = 2; session = 3;
@@ -36,10 +35,11 @@ for ii = 1:length(test_names)
    
     test_name = test_names(ii);
         
-    [sid, time, score, test_name] = prepLongitudinaldata(data, subs, test_name, time_course);
-    [lme_linear, lme_quad, data_table] = lmeLongitudinaldata(sid, time, score);
+    [sid, long_var, score, test_name] = prepLongitudinaldata(data, subs, test_name, time_course);
+    [lme_linear, lme_quad, data_table] = lmeLongitudinaldata(sid, long_var, score);
    
     stats(ii).test_name = test_name;
+    stats(ii).sessions = long_var;
     stats(ii).lme_linear = lme_linear;
     stats(ii).lme_quad = lme_quad;
 %     stats(ii).logistic = logistic_stats;

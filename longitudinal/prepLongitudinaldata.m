@@ -1,4 +1,4 @@
-function [sid, time, score, test_name] = prepLongitudinaldata(data, subs, test_name, time_course)
+function [sid, long_var, score, test_name] = prepLongitudinaldata(data, subs, test_name, time_course)
 % Function: Prepares data for lmeLongitudinaldata and plotLongitudinaldata
 % Inputs: 
 % data

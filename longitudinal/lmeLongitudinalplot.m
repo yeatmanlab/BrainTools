@@ -28,7 +28,7 @@ for ii = 1:length(test_names)
 %     subplot(m,n,ii);
     % Create table for individual test
     plot_table = table(stats(ii).data_table.sid, stats(ii).data_table.long_var, ...
-         stats(ii).data_table.score_adj);
+         stats(ii).data_table.score);
     % Name variables in plot table
     plot_table.Properties.VariableNames = {'sid', x_name, 'score'};
     % find the number of individual subjects
@@ -94,7 +94,11 @@ for ii = 1:length(test_names)
     p_quad = double(stats(ii).lme_quad.Coefficients.pValue(3));
     text(-40, 6, num2str(p_quad), 'Color', 'blue', 'FontSize', 12);
     
-    % Add logistic line of fit
+    % Save image
+    test = num2str(cell2mat(test_names(ii)));
+    test = strrep(test, '\_', '-');
+    fname = sprintf('~/Desktop/figures/LMB/%s-%s.png', test, date);
+    print(fname, '-dpng'); 
     
 
 end

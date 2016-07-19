@@ -1,4 +1,4 @@
-function [lme_linear, lme_quad, data_table] = lmeLongitudinaldata(sid, time, score)
+function [lme_linear, lme_quad, data_table] = lmeLongitudinaldata(sid, long_var, score)
 % Furnction: Calculates linear mixed effects on longitudinal data
 % 
 % Inputs: 
@@ -32,23 +32,23 @@ for ii = 1:length(s)
    index = find(strcmp(s(ii),sid));
    total = 0;
    for jj = 1:length(index)
-       total = plus(total, time(index(jj))); 
+       total = plus(total, long_var(index(jj))); 
    end
    avg = total/length(index);
    
    for kk = 1:length(index);
-       time_adj(index(kk), 1) = time(index(kk)) - avg;
+       time_adj(index(kk), 1) = long_var(index(kk)) - avg;
    end
    
 end
-time = time_adj;
+long_var = time_adj;
 
 % Create squared hours variable to use in quadratic model
-time_sq = time.^2;
+long_var_sq = long_var.^2;
 
 
 %% Create DataSet
-data_table = dataset(sid, time, time_sq, score, score_adj);
+data_table = dataset(sid, long_var, long_var_sq, score);
 
 %% Calculate LME fit
 % Make sid a categorical variable
