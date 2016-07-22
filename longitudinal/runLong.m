@@ -49,8 +49,12 @@ end
 %% Plot data & Lines of best fit
 [stats] = lmeLongitudinalplot(stats, test_names, subs, time_course);
 
+
 % Plot histogram of growth estimates with error bars
 [stats] = lmeGrowthplot(stats, test_names, subs, time_course);
+
+% % Gather by Session data and run one-way ANOVA
+% [stats] = bySession(stats);
 
 % % plot Correlation matrix
 % [stats] = plotCorr(stats, data, subs);

@@ -27,28 +27,30 @@ end
 score_adj = score_sq_unique;
 
 
-% Centering of time course variable
-for ii = 1:length(s)
-   index = find(strcmp(s(ii),sid));
-   total = 0;
-   for jj = 1:length(index)
-       total = plus(total, long_var(index(jj))); 
-   end
-   avg = total/length(index);
-   
-   for kk = 1:length(index);
-       time_adj(index(kk), 1) = long_var(index(kk)) - avg;
-   end
-   
-end
-long_var = time_adj;
-
-% Create squared hours variable to use in quadratic model
+% % Centering of time course variable
+% for ii = 1:length(s)
+%    index = find(strcmp(s(ii),sid));
+%    total = 0;
+%    for jj = 1:length(index)
+%        total = plus(total, long_var(index(jj))); 
+%    end
+%    avg = total/length(index);
+%    
+%    for kk = 1:length(index);
+%        time_adj(index(kk), 1) = long_var(index(kk)) - avg;
+%    end
+%    
+% end
+% long_var = time_adj;
+% 
+% % Create squared hours variable to use in quadratic model
 long_var_sq = long_var.^2;
 
+long_var = categorical(long_var);
 
 %% Create DataSet
 data_table = dataset(sid, long_var, long_var_sq, score);
+
 
 %% Calculate LME fit
 % Make sid a categorical variable
@@ -61,7 +63,8 @@ lme_linear = fitlme(data_table, 'score ~ long_var + (1|sid)');
 % lme = fitlme(data_table, 'score_adj ~ long_var + (1|sid)');
 % Fit the model on uncentered data as changing quadratically with time
 % course
-lme_quad = fitlme(data_table, 'score ~ long_var + long_var_sq + (1|sid)');
+% lme_quad = fitlme(data_table, 'score ~ long_var + long_var_sq + (1|sid)');
+lme_quad = [];
 % Fit the model where we predict reading score as changing quadratically
 % with time course
 % lme2 = fitlme(data_table, 'score_adj ~ long_var + long_var_sq + (1|sid)');
