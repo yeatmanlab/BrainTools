@@ -21,7 +21,7 @@ subs = {'102_RS', '110_HH', '145_AC', '150_MG', '151_RD', '152_TC', ...
         '179_GM', '180_ZD', '201_GS', '202_DD', '203_AM', '204_AM', '205_AC', '206_LM', ...
         '207_AH', '208_LH', '210_SB', '211_LB'};
 %% Test Selection
-% test_names = {'WJ_BRS'};
+% test_names = {'WJ_MFF_SS', 'WJ_CALC_SS'};
 test_names = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_RF', ...
                 'TWRE_SWE_SS', 'TWRE_PDE_SS', 'TWRE_INDEX'};
 test_names = strrep(test_names, '_', '\_');
@@ -31,7 +31,7 @@ time_course = 3;
 
 %% Plotting on/off
 % plotting = 0 for off; 1 for on
-plotting = 0;
+plotting = 1;
 
 %% Dummy coding on/off
 % dummyon = 0 for off; 1 for on
