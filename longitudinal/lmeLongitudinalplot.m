@@ -69,40 +69,35 @@ for ii = 1:length(test_names)
     grid('on')
 
     % Add linear line of best fit
-    if isnumeric(stats(ii).data_table.long_var)
-        low = min(stats(ii).data_table.long_var);
-        high = max(stats(ii).data_table.long_var);
-        xx = [low low/2 0 high/2 high];
-        y = polyval(flipud(stats(ii).lme_linear.Coefficients.Estimate),xx);
-        plot(xx,y,'--k','linewidth',2);
-        
-        %     % Add shaded error bar
-        %     err = repmat(stats(ii).lme.Coefficients.SE(2), 1, length(xx));
-        %     shadedErrorBar(xx, y, err);
-        
-        % Add p value for best fit line
-        p_linear = double(stats(ii).lme_linear.Coefficients.pValue(2));
-        text(-40, 8, num2str(p_linear), 'FontSize', 12);
-        
+    low = min(double(stats(ii).data_table.long_var));
+    high = max(double(stats(ii).data_table.long_var));
+    xx = [low low/2 0 high/2 high];
+    y = polyval(flipud(stats(ii).lme_linear.Coefficients.Estimate),xx);
+    plot(xx,y,'--k','linewidth',2);
+
+
+    % Add p value for best fit line
+    p_linear = double(stats(ii).lme_linear.Coefficients.pValue(2));
+    text(-40, 8, num2str(p_linear), 'FontSize', 12);
+    
+    if time_course ~= 3
         % Add quadratic line of best fit
         y = polyval(flipud(stats(ii).lme_quad.Coefficients.Estimate),xx);
         plot(xx,y,'--b','linewidth',2);
         
-        %      % Add shaded error bar
-        %     err = repmat(stats(ii).lme2.Coefficients.SE(3), 1, length(xx));
-        %     shadedErrorBar(xx, y, err);
         
         % Add p value for best fit line
         p_quad = double(stats(ii).lme_quad.Coefficients.pValue(3));
         text(-40, 6, num2str(p_quad), 'Color', 'blue', 'FontSize', 12);
-        
-        % Save image
-        test = num2str(cell2mat(test_names(ii)));
-        test = strrep(test, '\_', '-');
-        fname = sprintf('~/Desktop/figures/LMB/%s-%s.png', test, date);
-        print(fname, '-dpng');
-        
     end
+    
+    % Save image
+    test = num2str(cell2mat(test_names(ii)));
+    test = strrep(test, '\_', '-');
+    fname = sprintf('~/Desktop/figures/LMB/%s-%s.png', test, date);
+    print(fname, '-dpng');
+        
+    
 end
 
 
