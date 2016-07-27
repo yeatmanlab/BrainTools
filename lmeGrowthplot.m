@@ -8,7 +8,6 @@ function [stats] = lmeGrowthplot(stats, test_names, subs, time_course)
 
 %% Linear
 figure; hold;
-
 for ii = 1:length(test_names)
     linear_data(ii,:) = table(test_names(ii), stats(ii).lme_linear.Coefficients.Estimate(2), stats(ii).lme_linear.Coefficients.SE(2));
     linear_data.Properties.VariableNames = {'test_name', 'Growth', 'SE'};    
@@ -54,8 +53,7 @@ if time_course ~= 3
             num2str(round(stats(jj).lme_quad.Coefficients.pValue(3), 3)), ...
             'HorizontalAlignment', 'center', 'Color', 'b');
     end
-    
-    
+        
     % Format
     ylabel('Growth Estimate'); xlabel('Test Name');
     ax = gca;
@@ -63,8 +61,7 @@ if time_course ~= 3
     ax.XTickLabel = test_names;
     ax.XTickLabelRotation = 45;
     title('Quadratic Growth Estimate by Test');
-    
-    
+        
     % Save image
     fname = sprintf('~/Desktop/figures/LMB/quadGrowthEst-%s.png', date);
     print(fname, '-dpng');

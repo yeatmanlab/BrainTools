@@ -68,19 +68,21 @@ for ii = 1:length(test_names)
     title([test_names(ii), 'vs ', x_name]);
     grid('on')
 
-    % Add linear line of best fit
-    low = min(double(stats(ii).data_table.long_var));
-    high = max(double(stats(ii).data_table.long_var));
-    xx = [low low/2 0 high/2 high];
-    y = polyval(flipud(stats(ii).lme_linear.Coefficients.Estimate),xx);
-    plot(xx,y,'--k','linewidth',2);
-
-
-    % Add p value for best fit line
-    p_linear = double(stats(ii).lme_linear.Coefficients.pValue(2));
-    text(-40, 8, num2str(p_linear), 'FontSize', 12);
     
-    if time_course ~= 3
+    
+%     if time_course ~= 3
+        % Add linear line of best fit
+        low = min(double(stats(ii).data_table.long_var));
+        high = max(double(stats(ii).data_table.long_var));
+        xx = [low low/2 0 high/2 high];
+        y = polyval(flipud(stats(ii).lme_linear.Coefficients.Estimate),xx);
+        plot(xx,y,'--k','linewidth',2);
+
+
+        % Add p value for best fit line
+        p_linear = double(stats(ii).lme_linear.Coefficients.pValue(2));
+        text(1, 130, num2str(p_linear), 'Color', 'k', 'FontSize', 12, 'HorizontalAlignment', 'center');
+        
         % Add quadratic line of best fit
         y = polyval(flipud(stats(ii).lme_quad.Coefficients.Estimate),xx);
         plot(xx,y,'--b','linewidth',2);
@@ -88,8 +90,8 @@ for ii = 1:length(test_names)
         
         % Add p value for best fit line
         p_quad = double(stats(ii).lme_quad.Coefficients.pValue(3));
-        text(-40, 6, num2str(p_quad), 'Color', 'blue', 'FontSize', 12);
-    end
+        text(1, 125, num2str(p_quad), 'Color', 'b', 'FontSize', 12, 'HorizontalAlignment', 'center');
+%     end
     
     % Save image
     test = num2str(cell2mat(test_names(ii)));
