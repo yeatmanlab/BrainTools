@@ -2,19 +2,12 @@ function [stats] = lmeLongitudinalplot(stats, test_names, subs, time_course);
 % [stats] = lmeLongitudinalplot(stats, test_names, subs);
 % 
 % Function: plots the behavioral data and overlays lme curve
-% 
-% Inputs:
-% stats: in the form of a struct
-% 
-% Outputs:
-% 
-% Example:
-%
+
 
 %% Time Variable
 if time_course == 1
     x_name = 'hours';
-    xx = [0 50 100 150 200];    
+    xx = [0 50 100 150 200];
 elseif time_course == 2
     x_name = 'days'; 
     xx = [0 10 20 30 40 50 60 70]; 
@@ -63,8 +56,12 @@ for ii = 1:length(test_names)
     end
 
     % format the plot nicely
+    ax = gca;
     ylabel(test_names(ii)); xlabel(x_name); 
-    legend(subs, 'Location', 'westoutside');
+    ax.XAxis.TickValues = [-50 -40 -30 -20 -10 0 10 20 30 40 50];
+    ax.YLim = [40 120];
+    ax.YAxis.TickValues = [40 60 80 100 120];
+%     legend(subs, 'Location', 'westoutside');
     title([test_names(ii), 'vs ', x_name]);
     grid('on')
 
@@ -81,16 +78,16 @@ for ii = 1:length(test_names)
 
         % Add p value for best fit line
         p_linear = double(stats(ii).lme_linear.Coefficients.pValue(2));
-        text(1, 130, num2str(p_linear), 'Color', 'k', 'FontSize', 12, 'HorizontalAlignment', 'center');
+        text(30, 127, num2str(p_linear), 'Color', 'k', 'FontSize', 12, 'HorizontalAlignment', 'center');
         
-        % Add quadratic line of best fit
-        y = polyval(flipud(stats(ii).lme_quad.Coefficients.Estimate),xx);
-        plot(xx,y,'--b','linewidth',2);
-        
-        
-        % Add p value for best fit line
-        p_quad = double(stats(ii).lme_quad.Coefficients.pValue(3));
-        text(1, 125, num2str(p_quad), 'Color', 'b', 'FontSize', 12, 'HorizontalAlignment', 'center');
+% %         Add quadratic line of best fit
+% %         y = polyval(flipud(stats(ii).lme_quad.Coefficients.Estimate),xx);
+% %         plot(xx,y,'--b','linewidth',2);
+% %         
+% %         
+% %         Add p value for best fit line
+% %         p_quad = double(stats(ii).lme_quad.Coefficients.pValue(3));
+% %         text(30, 122, num2str(p_quad), 'Color', 'b', 'FontSize', 12, 'HorizontalAlignment', 'center');
 %     end
     
     % Save image
@@ -98,8 +95,46 @@ for ii = 1:length(test_names)
     test = strrep(test, '\_', '-');
     fname = sprintf('~/Desktop/figures/LMB/%s-%s.png', test, date);
     print(fname, '-dpng');
-        
+
     
+    
+    
+    num_sessions = 4; % number of sessions including session 0
+    sessions = [1 2 3 4]; 
+    estimates = zeros(num_sessions, 1);
+    se = zeros(num_sessions, 1);
+    p = zeros(num_sessions, 1);
+    for num = 1:num_sessions
+        estimates(num, 1) = stats(ii).lme_linear.Coefficients.Estimate(num);
+        se(num, 1) = stats(ii).lme_linear.Coefficients.SE(num);
+        p(num, 1) = round(stats(ii).lme_linear.Coefficients.pValue(num), 3); 
+    end
+    
+    for num = 2:num_sessions
+       estimates(num, 1) = (estimates(1,1) + estimates(num, 1)); 
+    end
+    
+    figure; hold;
+    bar(sessions', estimates, 'w');
+    errorbar(sessions', estimates, se, '.k');
+    for num = 1:num_sessions
+        text(sessions(num), estimates(num) + se(num) + 2, ...
+            num2str(p(num)), ...
+            'HorizontalAlignment', 'center', 'Color', 'b');
+    end
+    ax = gca;   
+    ax.XLim = [-0.5000 4.5000];
+    ax.XAxis.TickValues = [1 2 3 4];
+    ax.YLim = [50 100];
+    xlabel('Session'); ylabel('LME Estimate');
+    title([test_names(ii), 'LME Estimate']);
+    grid('on');
+    
+    % Save image
+    test = num2str(cell2mat(test_names(ii)));
+    test = strrep(test, '\_', '-');
+    fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.png', 'LMEestimate', test, date);
+    print(fname, '-dpng');
 end
 
 
