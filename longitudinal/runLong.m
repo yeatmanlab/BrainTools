@@ -12,11 +12,10 @@ stats = struct;
 % subs = {'124_AT', '138_LA', '141_GC', '143_CH'};
 % LMB
 subs = {'102_RS', '110_HH', '145_AC', '150_MG', '151_RD', '152_TC', ...
-        '160_EK', '161_AK', '162_EF', '170_GM', '172_TH', '174_HS', ...
+        '160_EK', '161_AK', '162_EF', '163_LF', '164_SF', '170_GM', '172_TH', '174_HS', ...
         '179_GM', '180_ZD', '201_GS', '202_DD', '203_AM', '204_AM', '205_AC', '206_LM', ...
         '207_AH', '208_LH', '210_SB', '211_LB'};
-    
-%     '163_LF', '164_SF'
+        
 %% Test Selection
 % test_names = {'WJ_BRS'};
 % test_names = {'WJ_MFF_SS', 'WJ_CALC_SS'};
@@ -52,7 +51,7 @@ for ii = 1:length(test_names)
         % 3, 4. Since some subjects don't have session 0 or 5, these are a
         % bit more difficult to interpret. But let's remember to go
         % through, look at different models and understand
-        usesessions = [1, 2, 3, 4];
+        usesessions = [0, 1, 2];
         indx = ismember(long_var, usesessions);
         % Here we remove rows that correspond to the ones we don't want to
         % analyze

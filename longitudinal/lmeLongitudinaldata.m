@@ -41,13 +41,14 @@ for ii = 1:length(s)
    end
    
 end
+uncentered = long_var;
 long_var = time_adj;
 
 % Create squared hours variable to use in quadratic model
 long_var_sq = long_var.^2;
 
 %% Create DataSet
-data_table = dataset(sid, long_var, long_var_sq, score);
+data_table = dataset(sid, uncentered, long_var, long_var_sq, score);
 
 
 %% Calculate LME fit
