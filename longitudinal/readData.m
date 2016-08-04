@@ -1,37 +1,5 @@
 function [sid, long_var, score, test_name] = readData(data, subs, test_name, time_course, usesessions)
 % Function: Prepares data for lmeLongitudinaldata and plotLongitudinaldata
-% Inputs: 
-% data
-% test_name
-% subs
-% 
-% Outputs:
-% sid
-% hours
-% reading_score
-% 
-% Example:
-% data = []; subs = {'...', '...', '...'}; test_name = 'WJ_BRS'; 
-% [sid, time, score, test_name] = readData(data, subs, test_name, time_course);
-
-%% Argument Checking
-if ~exist('data', 'var') || isempty(data)
-    [~, ~, data] = xlsread('~/Desktop/NLR_Scores.xlsx');
-    %[~, ~, data] = xlsread('C:\Users\Patrick\Desktop/NLR_Scores.xlsx');
-end
-
-if ~exist('subs', 'var') || isempty(subs)
-   error('Please enter the subjects you would like to use');  
-   return
-end
-
-if ~exist('test_name', 'var') || isempty(test_name)
-   error('Please enter the reading test of interest');
-   return
-end
-
-
-%% Select group of Subjects
 
 % gather column headings
 data_ref = data(1,:);
@@ -76,7 +44,7 @@ end
 %% Gather Reading Score of Interest
 % intialize variable
 score = []; 
-
+test_name = strrep(test_name, '_', '\_');
 % vertcat the data into a cell matrix
 for subj = 1:numel(data_indx)
 score = vertcat(score, data(data_indx(subj), strcmp(data_ref, test_name)));

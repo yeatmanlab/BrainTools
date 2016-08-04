@@ -44,7 +44,7 @@ if dummyon == 0
     % Fit the model on uncentered data as changing quadratically
     lme_quad = fitlme(data_table, 'score ~ long_var + long_var_sq + (1|sid)');
     
-    stats(ii).lme_quad = lme_quad;
+    
 
 elseif dummyon == 1
     % make the longitudinal variable a categorical variable
@@ -58,11 +58,6 @@ elseif dummyon == 1
     lme_linear = fitlme(data_table, 'score ~ long_var + (long_var|sid)');
     
 end
-% Collate data into stats struct
-
-stats(ii).test_name = test_name;  
-stats(ii).lme_linear = lme_linear;
-stats(ii).data_table = data_table;  
 
 
 
