@@ -59,15 +59,15 @@ basic = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_RF', 'TWRE_SWE_SS', 'TWRE_PDE_S
 %% Gather data
 stats = struct; % initialize the struct to store all data per test for analysis
 for ii = 1:length(test_names);
-    % run readData function to gather data of interest
-    [sid, long_var, score, test_name] = readData(data, subs, test_names(ii), time_course, usesessions);
-    % gather lme statistics using lmeCalc function
-    [stats] = lmeCalc(stats, sid, long_var, score, dummyon);
+    % run prepLongitudinaldata function to gather data of interest
+    [sid, long_var, score, test_name] = prepLongitudinaldata(data, subs, test_names(ii), time_course, usesessions);
+    % gather lme statistics
+    [stats] = lmeLongitudinaldata(stats, sid, long_var, score, dummyon);
 end
 
 %% Plotting Techniques
 if long_plot == 1
-   [stats] = lmeLongplot(stats, test_names, subs, time_course); 
+   [stats] = lmeLongitudinalplot(stats, test_names, subs, time_course); 
 end
     
 if growth_plot == 1
@@ -75,5 +75,5 @@ if growth_plot == 1
 end
 
 if lmestimate == 1
-   [stats] = lmeEstimateplot(stats, test_names, subs, time_course);
+    
 end
