@@ -54,7 +54,7 @@ score = cell2mat(score);
 
 %% Concentrate on sessions of interest, if applicable
 if time_course == 3
-    usesessions = [0, 1, 2];
+    usesessions = [1, 0, 2];
     indx = ismember(long_var, usesessions);
     % remove rows that correspond to the ones we don't want to analyze
     sid = sid(indx); long_var = long_var(indx); score = score(indx);

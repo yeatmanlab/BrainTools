@@ -1,37 +1,30 @@
-function [lme_linear, lme_quad, data_table] = lmeCalc(sid, long_var, score, dummyon)
+function [lme_linear, lme_quad, data_table] = lmeCalc(sid, long_var, score, dummyon, centering)
 % Furnction: Calculates linear mixed effects on longitudinal data
 
 
 s = unique(sid);
-% % Center each individual's reading scores
-% for ii = 1:length(s)
-%    index = find(strcmp(s(ii),sid));
-%    total = 0;
-%    for jj = 1:length(index)
-%        total = plus(total, score(index(jj))); 
-%    end
-%    avg = total/length(index);
-%    
-%    for kk = 1:length(index);
-%        score_sq_unique(index(kk), 1) = score(index(kk)) - avg;
-%    end
-% end
-% score_adj = score_sq_unique;
 if dummyon == 0
     % Centering of time course variable
+    time_adj = []; score_centered = [];
     for ii = 1:length(s)
         index = find(strcmp(s(ii),sid));
-        total = 0;
-        for jj = 1:length(index)
-            total = plus(total, long_var(index(jj)));
-        end
-        avg = total/length(index);
+        
         for kk = 1:length(index);
-            time_adj(index(kk), 1) = long_var(index(kk)) - avg;
+            if centering == 1
+                time_adj(index(kk), 1) = long_var(index(kk)) - mean(long_var(index));
+            end
+            if centering == 2
+                score_centered(index(kk), 1) = score(index(kk)) - mean(score(index));
+            end
+            if centering == 3
+                time_adj(index(kk), 1) = long_var(index(kk)) - mean(long_var(index));
+                score_centered(index(kk), 1) = score(index(kk)) - mean(score(index));
+            end
         end
     end
     uncentered = long_var;
     long_var = time_adj;
+    score_adj = score_centered;
     % Create squared hours variable to use in quadratic model
     long_var_sq = long_var.^2;
     % Create DataSet
@@ -56,7 +49,7 @@ elseif dummyon == 1
     data_table.sid = categorical(data_table.sid);
     % Fit the model on the centered data as changing linearly
     lme_linear = fitlme(data_table, 'score ~ long_var + (long_var|sid)');
-    
+    lme_quad = [];
 end
 
 

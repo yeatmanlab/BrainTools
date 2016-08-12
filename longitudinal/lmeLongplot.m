@@ -19,6 +19,7 @@ end
 
 %% Create plots
 for ii = 1:length(test_names)
+    test_name = strrep(test_names(ii), '_', '\_');
 %     subplot(m,n,ii);
     % Create table for individual test
     plot_table = table(stats(ii).data_table.sid, stats(ii).data_table.uncentered, ...
@@ -62,7 +63,7 @@ for ii = 1:length(test_names)
     ax.YLim = [40 140];
     ax.YAxis.TickValues = [40 60 80 100 120 140];
 %     legend(subs, 'Location', 'westoutside');
-    title([test_names(ii), 'vs ', x_name]);
+    title([test_name, 'vs ', x_name]);
     grid('on')
 
     
@@ -97,6 +98,8 @@ for ii = 1:length(test_names)
     print(fname, '-dpng');
 
 end
+
+
 
 
 

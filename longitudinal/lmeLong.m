@@ -26,13 +26,15 @@ math = {'WJ_MFF_SS', 'WJ_CALC_SS'};
 basic = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_RF', 'TWRE_SWE_SS', 'TWRE_PDE_SS', 'TWRE_INDEX'};
 %% Selections
 % test group options: all, wj, twre, wasi, ctopp, math, and basic
-test_names = basic; 
+test_names = twre; 
 % time course options: (1) hours, (2) days, (3) sessions
-time_course = 2; 
+time_course = 3; 
 % enter sessions of interest, if applicable
-usesessions = []; 
+usesessions = [1 0 2 3]; 
 % dummy variable options: (0) off, (1) on
-dummyon = 0;
+dummyon = 1;
+% centering options: 'Time' (1), 'Score'(2), or 'Both' (3)
+centering = 1;
 % longitudinal plot options: (0) off, (1) on
 long_plot = 0;
 % growth plot options: (0) off, (1) on
@@ -62,7 +64,7 @@ for ii = 1:length(test_names);
     % run readData function to gather data of interest
     [sid, long_var, score, test_name] = readData(data, subs, test_names(ii), time_course, usesessions);
     % gather lme statistics using lmeCalc function
-    [lme_linear, lme_quad, data_table] = lmeCalc(sid, long_var, score, dummyon);  
+    [lme_linear, lme_quad, data_table] = lmeCalc(sid, long_var, score, dummyon, centering);  
     % Collate data into stats struct
     stats(ii).test_name = test_name; 
     stats(ii).lme_linear = lme_linear;
