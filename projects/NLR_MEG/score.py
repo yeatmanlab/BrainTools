@@ -33,28 +33,31 @@ def score(p, subjects, run_indices):
             os.mkdir(out_dir)
         for rii, fname in zip(runs, raw_names):
             print('  Run %s...' % op.basename(fname))
-            if not op.isfile(fname):
-                raise RuntimeError(' File %s not found' % fname)
+            
+            # sjjoo_20160810: To incorporate session that has incomplete data
+#            if not op.isfile(fname):
+#                raise RuntimeError(' File %s not found' % fname)
+            if op.isfile(fname):
             # read events, make sure we got the correct number of trials
-            raw = mne.io.Raw(fname, allow_maxshield=True)
-            ev = mne.find_events(raw, stim_channel='STI101', shortest_event=1)
-            if op.basename(fname).__contains__('_1_raw'):
-                ev[:, 2] += 100
-            elif op.basename(fname).__contains__('_2_raw'):
-                ev[:, 2] += 200
-            elif op.basename(fname).__contains__('_3_raw'):
-                ev[:, 2] += 100
-            elif op.basename(fname).__contains__('_4_raw'):
-                ev[:, 2] += 200
-            elif op.basename(fname).__contains__('_5_raw'):
-                ev[:, 2] += 100
-            elif op.basename(fname).__contains__('_6_raw'):
-                ev[:, 2] += 200
-            elif op.basename(fname).__contains__('_7_raw'):
-                ev[:, 2] += 100
-            elif op.basename(fname).__contains__('_8_raw'):
-                ev[:, 2] += 200
-            fname_out = 'ALL_' + safe_inserter(rii,
-                                               subj) + '-eve.lst'
-            fname_out = op.join(out_dir, fname_out)
-            mne.write_events(fname_out, ev)
+                raw = mne.io.Raw(fname, allow_maxshield=True)
+                ev = mne.find_events(raw, stim_channel='STI101', shortest_event=1)
+                if op.basename(fname).__contains__('_1_raw'):
+                    ev[:, 2] += 100
+                elif op.basename(fname).__contains__('_2_raw'):
+                    ev[:, 2] += 200
+                elif op.basename(fname).__contains__('_3_raw'):
+                    ev[:, 2] += 100
+                elif op.basename(fname).__contains__('_4_raw'):
+                    ev[:, 2] += 200
+                elif op.basename(fname).__contains__('_5_raw'):
+                    ev[:, 2] += 100
+                elif op.basename(fname).__contains__('_6_raw'):
+                    ev[:, 2] += 200
+                elif op.basename(fname).__contains__('_7_raw'):
+                    ev[:, 2] += 100
+                elif op.basename(fname).__contains__('_8_raw'):
+                    ev[:, 2] += 200
+                fname_out = 'ALL_' + safe_inserter(rii,
+                                                   subj) + '-eve.lst'
+                fname_out = op.join(out_dir, fname_out)
+                mne.write_events(fname_out, ev)

@@ -38,6 +38,11 @@ if not os.path.isdir(out_dir):
     
 os.chdir(out_dir)
 
+# 162_ef and 208_lh missing
+# 210_sb missing first session 
+subs = ['102_rs','110_hh','145_ac','150_mg','151_rd','152_tc','160_ek','161_ak',
+    '163_lf','164_sf','170_gm','172_th','174_hs','179_gm','180_zd','207_ah','210_sb','211_lb']
+
 # tmin, tmax: sets the epoch
 # bmin, bmax: sets the prestim duration for baseline correction. baseline is set
 # as individual as default. Refer to _mnefun.py bmax is 0.0 by default
@@ -53,7 +58,7 @@ os.chdir(out_dir)
 params = mnefun.Params(tmin=-0.2, tmax=1.0, t_adjust=-39e-3, n_jobs=18,
                        decim=2, n_jobs_mkl=1, proj_sfreq=250,
                        n_jobs_fir='cuda', n_jobs_resample='cuda',
-                       filter_length='5s', epochs_type='fif', lp_cut=40, 
+                       filter_length='5s', epochs_type='fif', lp_cut=40.,
                        bmin=-0.2, auto_bad=20., plot_raw=False, 
                        bem_type = '5120')
           
@@ -61,60 +66,40 @@ params = mnefun.Params(tmin=-0.2, tmax=1.0, t_adjust=-39e-3, n_jobs=18,
 # A typical head position. So now in sensor space everyone is aligned. However
 # We should also note that for source analysis it is better to leave this as
 # the mne-fun default
-params.trans_to = (0., 0., .04)
+          
+#params.trans_to = (0., 0., .04)
+
 params.sss_type = 'python'
 params.sss_regularize = 'svd' # 'in' by default
-params.tsss_dur = 10. # 60 for adults with not much head movements. This was set to 6.
+params.tsss_dur = 16. # 60 for adults with not much head movements. This was set to 6.
 
 params.auto_bad_meg_thresh = 30 # THIS SHOULD NOT BE SO HIGH!
- 
-# Hardcoded adult subjects here. This is temporary
-#subs = glob.glob(os.path.join(raw_dir, '*mark*'))
-#params.subjects = nlr_organizeMEG_mnefun(raw_dir=raw_dir,out_dir=out_dir,subs=subs)
 
 # Regular subjects
-params.subjects = nlr_organizeMEG_mnefun(raw_dir=raw_dir,out_dir=out_dir)
+#out,ind = nlr_organizeMEG_mnefun(raw_dir=raw_dir,out_dir=out_dir,subs=subs)
 
-#params.subjects = ['112_ar150825']
+params.subjects = ['170_gm160613']
 
-params.subjects.sort() # Sort the subject list
-print("Done sorting subjects.\n")
+#params.subjects.sort() # Sort the subject list
+#print("Done sorting subjects.\n")
+
+""" Attention!!!
+164_sf160707_4_raw.fif: continuous HPI was not active in this file!
+170_gm160613_6_raw.fif: in _fix_raw_eog_cals...non equal eog arrays???
+"""
 
 # REMOVE BAD SUBJECTS
-# 101_lg150618 On entry to DLASCL parameter number 4 had an illegal value
-# 103_ac150609 svd does not converge [3]: resolved!!! with tsss_dur 10
-# 105_bb150713 svd does not converge: resolved!!! with tsss_dur 8
-# 109_kt150814 svd does not converge: resolved!!! with tsss_dur 10
-# 110_hh150824 Same as 101_lg150618: decomp_svd, DLASCL param number 4 had an illegal value
-# 121_gg150904 ERROR: continuous HPI was not active in this file! [10] Only 6 sessions
-# 132_wp151117: svd does not converge: resolved!!!
-# 133_ml151124: svd does not converge: resolved!!!
-# 135_rd151124: svd does not converge: resolved!!!
-# 138_la151208: svd does not converge (tsss_dur of 8), Matrix is badly conditioned (tsss_dur of 10): 1238 >= 1000
-# 201_gs150824 corrupted file [24]
-# 201_gs150729 chpi not active [26]
-# 202_dd151103: SVD does not converge [20]: resolved!!!
-# 203_am151009: On entry to DLASCL parameter number 4 had an illegal value
-# 203_am151029: On entry to DLASCL parameter number 4 had an illegal value
-# 204_am151120: has 6 sessions
-# 205_ac151123: Too many bad meg channels found: 88 > 30
-
-# 105_bb150713 too many bad channels
-# 137_gr151201 too many bad channels
-
-# 205_ac151123 over 100 bad channels
-
-
-
-badsubs = ['101_lg150618','110_hh150824','121_gg150904','138_la151208','201_gs150824','201_gs150729',
-            '203_am151009','203_am151029','204_am151120','205_ac151123']
-for n, s in enumerate(badsubs):
-    subnum = params.subjects.index(s)
-    print('Removing subject ' + str(subnum) + ' ' + params.subjects[subnum])
-    params.subjects.remove(s)
+#badsubs = ['102_rs150716','110_hh150824','152_tc160510','152_tc160527',
+#           '164_sf160707','170_gm160613']
+#for n, s in enumerate(badsubs):
+#    subnum = params.subjects.index(s)
+#    print('Removing subject ' + str(subnum) + ' ' + params.subjects[subnum])
+#    params.subjects.remove(s)
+#    ind[subnum] = []
+#    ind.remove([])
     
 print("Running " + str(len(params.subjects)) + ' Subjects') 
-print("\n".join(params.subjects))
+print("\n\n".join(params.subjects))
 params.subject_indices = np.arange(0,len(params.subjects))
 
 #params.subject_indices = np.concatenate((np.arange(0,3), np.arange(4,10), np.arange(11,16), np.arange(17,20),
@@ -122,9 +107,18 @@ params.subject_indices = np.arange(0,len(params.subjects))
 #                                         , axis=0)
 #params.subject_indices = np.arange(27,len(params.subjects))
 params.structurals =[None] * len(params.subjects)
-params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4', '%s_5', '%s_6', '%s_7', '%s_8']
-#params.subject_run_indices = [[0, 1, 2, 3], [0, 1, 2, 3, 4, 5, 6, 7], [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6, 7]
-#,None,None,None,None]
+
+params.run_names = ['%s_1', '%s_2', '%s_3', '%s_5', '%s_6']
+
+#params.subject_run_indices = np.array([
+#    np.arange(0,ind[0]),np.arange(0,ind[1]),np.arange(0,ind[2]),np.arange(0,ind[3]),
+#    np.arange(0,ind[4]),np.arange(0,ind[5]),np.arange(0,ind[6]),np.arange(0,ind[7]),
+#    np.arange(0,ind[8]),np.arange(0,ind[9])#,np.arange(0,ind[11])
+##    np.arange(0,ind[12]),np.arange(0,ind[13]),np.arange(0,ind[14]),np.arange(0,ind[15]),
+##    np.arange(0,ind[16]),np.arange(0,ind[17]),np.arange(0,ind[18]),np.arange(0,ind[19]),
+##    np.arange(0,ind[20]),np.arange(0,ind[21]),np.arange(0,ind[22]),np.arange(0,ind[23]),
+##    np.arange(0,ind[24])
+#])
 
 params.dates = [(2014, 0, 00)] * len(params.subjects)
 #params.subject_indices = [0]
@@ -140,7 +134,8 @@ params.acq_dir = '/sinuhe/data03/jason_words'
 params.sws_ssh = 'jason@kasga.ilabs.uw.edu'  # kasga - 172.28.161.8
 params.sws_dir = '/data05/jason/NLR'
 
-#params.mf_args = '-hpie 30 -hpig .8 -hpicons'
+#params.mf_args = '-hpie 30 -hpig .8 -hpicons' # sjjoo-20160826: We are doing SSS using python
+
 # epoch rejection criterion
 params.reject = dict(grad=4000e-13, mag=4.0e-12)
 params.flat = dict(grad=1e-13, mag=1e-15)
@@ -148,14 +143,16 @@ params.auto_bad_reject = params.reject
 # params.auto_bad_flat = params.flat
 params.ssp_eog_reject = dict(grad=3000e-13, mag=4.0e-12, eog=np.inf)
 params.ssp_ecg_reject = dict(grad=3000e-13, mag=4.0e-12, eog=np.inf)
-# params.bem_type = '5120'
+
 params.cov_method = 'shrunk'
+
 params.get_projs_from = range(len(params.run_names))
 params.inv_names = ['%s']
 params.inv_runs = [range(0, len(params.run_names))]
 params.runs_empty = []
+
 params.proj_nums = [[2, 2, 0],  # ECG: grad/mag/eeg
-                    [3, 3, 0],  # EOG
+                    [2, 2, 0],  # EOG # sjjoo-20160826: was 3
                     [0, 0, 0]]  # Continuous (from ERM)
 
 # The scoring function needs to produce an event file with these values
@@ -201,11 +198,11 @@ mnefun.do_processing(
     fetch_raw=False,
     do_score=False, # True
     push_raw=False,
-    do_sss=False, # True
+    do_sss=True, # True
     fetch_sss=False,
-    do_ch_fix=False, # True
-    gen_ssp=False, # True
-    apply_ssp=False, # True
+    do_ch_fix=True, # True
+    gen_ssp=True, # True
+    apply_ssp=True, # True
     write_epochs=True,
     plot_psd=False,
     gen_covs=False,
