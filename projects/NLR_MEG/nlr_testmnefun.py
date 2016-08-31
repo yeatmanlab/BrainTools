@@ -57,11 +57,15 @@ params = mnefun.Params(tmin=-0.2, tmax=1.0, t_adjust=-39e-3, n_jobs=18,
                        bmin=-0.2, auto_bad=20., plot_raw=False, 
                        bem_type = '5120')
           
+<<<<<<< HEAD
 # This sets the position of the head relative to the sensors. These values a
 # A typical head position. So now in sensor space everyone is aligned. However
 # We should also note that for source analysis it is better to leave this as
 # the mne-fun default
 params.trans_to = (0., 0., .04)
+=======
+params.trans_to = (0., 0., .04) # Align each subject to a common reference frame
+>>>>>>> a4cd458d621a2dab85571599080677eb96297c75
 params.sss_type = 'python'
 params.sss_regularize = 'svd' # 'in' by default
 params.tsss_dur = 10. # 60 for adults with not much head movements. This was set to 6.
