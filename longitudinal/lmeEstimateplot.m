@@ -19,8 +19,8 @@ end
 
 %% Create plots
 for ii = 1:length(test_names)
-    num_sessions = 3; % number of sessions including session 0
-    sessions = [0 1 2]; 
+    num_sessions = 5; % number of sessions including session 0
+    sessions = ['Session 0', 'Session 1', 'Session 2', 'Session 3', 'Session 4']; 
     estimates = zeros(num_sessions, 1);
     se = zeros(num_sessions, 1);
     p = zeros(num_sessions, 1);
@@ -43,8 +43,8 @@ for ii = 1:length(test_names)
             'HorizontalAlignment', 'center', 'Color', 'b');
     end
     ax = gca;   
-    ax.XLim = [-0.5000 2.5000];
-    ax.XAxis.TickValues = [0 1 2];
+    ax.XLim = [-0.5000 4.5000];
+    ax.XAxis.TickValues = [0 1 2 3 4];
     ax.YLim = [70 (max(estimates) + 5)];
     xlabel('Session'); ylabel('LME Estimate');
     title([test_names(ii), 'LME Estimate']);
@@ -53,7 +53,7 @@ for ii = 1:length(test_names)
     % Save image
     test = num2str(cell2mat(test_names(ii)));
     test = strrep(test, '\_', '-');
-    fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.png', 'LMEestimate_0to2', test, date);
+    fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.png', 'LMEestimate', test, date);
     print(fname, '-dpng');
 end
 

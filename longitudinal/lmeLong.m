@@ -26,17 +26,17 @@ math = {'WJ_MFF_SS', 'WJ_CALC_SS'};
 basic = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_RF', 'TWRE_SWE_SS', 'TWRE_PDE_SS', 'TWRE_INDEX'};
 %% Selections
 % test group options: all, wj, twre, wasi, ctopp, math, and basic
-test_names = twre; 
+test_names = basic; 
 % time course options: (1) hours, (2) days, (3) sessions
 time_course = 3; 
 % enter sessions of interest, if applicable
-usesessions = [1 0 2 3]; 
+usesessions = [0 1 2 3 4]; 
 % dummy variable options: (0) off, (1) on
-dummyon = 1;
+dummyon = 0;
 % centering options: 'Time' (1), 'Score'(2), or 'Both' (3)
 centering = 1;
 % longitudinal plot options: (0) off, (1) on
-long_plot = 0;
+long_plot = 1;
 % growth plot options: (0) off, (1) on
 growth_plot = 0;
 % lme estimate plot options: (0) off, (1) on

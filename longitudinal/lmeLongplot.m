@@ -59,7 +59,8 @@ for ii = 1:length(test_names)
     % format the plot nicely
     ax = gca;
     ylabel(test_names(ii)); xlabel(x_name); 
-    ax.XAxis.TickValues = [0 10 20 30 40 50 60 70];
+    ax.XAxis.TickValues = [0 1 2 3 4 5];
+%     ax.XAxis.TickValues = [0 10 20 30 40 50 60 70];
     ax.YLim = [40 140];
     ax.YAxis.TickValues = [40 60 80 100 120 140];
 %     legend(subs, 'Location', 'westoutside');
@@ -79,7 +80,7 @@ for ii = 1:length(test_names)
 
     % Add p value for best fit line
     p_linear = double(stats(ii).lme_linear.Coefficients.pValue(2));
-    text(70, 110, num2str(p_linear), 'Color', 'k', 'FontSize', 12, 'HorizontalAlignment', 'center');
+    text(3, 110, num2str(p_linear), 'Color', 'k', 'FontSize', 12, 'HorizontalAlignment', 'center');
 
     % Add quadratic line of best fit
     y = polyval(flipud(stats(ii).lme_quad.Coefficients.Estimate),xx);
@@ -88,7 +89,7 @@ for ii = 1:length(test_names)
 
     % Add p value for best fit line
     p_quad = double(stats(ii).lme_quad.Coefficients.pValue(3));
-    text(70, 105, num2str(p_quad), 'Color', 'b', 'FontSize', 12, 'HorizontalAlignment', 'center');
+    text(3, 105, num2str(p_quad), 'Color', 'b', 'FontSize', 12, 'HorizontalAlignment', 'center');
 
     
     % Save image
