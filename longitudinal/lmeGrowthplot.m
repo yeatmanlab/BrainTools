@@ -27,7 +27,7 @@ end
 ylabel('Growth Estimate'); xlabel('Test Name');
 ax = gca;
 ax.XTick = 1:length(test_names);
-ax.XTickLabel = test_names;
+ax.XTickLabel = strrep(test_names, '_', '\_');
 ax.XTickLabelRotation = 45;
 title('Linear Growth Estimate by Test');
 
@@ -46,7 +46,7 @@ if time_course ~= 3
         quad_data.Properties.VariableNames = {'test_name', 'Growth', 'SE'};
     end
     h = bar(quad_data.Growth, 'FaceColor', 'g', 'EdgeColor', 'k');
-    errorbar(quad_data.Growth, linear_data.SE, 'k');
+    errorbar(quad_data.Growth, linear_data.SE, 'kx');
     
     for jj = 1:length(test_names)
         text(jj, quad_data.Growth(jj) + quad_data.SE(jj) + 0.01, ...
@@ -58,7 +58,7 @@ if time_course ~= 3
     ylabel('Growth Estimate'); xlabel('Test Name');
     ax = gca;
     ax.XTick = 1:length(test_names);
-    ax.XTickLabel = test_names;
+    ax.XTickLabel = strrep(test_names, '_', '\_');
     ax.XTickLabelRotation = 45;
     title('Quadratic Growth Estimate by Test');
         

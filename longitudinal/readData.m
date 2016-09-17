@@ -54,30 +54,13 @@ score = cell2mat(score);
 
 %% Concentrate on sessions of interest, if applicable
 if time_course == 3
-    usesessions = [0, 1, 2, 3, 4];
     indx = ismember(long_var, usesessions);
     % remove rows that correspond to the ones we don't want to analyze
     sid = sid(indx); long_var = long_var(indx); score = score(indx);
 end
 
 
-%% Turn sessions into strings
-% sessions = cell2mat(sessions);
-% for ii = 1:length(sessions)
-%     if sessions{ii} == 1
-%         sessions{ii} = 'Session 1';
-%     elseif sessions{ii} == 2
-%         sessions{ii} = 'Session 2';
-%     elseif sessions{ii} == 3
-%         sessions{ii} = 'Session 3';
-%     elseif sessions{ii} == 4
-%         sessions{ii} = 'Session 4';
-%     elseif sessions{ii} == 5
-%         sessions{ii} = 'Session 5';
-%     elseif sessions{ii} == 10
-%         sessions{ii} = 'Session 0';
-%     end
-% end
+
 return
 
 

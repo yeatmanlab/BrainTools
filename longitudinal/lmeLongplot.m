@@ -13,7 +13,7 @@ elseif time_course == 2
     xx = [0 10 20 30 40 50 60 70]; 
 elseif time_course == 3
     x_name = 'session';
-    xx = [0 1 2 3 4 5]; 
+    xx = [0 1 2 3 4]; 
 
 end
 
@@ -60,7 +60,7 @@ for ii = 1:length(test_names)
     ax = gca;
     ylabel(test_names(ii)); xlabel(x_name); 
     ax.XAxis.TickValues = [0 1 2 3 4 5];
-%     ax.XAxis.TickValues = [0 10 20 30 40 50 60 70];
+%     ax.XAxis.TickValues = [0 10 20 30 40 50 60 70 80 90];
     ax.YLim = [40 140];
     ax.YAxis.TickValues = [40 60 80 100 120 140];
 %     legend(subs, 'Location', 'westoutside');
@@ -81,16 +81,16 @@ for ii = 1:length(test_names)
     % Add p value for best fit line
     p_linear = double(stats(ii).lme_linear.Coefficients.pValue(2));
     text(3, 110, num2str(p_linear), 'Color', 'k', 'FontSize', 12, 'HorizontalAlignment', 'center');
-
-    % Add quadratic line of best fit
-    y = polyval(flipud(stats(ii).lme_quad.Coefficients.Estimate),xx);
-    plot(xx,y,'--b','linewidth',2);
-
-
-    % Add p value for best fit line
-    p_quad = double(stats(ii).lme_quad.Coefficients.pValue(3));
-    text(3, 105, num2str(p_quad), 'Color', 'b', 'FontSize', 12, 'HorizontalAlignment', 'center');
-
+    if time_course ~= 3
+        % Add quadratic line of best fit
+        y = polyval(flipud(stats(ii).lme_quad.Coefficients.Estimate),xx);
+        plot(xx,y,'--b','linewidth',2);
+        
+        
+        % Add p value for best fit line
+        p_quad = double(stats(ii).lme_quad.Coefficients.pValue(3));
+        text(3, 105, num2str(p_quad), 'Color', 'b', 'FontSize', 12, 'HorizontalAlignment', 'center');
+    end
     
     % Save image
     test = num2str(cell2mat(test_names(ii)));

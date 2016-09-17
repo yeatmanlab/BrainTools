@@ -40,10 +40,28 @@ if dummyon == 0
     
 
 elseif dummyon == 1
+    uncentered = long_var;
+    % recode sessions as strings
+    sess_recoded = cell(size(long_var));
+    for jj = 1:length(sess_recoded)
+        if long_var(jj) == 0
+            sess_recoded{jj} = 'Session 1.5';
+        elseif long_var(jj) == 1
+            sess_recoded{jj} = 'Session 1';
+        elseif long_var(jj) == 2
+            sess_recoded{jj} = 'Session 2';
+        elseif long_var(jj) == 3
+            sess_recoded{jj} = 'Session 3';
+        elseif long_var(jj) == 4
+            sess_recoded{jj} = 'Session 4';
+        end
+    end
+    
     % make the longitudinal variable a categorical variable
-    long_var = categorical(long_var);
+%     long_var = categorical(long_var);
+    long_var = categorical(sess_recoded);
     % Create DataSet
-    data_table = dataset(sid, long_var, score);
+    data_table = dataset(sid, uncentered, long_var, score);
     % Calculate LME fit
     % Make sid a categorical variable
     data_table.sid = categorical(data_table.sid);

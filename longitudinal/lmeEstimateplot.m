@@ -13,14 +13,17 @@ elseif time_course == 2
     xx = [0 10 20 30 40 50 60 70]; 
 elseif time_course == 3
     x_name = 'session';
-    xx = [0 1 2 3 4 5]; 
-
+    xx = [1 2 3 4]; 
+    
 end
+% if doing a single plot
+figure; hold
+c = jet(length(test_names));
 
 %% Create plots
 for ii = 1:length(test_names)
-    num_sessions = 5; % number of sessions including session 0
-    sessions = ['Session 0', 'Session 1', 'Session 2', 'Session 3', 'Session 4']; 
+    num_sessions = 4; % number of sessions including session 0
+    sessions = [1 2 3 4]; 
     estimates = zeros(num_sessions, 1);
     se = zeros(num_sessions, 1);
     p = zeros(num_sessions, 1);
@@ -33,30 +36,39 @@ for ii = 1:length(test_names)
     for num = 2:num_sessions
        estimates(num, 1) = (estimates(1,1) + estimates(num, 1)); 
     end
-    
-    figure; hold;
-    bar(sessions', estimates, 'w');
+%     % if doing individual plots
+%     figure; hold;
+    plot(sessions', estimates);
     errorbar(sessions', estimates, se, '.k');
-    for num = 1:num_sessions
-        text(sessions(num), estimates(num) + se(num) + 2, ...
-            num2str(p(num)), ...
-            'HorizontalAlignment', 'center', 'Color', 'b');
-    end
-    ax = gca;   
-    ax.XLim = [-0.5000 4.5000];
-    ax.XAxis.TickValues = [0 1 2 3 4];
-    ax.YLim = [70 (max(estimates) + 5)];
-    xlabel('Session'); ylabel('LME Estimate');
-    title([test_names(ii), 'LME Estimate']);
-    grid('on');
-    
-    % Save image
-    test = num2str(cell2mat(test_names(ii)));
-    test = strrep(test, '\_', '-');
-    fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.png', 'LMEestimate', test, date);
-    print(fname, '-dpng');
-end
+%     for num = 1:num_sessions
+%         if p(num) <= 0.001
+%             text(sessions(num), estimates(num) + se(num) + 2, ...
+%                 '**', 'HorizontalAlignment', 'center', 'Color', 'b');
+%         elseif p(num) <= 0.05
+%             text(sessions(num), estimates(num) + se(num) + 2, ...
+%                 '*', 'HorizontalAlignment', 'center', 'Color', 'b');
+%         end
+%     end
 
+    ax = gca;   
+    ax.XLim = [0.5000 4.5000];
+    ax.XAxis.TickValues = [1 2 3 4];
+%     ax.YLim = [70 (max(estimates) + 5)];
+
+    xlabel('Session'); ylabel('LME Estimate');
+    title([strrep(test_names(ii), '_', '\_'), 'LME Estimate']);
+    grid('on');
+    axis('tight');
+     
+%     % Save image
+%     test = num2str(cell2mat(test_names(ii)));
+%     test = strrep(test, '\_', '-');
+%     fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.png', 'LMEestimate', test, date);
+%     print(fname, '-dpng');
+end
+% if single plot
+   l = legend(test_names, 'Location', 'eastoutside');
+    ax.YLim = [70 110];
 
 
 return
