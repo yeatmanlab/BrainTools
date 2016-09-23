@@ -52,13 +52,9 @@ if time_course ~= 3
     errorbar(quad_data.Growth, linear_data.SE, 'kx');
     
     for jj = 1:length(test_names)
-        if stats(jj).lme_quad.Coefficients.pValue(3) <= 0.001
-            text(jj, estimates(num) + se(num) + 2, ...
-                '**', 'HorizontalAlignment', 'center', 'Color', 'b');
-        elseif stats(jj).lme_quad.Coefficients.pValue(3) <= 0.05
-            text(jj, estimates(num) + se(num) + 2, ...
-                '*', 'HorizontalAlignment', 'center', 'Color', 'b');
-        end
+        text(jj, quad_data.Growth(jj) + quad_data.SE(jj) + 0.01, ...
+            num2str(round(stats(jj).lme_quad.Coefficients.pValue(3), 3)), ...
+            'HorizontalAlignment', 'center', 'Color', 'b');
     end
         
     % Format

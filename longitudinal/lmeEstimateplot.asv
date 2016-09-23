@@ -52,6 +52,7 @@ for ii = 1:length(test_names)
     for num = 2:num_sessions
        estimates(num, 1) = (estimates(1,1) + estimates(num, 1)); 
     end
+
     errorbar(sessions', estimates, se, '.k');
 end
 
@@ -96,7 +97,7 @@ for ii = 1:length(test_names)
     ax.YLim = [70 (max(estimates) + 5)];
     ax.XAxis.TickValues = [1 2 3 4];
     xlabel('Session'); ylabel('Standard Score');
-    title([strrep(test_names(ii), '_', '\_'), ' LME Mean Growth']);
+    title([strrep(test_names(ii), '_', '\_'));
     grid('on');
     axis('tight');
     legend(h, test_names, 'Location', 'eastoutside');

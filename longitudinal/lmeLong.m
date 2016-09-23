@@ -13,7 +13,6 @@ subs = {'102_RS', '110_HH', '145_AC', '150_MG', '151_RD', '152_TC', ...
         '172_TH', '174_HS', '179_GM', '180_ZD', '201_GS', '202_DD', ...
         '203_AM', '204_AM', '205_AC', '206_LM', '207_AH', '208_LH', ...
         '210_SB', '211_LB'};
-% Subjects removed from set
 
 %% Test Selection; subgroups
 all = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_OR_SS', 'WJ_SRF_SS', 'WJ_MFF_SS', 'WJ_CALC_SS', 'WJ_BRS', 'WJ_RF',...
@@ -25,9 +24,12 @@ wasi= {'WASI_FS2'};
 ctopp= {'CTOPP_ELISION_SS', 'CTOPP_BW_SS', 'CTOPP_PI_SS','CTOPP_RAPID', 'CTOPP_PA'};
 math = {'WJ_MFF_SS', 'WJ_CALC_SS'};
 basic = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_RF', 'TWRE_SWE_SS', 'TWRE_PDE_SS', 'TWRE_INDEX'};
+basic_plus = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_RF', 'TWRE_SWE_SS', 'TWRE_PDE_SS', 'TWRE_INDEX', 'WJ_MFF_SS', 'WJ_CALC_SS'};
+select = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_RF', 'TWRE_SWE_SS', 'TWRE_PDE_SS'};
+
 %% Selections
 % test group options: all, wj, twre, wasi, ctopp, math, and basic
-test_names = {'WJ_LWID_SS', 'WJ_WA_SS', 'TWRE_SWE_SS', 'TWRE_PDE_SS'}; 
+test_names = select;
 % time course options: (1) hours, (2) days, (3) sessions
 time_course = 3; 
 % enter sessions of interest, if applicable
