@@ -1,6 +1,6 @@
 %% LME Model for Word Lists
 % Read in data and fit model
-t = readtable('C:\Users\donne\Desktop\NLR_Scores_WordLists.xlsx');
+t = readtable('~/Desktop/NLR_WordLists_Scores.xlsx');
 t.Session = categorical(t.Session);
 t.Spacing = categorical(t.Spacing);
 lme = fitlme(t, 'x4Letter ~ Session + Spacing + (Session * Spacing) + (Session|Subject)');
@@ -57,4 +57,49 @@ axis('tight');
 errorbar(sessions', estimates, se, '.k');
 errorbar(sessions', spaced_estimates, spaced_se, '.k');
 
+%% Adjust for Hypothesis of Individual variation in propensity
+v = readtable('~/Desktop/NLR_WordLists_Scores.xlsx');
+s = unique(v.Subject);
+unspaced = []; spaced = []; session = [];
+adjusted_sub = {}; difference = [];
+spaced_count = 1;
+unspaced_count = 1;
+for ii = 1:length(v.Subject)
+    if v.Spacing(ii) == 1
+        spaced(spaced_count) = v.x4Letter(ii);
+        spaced_count = spaced_count + 1;
+    elseif v.Spacing(ii) == 0
+        unspaced(unspaced_count) = v.x4Letter(ii);
+        adjusted_sub(unspaced_count) = v.Subject(ii);
+        session(unspaced_count) = v.Session(ii);
+        unspaced_count = unspaced_count + 1;
+    end           
+end
+
+if length(unspaced_count) ~= length(spaced_count)
+    print('ERROR - UNEQUAL INFO');
+end
+
+difference = zeros(length(unspaced), 1);
+
+for jj = 1:length(difference)
+   difference(jj) = spaced(jj) - unspaced(jj); 
+end
+
+wlists = table(adjusted_sub', session', spaced', unspaced', difference);
+wlists.Properties.VariableNames = {'Subject', 'Session', 'Spaced', 'Unspaced', 'Difference'};
+
+[R, PValue] = corrplot(wlists);
+lme_wl = fitlme(wlists, 'Difference ~ Session + (Session|Subject)');
+
+
+
+one2two = corr(wlists.Difference(wlists.Session==1),wlists.Difference(wlists.Session==2))
+two2three = corr(wlists.Difference(wlists.Session==2),wlists.Difference(wlists.Session==3))
+three2four = corr(wlists.Difference(wlists.Session==3),wlists.Difference(wlists.Session==4))
+
+
+% v.Session = categorical(v.Session);
+% v.Spacing = categorical(v.Spacing);
+% lme = fitlme(v, 'x4Letter ~ Session + Spacing + (Session * Spacing) + (Session|Subject)');
 

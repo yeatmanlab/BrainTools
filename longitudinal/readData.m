@@ -1,4 +1,4 @@
-function [sid, long_var, score, test_name] = readData(data, subs, test_name, time_course, usesessions)
+function [sid, long_var, score, predictor, test_name] = readData(data, subs, test_name, time_course, usesessions)
 % Function: Prepares data for lmeLongitudinaldata and plotLongitudinaldata
 
 % gather column headings
@@ -16,15 +16,32 @@ for subj = 1:numel(subs)
 end
 % create refined data array for data of interest
 % initialize empty arrays
-sid = []; sessions = []; days = []; hours = [];
+sid = []; sessions = []; days = []; hours = []; predictor = [];
 
 % vertcat each reading test variable
 for subj = 1:numel(data_indx)
     sid        = vertcat(sid, data(data_indx(subj), strcmp(data_ref, 'Subject')));
     sessions    = vertcat(sessions, data(data_indx(subj), strcmp(data_ref, 'LMB\_session')));
     days       = vertcat(days, data(data_indx(subj), strcmp(data_ref, 'Time')));
-    hours      = vertcat(hours, data(data_indx(subj), strcmp(data_ref, 'Hours')));   
+    hours      = vertcat(hours, data(data_indx(subj), strcmp(data_ref, 'Hours')));
+    predictor  = vertcat(predictor, data(data_indx(subj), strcmp(data_ref, 'Age')));
 end
+predictor = cell2mat(predictor);
+% Gather predictor variable
+pred_index = []; 
+for subj = 1:numel(subs)
+    pred_index = find(strcmp(sid, subs(subj)));
+    p_score = NaN;
+    for ii = 1:numel(pred_index)
+       if predictor(pred_index(ii)) > 0
+          p_score = predictor(pred_index(ii)); 
+       end
+    end
+    for jj = 1:numel(pred_index)
+       predictor(pred_index(jj)) = p_score; 
+    end
+end
+        
 
 % Convert cell arrays to variables suitable for use with dataset()
 hours       = cell2mat(hours);
@@ -43,20 +60,24 @@ end
 
 %% Gather Reading Score of Interest
 % intialize variable
-score = []; 
-test_name = strrep(test_name, '_', '\_');
+score = []; score2 = [];
+% test_name = strrep(test_name, '_', '\_');
+test_name = 'WJ\_WA\_SS'; test_name2 = 'WJ\_LWID\_SS';
 % vertcat the data into a cell matrix
 for subj = 1:numel(data_indx)
 score = vertcat(score, data(data_indx(subj), strcmp(data_ref, test_name)));
+score2 = vertcat(score2, data(data_indx(subj), strcmp(data_ref, test_name2)));
 end
 % Convert reading score to matlab variable
 score = cell2mat(score);
+score2 = cell2mat(score2);
+
 
 %% Concentrate on sessions of interest, if applicable
 if time_course == 3
     indx = ismember(long_var, usesessions);
     % remove rows that correspond to the ones we don't want to analyze
-    sid = sid(indx); long_var = long_var(indx); score = score(indx);
+    sid = sid(indx); long_var = long_var(indx); score = score(indx); score2 = score2(indx); predictor = predictor(indx);
 end
 
 
