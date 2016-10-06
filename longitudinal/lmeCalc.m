@@ -25,6 +25,7 @@ if dummyon == 0
     uncentered = long_var;
     long_var = time_adj;
     score_adj = score_centered;
+
     % Create squared hours variable to use in quadratic model
     long_var_sq = long_var.^2;
     % Create DataSet
@@ -32,6 +33,7 @@ if dummyon == 0
     % Calculate LME fit
     % Make sid a categorical variable
     data_table.sid = categorical(data_table.sid);
+  
     % Fit the model on the uncentered data as changing linearly
     lme_linear = fitlme(data_table, 'score ~ long_var + (1|sid)');
     % Fit the model on uncentered data as changing quadratically
@@ -40,7 +42,7 @@ if dummyon == 0
     
 
 elseif dummyon == 1
-    uncentered = long_var;
+    uncentered = long_var;      
     % recode sessions as strings
     sess_recoded = cell(size(long_var));
     for jj = 1:length(sess_recoded)

@@ -18,10 +18,10 @@ errorbar(linear_data.Growth, linear_data.SE, 'kx');
 
 for jj = 1:length(test_names)
     if stats(jj).lme_linear.Coefficients.pValue(2) <= 0.001
-        text(jj, estimates(num) + se(num) + 2, ...
+        text(jj, linear_data.Growth(jj) + linear_data.SE(jj) + .002, ...
             '**', 'HorizontalAlignment', 'center', 'Color', 'b');
     elseif stats(jj).lme_linear.Coefficients.pValue(2) <= 0.05
-        text(jj, estimates(num) + se(num) + 2, ...
+        text(jj,linear_data.Growth(jj) + linear_data.SE(jj) + .002, ...
             '*', 'HorizontalAlignment', 'center', 'Color', 'b');
     end
 end
@@ -35,8 +35,8 @@ ax.XTickLabelRotation = 45;
 title('Linear Growth Estimate by Test');
 
 % Save image
-    fname = sprintf('~/Desktop/figures/LMB/linearGrowthEst-%s.png', date);
-    print(fname, '-dpng'); 
+    fname = sprintf('~/Desktop/figures/LMB/%s-linearGrowthEst-%s.eps', 'hours', date);
+    print(fname, '-depsc'); 
 
 %% Quadratic
 % Determine if quadratic fit is necessary
@@ -70,8 +70,8 @@ if time_course ~= 3
     title('Quadratic Growth Estimate by Test');
         
     % Save image
-    fname = sprintf('~/Desktop/figures/LMB/quadGrowthEst-%s.png', date);
-    print(fname, '-dpng');
+    fname = sprintf('~/Desktop/figures/LMB/%s-quadGrowthEst-%s.eps', 'hours', date);
+    print(fname, '-depsc');
     
 else
     return;

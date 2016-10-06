@@ -61,23 +61,24 @@ end
 %% Gather Reading Score of Interest
 % intialize variable
 score = []; score2 = [];
-% test_name = strrep(test_name, '_', '\_');
-test_name = 'WJ\_WA\_SS'; test_name2 = 'WJ\_LWID\_SS';
+test_name = strrep(test_name, '_', '\_');
+% test_name = 'WJ\_WA\_SS'; test_name2 = 'WJ\_LWID\_SS';
 % vertcat the data into a cell matrix
 for subj = 1:numel(data_indx)
 score = vertcat(score, data(data_indx(subj), strcmp(data_ref, test_name)));
-score2 = vertcat(score2, data(data_indx(subj), strcmp(data_ref, test_name2)));
+% score2 = vertcat(score2, data(data_indx(subj), strcmp(data_ref, test_name2)));
 end
 % Convert reading score to matlab variable
 score = cell2mat(score);
-score2 = cell2mat(score2);
+% score2 = cell2mat(score2);
 
 
 %% Concentrate on sessions of interest, if applicable
 if time_course == 3
     indx = ismember(long_var, usesessions);
     % remove rows that correspond to the ones we don't want to analyze
-    sid = sid(indx); long_var = long_var(indx); score = score(indx); score2 = score2(indx); predictor = predictor(indx);
+    sid = sid(indx); long_var = long_var(indx); score = score(indx); 
+%     score2 = score2(indx); predictor = predictor(indx);
 end
 
 
