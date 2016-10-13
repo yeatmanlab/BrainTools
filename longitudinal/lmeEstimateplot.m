@@ -5,7 +5,7 @@ function [stats] = lmeEstimateplot(stats, test_names, subs, time_course);
 
 % Deside on single or individual plots
 % if decision == 1; single. if decision == 2; individual
-decision = 1;
+decision = 2;
 
 if decision == 1
     %% Create Single LME Mean Model Plot
@@ -66,8 +66,8 @@ if decision == 1
 elseif decision == 2
     %% Plot Individual Growth Plots
     for ii = 1:length(test_names)
-        num_sessions = 4; % number of sessions including session 0
-        sessions = [1 2 3 4];
+        num_sessions = 5; % number of sessions including session 0
+        sessions = [0 1 2 3 4];
         estimates = zeros(num_sessions, 1);
         se = zeros(num_sessions, 1);
         p = zeros(num_sessions, 1);
@@ -84,7 +84,7 @@ elseif decision == 2
         % set figure
         figure; hold;
         % Plot curves
-        h = plot(sessions', estimates);
+        h = bar(sessions', estimates, 'w');
         % Plot error bars
         errorbar(sessions', estimates, se, '.k');
         
@@ -101,9 +101,9 @@ elseif decision == 2
         
         %Format Plot
         ax = gca;
-        ax.XLim = [0.5000 4.5000];
-        ax.YLim = [70 (max(estimates) + 5)];
-        ax.XAxis.TickValues = [1 2 3 4];
+        ax.XLim = [-0.5000 4.5000];
+        ax.YLim = [70, (max(estimates) + 5)];
+        ax.XAxis.TickValues = [0 1 2 3 4];
         xlabel('Session'); ylabel('Standard Score');
         title([strrep(test_names(ii), '_', '\_'), ' LME Mean Growth']);
         grid('on');

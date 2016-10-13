@@ -30,7 +30,8 @@ select = {'WJ_LWID_SS', 'WJ_WA_SS', 'TWRE_SWE_SS', 'TWRE_PDE_SS'};
 
 %% Selections
 % test group options: all, wj, twre, wasi, ctopp, math, and basic
-test_names = select;
+test_names = {'WJ_WA_SS'};
+test_2_name = 'WJ_LWID_SS';
 % time course options: (1) hours, (2) days, (3) sessions
 time_course = 3; 
 % enter sessions of interest, if applicable
@@ -44,7 +45,7 @@ long_plot = 0;
 % growth plot options: (0) off, (1) on
 growth_plot = 0;
 % lme estimate plot options: (0) off, (1) on
-lmestimate_plot = 1;
+lmestimate_plot = 0;
 
 %% Data set
 %     If using a Mac/Linux
@@ -56,7 +57,7 @@ lmestimate_plot = 1;
 stats = struct; % initialize the struct to store all data per test for analysis
 for ii = 1:length(test_names);    
     % run readData function to gather data of interest
-    [sid, long_var, score, predictor, test_name] = readData(data, subs, test_names(ii), time_course, usesessions);
+    [sid, long_var, score, score2, predictor, test_name, test_2_name] = readData(data, subs, test_name, test_2_name, time_course, usesessions);
     % gather lme statistics using lmeCalc function
     [lme_linear, lme_quad, data_table] = lmeCalc(sid, long_var, score, dummyon, centering);  
     % Collate data into stats struct
