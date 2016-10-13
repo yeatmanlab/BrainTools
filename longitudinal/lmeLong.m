@@ -57,7 +57,7 @@ lmestimate_plot = 0;
 stats = struct; % initialize the struct to store all data per test for analysis
 for ii = 1:length(test_names);    
     % run readData function to gather data of interest
-    [sid, long_var, score, score2, predictor, test_name, test_2_name] = readData(data, subs, test_name, test_2_name, time_course, usesessions);
+    [sid, long_var, score, score2, predictor, test_name, test_2_name] = readData(data, subs, test_names(ii), test_2_name, time_course, usesessions);
     % gather lme statistics using lmeCalc function
     [lme_linear, lme_quad, data_table] = lmeCalc(sid, long_var, score, dummyon, centering);  
     % Collate data into stats struct

@@ -63,6 +63,7 @@ end
 %% Gather Reading Score of Interest
 % intialize variable
 score = []; score2 = [];
+test_name = strrep(test_2_name, '_', '\_');
 test_2_name = strrep(test_2_name, '_', '\_');
 % vertcat the data into a cell matrix
 for subj = 1:numel(data_indx)
