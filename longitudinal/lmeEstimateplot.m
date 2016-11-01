@@ -5,7 +5,7 @@ function [stats] = lmeEstimateplot(stats, test_names, subs, time_course);
 
 % Deside on single or individual plots
 % if decision == 1; single. if decision == 2; individual
-decision = 2;
+decision = 1;
 
 if decision == 1
     %% Create Single LME Mean Model Plot
@@ -35,11 +35,12 @@ if decision == 1
     ax.XLim = [0.5000 4.5000];
     ax.YLim = [70 (max(estimates) + 5)];
     ax.XAxis.TickValues = [0 1 2 3 4];
-    xlabel('Session'); ylabel('Standard Score');
-    title('LME Mean Growth Model');
+    xlabel('Hours of Intervention'); ylabel('Standard Score');
+    title('Growth in Reading Skill');
     grid('on');
     axis('tight');
-    legend(strrep(test_names, '_', '\_'), 'Location', 'eastoutside');
+%     legend(strrep(test_names, '_', '\_'), 'Location', 'eastoutside');
+    legend({'Real Word', 'Pseudo Word', 'Real Word - Timed', 'Pseudo Word - Timed'}, 'Location', 'eastoutside');
     
     %Add Error Bars
     for ii = 1:length(test_names)

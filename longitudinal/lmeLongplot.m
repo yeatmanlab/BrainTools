@@ -58,6 +58,7 @@ for ii = 1:length(test_names)
 
     % format the plot nicely
     ax = gca;
+    axis(ax, 'tight');
     ylabel(test_name); xlabel(x_name); 
     ax.XAxis.TickValues = [0 40 80 120 160];
     ax.XLim = [0 160];
@@ -90,8 +91,8 @@ for ii = 1:length(test_names)
     % Save image
     test = num2str(cell2mat(test_names(ii)));
     test = strrep(test, '\_', '-');
-    fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.png', x_name, test, date);
-    print(fname, '-dpng');
+    fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.eps', x_name, test, date);
+    print(fname, '-depsc');
 
 end
 

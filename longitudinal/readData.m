@@ -63,8 +63,7 @@ end
 %% Gather Reading Score of Interest
 % intialize variable
 score = []; score2 = [];
-test_name = strrep(test_2_name, '_', '\_');
-test_2_name = strrep(test_2_name, '_', '\_');
+test_name = strrep(test_name, '_', '\_');
 % vertcat the data into a cell matrix
 for subj = 1:numel(data_indx)
 score = vertcat(score, data(data_indx(subj), strcmp(data_ref, test_name)));
@@ -80,7 +79,7 @@ if time_course == 3
     indx = ismember(long_var, usesessions);
     % remove rows that correspond to the ones we don't want to analyze
     sid = sid(indx); long_var = long_var(indx); score = score(indx); 
-    score2 = score2(indx); predictor = predictor(indx);
+     score2 = score2(indx); predictor = predictor(indx);
 end
 
 

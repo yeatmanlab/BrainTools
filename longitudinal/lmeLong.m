@@ -11,9 +11,9 @@
 subs = {'102_RS', '110_HH', '145_AC', '150_MG', '151_RD', '152_TC', ...
         '160_EK', '161_AK', '162_EF', '163_LF', '164_SF', '170_GM', ...
         '172_TH', '174_HS', '179_GM', '180_ZD', '201_GS', '202_DD', ...
-        '203_AM', '204_AM', '205_AC', '206_LM', '207_AH', '208_LH', ...
+        '203_AM', '204_AM', '207_AH', '208_LH', ...
         '210_SB', '211_LB'};
-% not included: , 
+% not included: , '205_AC', '206_LM', 
 
 %% Test Selection; subgroups
 all = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_OR_SS', 'WJ_SRF_SS', 'WJ_MFF_SS', 'WJ_CALC_SS', 'WJ_BRS', 'WJ_RF',...
@@ -30,8 +30,8 @@ select = {'WJ_LWID_SS', 'WJ_WA_SS', 'TWRE_SWE_SS', 'TWRE_PDE_SS'};
 
 %% Selections
 % test group options: all, wj, twre, wasi, ctopp, math, and basic
-test_names = {'WJ_WA_SS'};
-test_2_name = 'WJ_LWID_SS';
+test_names = basic;
+test_2_name = 'TWRE\_PDE\_SS';
 % time course options: (1) hours, (2) days, (3) sessions
 time_course = 3; 
 % enter sessions of interest, if applicable
@@ -65,6 +65,7 @@ for ii = 1:length(test_names);
     stats(ii).lme_linear = lme_linear;
     stats(ii).data_table = data_table;  
     stats(ii).lme_quad = lme_quad;
+    corr_analysis;
 end
 
 %% Plotting Techniques
