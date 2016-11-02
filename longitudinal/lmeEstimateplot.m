@@ -39,8 +39,8 @@ if decision == 1
     title('Growth in Reading Skill');
     grid('on');
     axis('tight');
-%     legend(strrep(test_names, '_', '\_'), 'Location', 'eastoutside');
-    legend({'Real Word', 'Pseudo Word', 'Real Word - Timed', 'Pseudo Word - Timed'}, 'Location', 'eastoutside');
+    legend(strrep(test_names, '_', '\_'), 'Location', 'eastoutside');
+
     
     %Add Error Bars
     for ii = 1:length(test_names)
@@ -61,7 +61,7 @@ if decision == 1
     % Save image
     test = num2str(cell2mat(test_names(ii)));
     test = strrep(test, '\_', '-');
-    fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.eps', 'LMEestimate', 'Select', date);
+    fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.eps', 'LMEestimate', 'Skills', date);
     print(fname, '-depsc');
     
 elseif decision == 2
@@ -113,11 +113,11 @@ elseif decision == 2
         
     end
     
-    %% Save image
-    % test = num2str(cell2mat(test_names(ii)));
-    % test = strrep(test, '\_', '-');
-    % fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.png', 'LMEestimate', test, date);
-    % print(fname, '-dpng');
+%     % Save image
+%     test = num2str(cell2mat(test_names(ii)));
+%     test = strrep(test, '\_', '-');
+%     fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.eps', 'LMEestimate', test, date);
+%     print(fname, '-depsc');
 end
 end
 

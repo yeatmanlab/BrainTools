@@ -26,7 +26,7 @@ for subj = 1:numel(data_indx)
     sessions    = vertcat(sessions, data(data_indx(subj), strcmp(data_ref, 'LMB\_session')));
     days       = vertcat(days, data(data_indx(subj), strcmp(data_ref, 'Time')));
     hours      = vertcat(hours, data(data_indx(subj), strcmp(data_ref, 'Hours')));
-    predictor  = vertcat(predictor, data(data_indx(subj), strcmp(data_ref, 'Age')));
+    predictor  = vertcat(predictor, data(data_indx(subj), strcmp(data_ref, 'WASI\_FS2')));
 end
 predictor = cell2mat(predictor);
 % Gather predictor variable

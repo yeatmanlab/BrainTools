@@ -1,38 +1,38 @@
 
- x = test_2_name; y = test_name{1};
+ x = 'predictor'; y = test_name{1};
 
-one_1to2 = score(long_var == 2) - score(long_var == 1);
-one_2to3 = score(long_var == 3) - score(long_var == 2); 
-one_3to4 = score(long_var == 4) - score(long_var == 3); 
-one_1to4 = score(long_var == 4) - score(long_var == 1);
-
-two_1to2 = score2(long_var == 2) - score2(long_var == 1); 
-two_2to3 = score2(long_var == 3) - score2(long_var == 2);  
-two_3to4 = score2(long_var == 4) - score2(long_var == 3);  
-two_1to4 = score2(long_var == 4) - score2(long_var == 1); 
+one_1to2 = score(uncentered == 2) - score(uncentered == 1);
+one_2to3 = score(uncentered == 3) - score(uncentered == 2); 
+one_3to4 = score(uncentered == 4) - score(uncentered == 3); 
+one_1to4 = score(uncentered == 4) - score(uncentered == 1);
+% 
+% two_1to2 = score2(long_var == 2) - score2(long_var == 1); 
+% two_2to3 = score2(long_var == 3) - score2(long_var == 2);  
+% two_3to4 = score2(long_var == 4) - score2(long_var == 3);  
+% two_1to4 = score2(long_var == 4) - score2(long_var == 1); 
 
 figure; hold;
 
 subplot(2,2,1);
-scatter(two_1to2, one_1to2, ifsig(two_1to2, one_1to2));
+scatter(predictor, one_1to2, ifsig(predictor, one_1to2));
 lsline;
 xlabel(sprintf('%s init', x));
 ylabel(sprintf('%s init', y));
 
 subplot(2,2,2);
-scatter(two_1to2, one_2to3, ifsig(two_1to2, one_2to3));
+scatter(predictor, one_2to3, ifsig(predictor, one_2to3));
 lsline;
 xlabel(sprintf('%s init', x));
 ylabel(sprintf('%s mid', y));
 
 subplot(2,2,3);
-scatter(two_1to2, one_3to4, ifsig(two_1to2, one_3to4));
+scatter(predictor, one_3to4, ifsig(predictor, one_3to4));
 lsline;
 xlabel(sprintf('%s init', x));
 ylabel(sprintf('%s end', y));
 
 subplot(2,2,4);
-scatter(two_1to2, one_1to4, ifsig(two_1to2, one_1to4));
+scatter(predictor, one_1to4, ifsig(predictor, one_1to4));
 lsline;
 xlabel(sprintf('%s init', x));
 ylabel(sprintf('%s total', y));

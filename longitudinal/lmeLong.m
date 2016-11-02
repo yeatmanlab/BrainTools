@@ -25,13 +25,14 @@ wasi= {'WASI_FS2'};
 ctopp= {'CTOPP_ELISION_SS', 'CTOPP_BW_SS', 'CTOPP_PI_SS','CTOPP_RAPID', 'CTOPP_PA'};
 math = {'WJ_MFF_SS', 'WJ_CALC_SS'};
 basic = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_RF', 'TWRE_SWE_SS', 'TWRE_PDE_SS', 'TWRE_INDEX'};
+skills = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_OR_SS', 'WJ_SRF_SS', 'TWRE_SWE_SS', 'TWRE_PDE_SS', 'TWRE_INDEX'};
 basic_plus = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_BRS', 'WJ_OR_SS', 'WJ_SRF_SS',  'WJ_RF', 'TWRE_SWE_SS', 'TWRE_PDE_SS', 'TWRE_INDEX', 'WJ_MFF_SS', 'WJ_CALC_SS', 'WJ_MCS'};
 select = {'WJ_LWID_SS', 'WJ_WA_SS', 'TWRE_SWE_SS', 'TWRE_PDE_SS'};
 
 %% Selections
 % test group options: all, wj, twre, wasi, ctopp, math, and basic
-test_names = basic;
-test_2_name = 'TWRE\_PDE\_SS';
+test_names = skills;
+test_2_name = 'WASI\_FS2';
 % time course options: (1) hours, (2) days, (3) sessions
 time_course = 3; 
 % enter sessions of interest, if applicable
@@ -65,6 +66,7 @@ for ii = 1:length(test_names);
     stats(ii).lme_linear = lme_linear;
     stats(ii).data_table = data_table;  
     stats(ii).lme_quad = lme_quad;
+    predictor_lme;    
     corr_analysis;
 end
 
