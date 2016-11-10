@@ -60,33 +60,33 @@ title('WASI FS2 as a predictor of Group LME Slopes');
 lsline;
 
 
-% %% Slope Estimate Correlation Analysis - INDIVIDUAL LEVEL
-% % % Center Predictor variable
-% % pred_adj = [];
-% % pred_adj = predictor - mean(predictor);
-% % uncentered_predictor = predictor;
-% % predictor = pred_adj;
-% 
-% 
-% for jj = 1:length(s)
-%     indx = find(strcmp(s(jj), sid));
-%     tbl = table(sid(indx), long_var(indx), score(indx));
-%     tbl.Properties.VariableNames = {'sid', 'long_var', 'score'};
-% %     lme = fitlme(tbl, 'score ~ long_var + (long_var|sid)');
-%     [estimates,names] = randomEffects(stats(ii).lme_linear);
-%     indiv_slopes(jj, 1) = estimates(2);
-% end
-% % % reshape predictor matrix to get one score per subject
-% % % NOTE: the argument following the original predictor matrix is the number
-% % % of sessions involved in the analysis
-% % tmp = reshape(predictor, 4, numel(predictor)/4);
-% % % zero in on first column for unique scores
-% % predictor = tmp(1,:)';
-% % Compute correlation
-% figure; hold;
-% scatter(predictor, indiv_slopes);
-% xlabel('predictor'); ylabel('indiv slopes');
-% title('WASI FS2 as a predictor of Individual LME Slopes');
-% lsline;
+%% Slope Estimate Correlation Analysis - INDIVIDUAL LEVEL
+% % Center Predictor variable
+% pred_adj = [];
+% pred_adj = predictor - mean(predictor);
+% uncentered_predictor = predictor;
+% predictor = pred_adj;
+
+
+for jj = 1:length(s)
+    indx = find(strcmp(s(jj), sid));
+    tbl = table(sid(indx), long_var(indx), score(indx));
+    tbl.Properties.VariableNames = {'sid', 'long_var', 'score'};
+    lme = fitlme(tbl, 'score ~ long_var + (long_var|sid)');
+    [estimates,names] = randomEffects(lme);
+    indiv_slopes(jj, 1) = estimates(2);
+end
+% reshape predictor matrix to get one score per subject
+% NOTE: the argument following the original predictor matrix is the number
+% of sessions involved in the analysis
+tmp = reshape(predictor, 4, numel(predictor)/4);
+% zero in on first column for unique scores
+predictor = tmp(1,:)';
+% Compute correlation
+figure; hold;
+scatter(predictor, indiv_slopes);
+xlabel('predictor'); ylabel('indiv slopes');
+title('WASI FS2 as a predictor of Individual LME Slopes');
+lsline;
 
 
