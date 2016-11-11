@@ -67,14 +67,18 @@ lsline;
 % uncentered_predictor = predictor;
 % predictor = pred_adj;
 
-
+s = unique(sid);
 for jj = 1:length(s)
     indx = find(strcmp(s(jj), sid));
     tbl = table(sid(indx), long_var(indx), score(indx));
     tbl.Properties.VariableNames = {'sid', 'long_var', 'score'};
-    lme = fitlme(tbl, 'score ~ long_var + (long_var|sid)');
-    [estimates,names] = randomEffects(lme);
-    indiv_slopes(jj, 1) = estimates(2);
+    % lme = fitlme(tbl, 'score ~ long_var + (long_var|sid)');
+    % [estimates,names] = randomEffects(lme);
+    % indiv_slopes(jj, 1) = estimates(2);
+    % Rather than using a mixed linear model we want to use an ordinary least
+    % squares regression. Many functions impliment this. For example
+    % regress regstats or polyfit
+    indiv_slopes(jj,:) = polyfit(tbl.long_var-1,tbl.score,1);
 end
 % reshape predictor matrix to get one score per subject
 % NOTE: the argument following the original predictor matrix is the number
@@ -84,9 +88,10 @@ tmp = reshape(predictor, 4, numel(predictor)/4);
 predictor = tmp(1,:)';
 % Compute correlation
 figure; hold;
-scatter(predictor, indiv_slopes);
+[c, p] = corr(predictor, indiv_slopes(:,1));
+scatter(predictor, indiv_slopes(:,1));
 xlabel('predictor'); ylabel('indiv slopes');
-title('WASI FS2 as a predictor of Individual LME Slopes');
+title(sprintf('%s as a predictor of %s growth rate (r=%.2f p =%.3f)','WASI','BRS',c,p));
 lsline;
 
 
