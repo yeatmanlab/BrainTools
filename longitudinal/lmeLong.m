@@ -31,7 +31,7 @@ select = {'WJ_LWID_SS', 'WJ_WA_SS', 'TWRE_SWE_SS', 'TWRE_PDE_SS'};
 
 %% Selections
 % test group options: all, wj, twre, wasi, ctopp, math, and basic
-test_names = skills;
+test_names = {'WJ_BRS'};
 test_2_name = 'WASI\_FS2';
 % time course options: (1) hours, (2) days, (3) sessions
 time_course = 3; 
