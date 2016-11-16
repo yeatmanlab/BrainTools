@@ -1,16 +1,24 @@
 
- x = 'predictor'; y = test_name{1};
+%  x = 'predictor'; 
+ x = test_2_name;
+ y = test_name{1};
 
 one_1to2 = score(uncentered == 2) - score(uncentered == 1);
 one_2to3 = score(uncentered == 3) - score(uncentered == 2); 
-one_3to4 = score(uncentered == 4) - score(uncentered == 3); 
+one_3to4 = score(uncentered == 4) - score(uncentered == 3);
+one_1to3 = score(uncentered == 3) - score(uncentered == 1); 
+one_2to4 = score(uncentered == 4) - score(uncentered == 2);
 one_1to4 = score(uncentered == 4) - score(uncentered == 1);
-% 
-% two_1to2 = score2(long_var == 2) - score2(long_var == 1); 
-% two_2to3 = score2(long_var == 3) - score2(long_var == 2);  
-% two_3to4 = score2(long_var == 4) - score2(long_var == 3);  
-% two_1to4 = score2(long_var == 4) - score2(long_var == 1); 
 
+two_1to2 = score2(long_var == 2) - score2(long_var == 1); 
+two_2to3 = score2(long_var == 3) - score2(long_var == 2);  
+two_3to4 = score2(long_var == 4) - score2(long_var == 3);  
+two_1to4 = score2(long_var == 4) - score2(long_var == 1); 
+
+% t = table(one_1to2, one_2to3, one_3to4, one_1to4, one_1to3, one_2to4);
+t = table(one_1to2, one_2to3, one_3to4, one_1to3, one_2to4);
+% [R, PValue] = corrplot(t, 'varNames', {'1to2', '2to3', '3to4', '1to4', '1to3', '2to4'}, 'testR', 'on');
+[R, PValue] = corrplot(t, 'varNames', {'1to2', '2to3', '3to4', '1to3', '2to4'}, 'testR', 'on');
 figure; hold;
 
 subplot(2,2,1);
