@@ -16,10 +16,25 @@ two_3to4 = score2(long_var == 4) - score2(long_var == 3);
 two_1to4 = score2(long_var == 4) - score2(long_var == 1); 
 
 % t = table(one_1to2, one_2to3, one_3to4, one_1to4, one_1to3, one_2to4);
-t = table(one_1to2, one_2to3, one_3to4, one_1to3, one_2to4);
+t = table( one_1to3, one_2to4);
 % [R, PValue] = corrplot(t, 'varNames', {'1to2', '2to3', '3to4', '1to4', '1to3', '2to4'}, 'testR', 'on');
-[R, PValue] = corrplot(t, 'varNames', {'1to2', '2to3', '3to4', '1to3', '2to4'}, 'testR', 'on');
+[R, PValue] = corrplot(t, 'varNames', {'1to3', '2to4'}, 'testR', 'on');
+
 figure; hold;
+scatter(one_1to3, one_2to4, ifsig(one_1to3, one_2to4));
+lsline;
+xlabel('Session 1 to Session 3');
+ylabel('Session 2 to Session 4');
+title('Continuity of Growth Correlation r = 0.37');
+legend(test_name{1});
+
+subplot(2,1,2);
+scatter(predictor, one_2to3, ifsig(predictor, one_2to3));
+lsline;
+xlabel(sprintf('%s init', x));
+ylabel(sprintf('%s mid', y));
+
+
 
 subplot(2,2,1);
 scatter(predictor, one_1to2, ifsig(predictor, one_1to2));

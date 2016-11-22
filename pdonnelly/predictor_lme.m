@@ -86,12 +86,18 @@ end
 tmp = reshape(predictor, 4, numel(predictor)/4);
 % zero in on first column for unique scores
 predictor = tmp(1,:)';
+% For altering predictor based on mean/median/etc
+% for sub = 1:numel(predictor)
+%     predictor(sub) = predictor(sub) - median(predictor);
+% end
 % Compute correlation
 figure; hold;
 [c, p] = corr(predictor, indiv_slopes(:,1));
-scatter(predictor, indiv_slopes(:,1));
+scatter(predictor, indiv_slopes(:,1), ifsig(predictor, indiv_slopes(:,1)));
 xlabel('predictor'); ylabel('indiv slopes');
-title(sprintf('%s as a predictor of %s growth rate (r=%.2f p =%.3f)','WASI','BRS',c,p));
+title = title(sprintf('%s as a predictor of %s growth rate (r=%.2f p =%.3f)','Age','RF',c,p));
 lsline;
-
+% Save image
+fname = sprintf('~/Desktop/figures/LMB/%s_%s_%s_%s.eps', 'Age', 'RF','growth_predictor', date);
+print(fname, '-depsc');
 

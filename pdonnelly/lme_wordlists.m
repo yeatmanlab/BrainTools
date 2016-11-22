@@ -51,11 +51,13 @@ xlabel('Session'); ylabel('Score');
 title('Pseudoword LME Mean Growth Model');
 grid('on');
 axis('tight');
-
+legend({'unspaced', 'spaced'});
 
 %Add Error Bars
 errorbar(sessions', estimates, se, '.k');
 errorbar(sessions', spaced_estimates, spaced_se, '.k');
+
+
 
 %% Adjust for Hypothesis of Individual variation in propensity
 v = readtable('~/Desktop/NLR_WordLists_Scores.xlsx');
