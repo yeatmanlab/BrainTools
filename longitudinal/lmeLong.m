@@ -15,9 +15,9 @@ clc
 subs = {'102_RS', '110_HH', '145_AC', '150_MG', '151_RD', '152_TC', ...
         '160_EK', '161_AK', '162_EF', '163_LF', '164_SF', '170_GM', ...
         '172_TH', '174_HS', '179_GM', '180_ZD', '201_GS', '202_DD', ...
-        '203_AM', '204_AM', '207_AH', '208_LH', ...
+        '203_AM', '204_AM', '205_AC', '206_LM', '207_AH', '208_LH', ...
         '210_SB', '211_LB'};
-% not included: , '205_AC', '206_LM', 
+% not included: , , 
 
 %% Test Selection; subgroups
 all = {'WJ_LWID_SS', 'WJ_WA_SS', 'WJ_OR_SS', 'WJ_SRF_SS', 'WJ_MFF_SS', 'WJ_CALC_SS', 'WJ_BRS', 'WJ_RF',...
@@ -36,9 +36,9 @@ composites = {'WJ_BRS', 'WJ_RF', 'TWRE_INDEX'};
 
 %% Selections
 % test group options: all, wj, twre, wasi, ctopp, math, and basic
-test_names = {'WJ_BRS', 'TWRE_INDEX'};
+test_names = {'WJ_BRS'};
 test_2_name = 'WASI\_FS2';
-predictor_name = {'WASI_FS2'};
+predictor_name = {'WJ_BRS'};
 % time course options: (1) hours, (2) days, (3) sessions
 time_course = 3; 
 % enter sessions of interest, if applicable

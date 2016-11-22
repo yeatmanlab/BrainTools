@@ -33,20 +33,7 @@ for subj = 1:numel(data_indx)
 end
 predictor = cell2mat(predictor);
 
-% Gather predictor variable
-pred_index = []; 
-for subj = 1:numel(subs)
-    pred_index = find(strcmp(sid, subs(subj)));
-    p_score = NaN;
-    for kk = 1:numel(pred_index)
-       if predictor(pred_index(kk)) > 0
-          p_score = predictor(pred_index(kk)); 
-       end
-    end
-    for jj = 1:numel(pred_index)
-       predictor(pred_index(jj)) = p_score; 
-    end
-end      
+
 % Convert cell arrays to variables suitable for use with dataset()
 hours       = cell2mat(hours);
 %% Time Course
@@ -86,7 +73,26 @@ if time_course == 3
 end
 
 
+% Gather predictor variable
+pred_index = []; 
+predictor_influx = [];
+for subj = 1:numel(subs)
+    pred_index = find(strcmp(sid, subs(subj)));
+    p_score = NaN;
+    for kk = 1:numel(pred_index)
+        if predictor(pred_index(kk)) > 0
+            p_score = predictor(pred_index(kk));
+            
+            for jj = 1:numel(pred_index)
+                predictor(pred_index(jj)) = p_score;
+            end
+        end
+        
+    end
+    predictor_influx = vertcat(predictor_influx, predictor(pred_index(1)));
+end
 
+predictor = predictor_influx;
 %return
 
 

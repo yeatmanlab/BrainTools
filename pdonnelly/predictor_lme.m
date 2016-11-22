@@ -83,9 +83,9 @@ end
 % reshape predictor matrix to get one score per subject
 % NOTE: the argument following the original predictor matrix is the number
 % of sessions involved in the analysis
-tmp = reshape(predictor, 4, numel(predictor)/4);
-% zero in on first column for unique scores
-predictor = tmp(1,:)';
+% tmp = reshape(predictor, 4, numel(predictor)/4);
+% % zero in on first column for unique scores
+% predictor = tmp(1,:)';
 % For altering predictor based on mean/median/etc
 % for sub = 1:numel(predictor)
 %     predictor(sub) = predictor(sub) - median(predictor);
