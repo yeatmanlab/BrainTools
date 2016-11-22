@@ -1,7 +1,10 @@
-function [sid, long_var, score, score2, predictor, test_name, test_2_name] = readData(data, subs, test_name, test_2_name, time_course, usesessions)
+%function [sid, long_var, score, score2, predictor, predictor_name, test_name, test_2_name] = readData(data, subs, test_name, test_2_name, time_course, usesessions)
 % Function: Prepares data for lmeLongitudinaldata and plotLongitudinaldata
-
-
+%% Data set
+%     If using a Mac/Linux
+      [~, ~, data] = xlsread('~/Desktop/NLR_Scores.xlsx');
+%     If using a PC
+%     [~, ~, data] = xlsread('C:\Users\Patrick\Desktop/NLR_Scores.xlsx');
 
 % gather column headings
 data_ref = data(1,:);
@@ -26,28 +29,26 @@ for subj = 1:numel(data_indx)
     sessions    = vertcat(sessions, data(data_indx(subj), strcmp(data_ref, 'LMB\_session')));
     days       = vertcat(days, data(data_indx(subj), strcmp(data_ref, 'Time')));
     hours      = vertcat(hours, data(data_indx(subj), strcmp(data_ref, 'Hours')));
-    predictor  = vertcat(predictor, data(data_indx(subj), strcmp(data_ref, 'WASI\_FS2')));
+    predictor  = vertcat(predictor, data(data_indx(subj), strcmp(data_ref, strrep(predictor_name, '_', '\_'))));
 end
 predictor = cell2mat(predictor);
+
 % Gather predictor variable
 pred_index = []; 
 for subj = 1:numel(subs)
     pred_index = find(strcmp(sid, subs(subj)));
     p_score = NaN;
-    for ii = 1:numel(pred_index)
-       if predictor(pred_index(ii)) > 0
-          p_score = predictor(pred_index(ii)); 
+    for kk = 1:numel(pred_index)
+       if predictor(pred_index(kk)) > 0
+          p_score = predictor(pred_index(kk)); 
        end
     end
     for jj = 1:numel(pred_index)
        predictor(pred_index(jj)) = p_score; 
     end
-end
-        
-
+end      
 % Convert cell arrays to variables suitable for use with dataset()
 hours       = cell2mat(hours);
-
 %% Time Course
 % Variable Selection
 if time_course == 1
@@ -60,14 +61,16 @@ elseif time_course == 3
     long_var = cell2mat(long_var);
 end
 
+
+
 %% Gather Reading Score of Interest
 % intialize variable
 score = []; score2 = [];
-test_name = strrep(test_name, '_', '\_');
+
 % vertcat the data into a cell matrix
 for subj = 1:numel(data_indx)
-score = vertcat(score, data(data_indx(subj), strcmp(data_ref, test_name)));
-score2 = vertcat(score2, data(data_indx(subj), strcmp(data_ref, test_2_name)));
+score = vertcat(score, data(data_indx(subj), strcmp(data_ref, strrep(test_names(test), '_', '\_'))));
+score2 = vertcat(score2, data(data_indx(subj), strcmp(data_ref, strrep(test_names(test), '_', '\_'))));
 end
 % Convert reading score to matlab variable
 score = cell2mat(score);
@@ -84,6 +87,6 @@ end
 
 
 
-return
+%return
 
 
