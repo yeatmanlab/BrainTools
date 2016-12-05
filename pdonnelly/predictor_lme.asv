@@ -70,7 +70,7 @@
 s = unique(sid);
 for jj = 1:length(s)
     indx = find(strcmp(s(jj), sid));
-    indx = indx(isnan(score(indx)) == 0);
+    
     tbl = table(sid(indx), long_var(indx), score(indx));
     tbl.Properties.VariableNames = {'sid', 'long_var', 'score'};
     % lme = fitlme(tbl, 'score ~ long_var + (long_var|sid)');
