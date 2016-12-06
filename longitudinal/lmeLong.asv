@@ -36,7 +36,7 @@ composites = {'WJ_BRS', 'WJ_RF', 'TWRE_INDEX'};
 
 %% Selections
 % test group options: all, wj, twre, wasi, ctopp, math, and basic
-test_names = {'WJ_RF'};
+test_names = {'TWRE_INDEX'};
 test_2_name = 'WASI\_FS2';
 predictor_name = {'WASI_FS2'};
 % time course options: (1) hours, (2) days, (3) sessions

@@ -12,3 +12,5 @@ function lme_barplot(lme, subplots, colors)
 %            its own axis
 % colors   - Either a colormap name (eg 'jet', 'autumn') or a nx3 matrix of
 %            RGB values denoting the color for each lme plot
+
+
