@@ -35,8 +35,10 @@ ax.XTickLabelRotation = 45;
 title('Linear Growth Estimate by Test');
 
 % Save image
-    fname = sprintf('~/Desktop/figures/LMB/%s-linearGrowthEst-%s.eps', 'hours', date);
+    fname = sprintf('C:/Users/Patrick/Desktop/figures/LMB/%s-linearGrowthEst-%s.eps', 'hours', date);
     print(fname, '-depsc'); 
+    fname2 = sprintf('C:/Users/Patrick/Desktop/figures/LMB/%s-linearGrowthEst-%s.png', 'hours', date);
+    print(fname2, '-dpng');
 
 %% Quadratic
 % Determine if quadratic fit is necessary
@@ -49,14 +51,14 @@ if time_course ~= 3
         quad_data.Properties.VariableNames = {'test_name', 'Growth', 'SE'};
     end
     h = bar(quad_data.Growth, 'FaceColor', 'w', 'EdgeColor', 'k');
-    errorbar(quad_data.Growth, linear_data.SE, 'kx');
+    errorbar(quad_data.Growth, quad_data.SE, 'kx');
     
     for jj = 1:length(test_names)
         if stats(jj).lme_quad.Coefficients.pValue(3) <= 0.001
-            text(jj, estimates(num) + se(num) + 2, ...
+            text(jj, quad_data.Growth(jj) + quad_data.SE(jj) + 2, ...
                 '**', 'HorizontalAlignment', 'center', 'Color', 'b');
         elseif stats(jj).lme_quad.Coefficients.pValue(3) <= 0.05
-            text(jj, estimates(num) + se(num) + 2, ...
+            text(jj, quad_data.Growth(jj) + quad_data.SE(jj) + 2, ...
                 '*', 'HorizontalAlignment', 'center', 'Color', 'b');
         end
     end
@@ -70,9 +72,47 @@ if time_course ~= 3
     title('Quadratic Growth Estimate by Test');
         
     % Save image
-    fname = sprintf('~/Desktop/figures/LMB/%s-quadGrowthEst-%s.eps', 'hours', date);
-    print(fname, '-depsc');
+    fname = sprintf('C:/Users/Patrick/Desktop/figures/LMB/%s-quadGrowthEst-%s.eps', 'hours', date);
+    print(fname, '-depsc');    
+    fname2 = sprintf('C:/Users/Patrick/Desktop/figures/LMB/%s-quadGrowthEst-%s.png', 'hours', date);
+    print(fname2, '-dpng');
+end
+%% Cubic Fit
+if time_course ~= 3
     
-else
-    return;
+    figure; hold;
+    
+    for ii = 1:length(test_names)
+        cube_data(ii,:) = table(test_names(ii), stats(ii).lme_cube.Coefficients.Estimate(3), stats(ii).lme_cube.Coefficients.SE(3));
+        cube_data.Properties.VariableNames = {'test_name', 'Growth', 'SE'};
+    end
+    h = bar(cube_data.Growth, 'FaceColor', 'w', 'EdgeColor', 'k');
+    errorbar(cube_data.Growth, cube_data.SE, 'kx');
+    
+    for jj = 1:length(test_names)
+        if stats(jj).lme_cube.Coefficients.pValue(3) <= 0.001
+            text(jj, cube_data.Growth(jj) + cube_data.SE(jj) + 2, ...
+                '**', 'HorizontalAlignment', 'center', 'Color', 'b');
+        elseif stats(jj).lme_cube.Coefficients.pValue(3) <= 0.05
+            text(jj, cube_data.Growth(jj) + cube_data.SE(jj) + 2, ...
+                '*', 'HorizontalAlignment', 'center', 'Color', 'b');
+        end
+    end
+        
+    % Format
+    ylabel('Growth Estimate'); xlabel('Test Name');
+    ax = gca;
+    ax.XTick = 1:length(test_names);
+    ax.XTickLabel = strrep(test_names, '_', '\_');
+    ax.XTickLabelRotation = 45;
+    title('Cubic Growth Estimate by Test');
+        
+    % Save image
+    fname = sprintf('C:/Users/Patrick/Desktop/figures/LMB/%s-cubeGrowthEst-%s.eps', 'hours', date);
+    print(fname, '-depsc'); 
+    fname2 = sprintf('C:/Users/Patrick/Desktop/figures/LMB/%s-cubeGrowthEst-%s.png', 'hours', date);
+    print(fname2, '-dpng');
+    
+end
+
 end
