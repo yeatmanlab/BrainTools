@@ -1,4 +1,4 @@
-function [lme_linear, lme_quad, data_table] = lmeCalc(sid, long_var, score, dummyon, centering)
+function [lme_linear, lme_quad, lme_cube, data_table] = lmeCalc(sid, long_var, score, dummyon, centering)
 % Furnction: Calculates linear mixed effects on longitudinal data
 
 
@@ -28,8 +28,9 @@ if dummyon == 0
 
     % Create squared hours variable to use in quadratic model
     long_var_sq = long_var.^2;
+    long_var_cube = long_var.^3;
     % Create DataSet
-    data_table = dataset(sid, uncentered, long_var, long_var_sq, score);
+    data_table = dataset(sid, uncentered, long_var, long_var_sq, long_var_cube, score);
     % Calculate LME fit
     % Make sid a categorical variable
     data_table.sid = categorical(data_table.sid);
@@ -37,7 +38,9 @@ if dummyon == 0
     % Fit the model on the uncentered data as changing linearly
     lme_linear = fitlme(data_table, 'score ~ long_var + (1|sid)');
     % Fit the model on uncentered data as changing quadratically
-    lme_quad = fitlme(data_table, 'score ~ long_var + long_var_sq + (1|sid)');
+    lme_quad = fitlme(data_table, 'score ~ long_var + long_var_sq + (long_var|sid) + (long_var_sq|sid)');
+    % Fit the model on the uncentered data as changing cubically
+    lme_cube = fitlme(data_table, 'score ~ long_var + long_var_sq + long_var_cube +(long_var|sid) + (long_var_sq|sid) + (long_var_cube|sid)');
     
     
 
@@ -60,8 +63,8 @@ elseif dummyon == 1
     end
     
     % make the longitudinal variable a categorical variable
-%     long_var = categorical(long_var);
-    long_var = categorical(sess_recoded);
+     long_var = categorical(long_var);
+%     long_var = categorical(sess_recoded);
     % Create DataSet
     data_table = dataset(sid, uncentered, long_var, score);
     % Calculate LME fit

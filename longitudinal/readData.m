@@ -5,7 +5,6 @@
 %       [~, ~, data] = xlsread('~/Desktop/NLR_Scores.xlsx');
 %     If using a PC
     [~, ~, data] = xlsread('C:\Users\Patrick\Desktop/NLR_Scores.xlsx');
-
 % gather column headings
 data_ref = data(1,:);
 % add '\' preceding each "_" for nicer looking titles/formatting
@@ -29,30 +28,23 @@ for subj = 1:numel(data_indx)
     sessions    = vertcat(sessions, data(data_indx(subj), strcmp(data_ref, 'LMB\_session')));
     days       = vertcat(days, data(data_indx(subj), strcmp(data_ref, 'Time')));
     hours      = vertcat(hours, data(data_indx(subj), strcmp(data_ref, 'Hours')));
-    predictor  = vertcat(predictor, data(data_indx(subj), strcmp(data_ref, strrep(predictor_name, '_', '\_'))));
+%     predictor  = vertcat(predictor, data(data_indx(subj), strcmp(data_ref, strrep(predictor_name, '_', '\_'))));
 end
-predictor = cell2mat(predictor);
-% Gather predictor variable
-pred_index = []; 
-predictor_influx = [];
-for subj = 1:numel(subs)
-    pred_index = find(strcmp(sid, subs(subj)));
-    p_score = NaN;
-    for kk = 1:numel(pred_index)
-        if predictor(pred_index(kk)) > 0
-            p_score = predictor(pred_index(kk));
-            
-            for jj = 1:numel(pred_index)
-                predictor(pred_index(jj)) = p_score;
-            end
-        end
-        
-    end
-    predictor_influx = vertcat(predictor_influx, predictor(pred_index(1)));
+% predictor = cell2mat(predictor);
+
+%% Gather Reading Score of Interest
+% intialize variable
+score = []; score2 = [];
+% vertcat the data into a cell matrix
+for subj = 1:numel(data_indx)
+score = vertcat(score, data(data_indx(subj), strcmp(data_ref, strrep(test_names(test), '_', '\_'))));
+score2 = vertcat(score2, data(data_indx(subj), strcmp(data_ref, strrep(test_names(test), '_', '\_'))));
 end
-
-predictor = predictor_influx;
-
+% Convert reading score to matlab variable
+score = cell2mat(score);
+score2 = cell2mat(score2);
+% % Gather predictor variable
+% predictor = firstExtract(sid, subs, predictor, 'first');
 % Convert cell arrays to variables suitable for use with dataset()
 hours       = cell2mat(hours);
 %% Time Course
@@ -67,32 +59,24 @@ elseif time_course == 3
     long_var = cell2mat(long_var);
 end
 
-
-
-%% Gather Reading Score of Interest
-% intialize variable
-score = []; score2 = [];
-
-% vertcat the data into a cell matrix
-for subj = 1:numel(data_indx)
-score = vertcat(score, data(data_indx(subj), strcmp(data_ref, strrep(test_names(test), '_', '\_'))));
-score2 = vertcat(score2, data(data_indx(subj), strcmp(data_ref, strrep(test_names(test), '_', '\_'))));
-end
-% Convert reading score to matlab variable
-score = cell2mat(score);
-score2 = cell2mat(score2);
-
-
+sessions = cell2mat(sessions);
 %% Concentrate on sessions of interest, if applicable
-if time_course == 3
-    indx = ismember(long_var, usesessions);
+    indx = ismember(sessions, usesessions);
     % remove rows that correspond to the ones we don't want to analyze
     sid = sid(indx); long_var = long_var(indx); score = score(indx); 
-     score2 = score2(indx); 
-end
+    score2 = score2(indx);
 
 
+%% Extract first score for second test
+% score2 = firstExtract(sid, subs, score2, 'first');
+% discrepancy = predictor - score2;
+% discrepancy_name = sprintf('%s-%s', predictor_name, test_2_name);
+% % % if applicable, compute difference between predictor and score2
+% % if isempty(test_2_name) == 0
+% %     predictor = predictor - score2;
+% %     predictor_name = sprintf('%s-%s', predictor_name, test_2_name);
+% % end
 
-%return
+
 
 
