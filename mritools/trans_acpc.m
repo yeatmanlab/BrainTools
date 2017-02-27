@@ -9,7 +9,7 @@
 %% AC-PC align
 sub = 'NLR_132_WP'; % set the subject id
 
-filelist = {'/mnt/diskArray/projects/MRI/NLR_102_RS/20160618/raw/NLR_102_RS_WIP_MEMP_VBM_SENSE_14_1.nii.gz', ...
+filelist = {'/mnt/diskArray/projects/MRI/NLR_132_WP/20160919/raw/NLR_132_WP_WIP_MEMP_VBM_SENSE_14_1.nii.gz', ...
     '/mnt/diskArray/projects/MRI/NLR_132_WP/20161010/raw/NLR_132_WP_WIP_MEMP_VBM_SENSE_14_1.nii.gz', ...
     '/mnt/diskArray/projects/MRI/NLR_132_WP/20161122/raw/NLR_132_WP_WIP_MEMP_VBM_SENSE_14_1.nii.gz'%, ...
 %     '/mnt/diskArray/projects/MRI/NLR_132_WP/20160815/raw/NLR_102_RS_WIP_MEMP_VBM_SENSE_14_1.nii.gz'
@@ -23,17 +23,13 @@ end
 voxres = [0.8, 0.8, 0.8];
 
 for i = 1: length(filelist)
-    %     system(sprintf('fslview %s',filelist{i}));
+    if isempty(dir(filelist{i}))
+        system(sprintf('parrec2nii -o -c %s %s.par',filelist{i}(1:51),filelist{i}(1:end-7)));
+    end
     temp = readFileNifti(filelist{i});
     tempmontage = makeMontage(temp.data,176:265);
     imagesc(tempmontage), colormap('gray')
 end
-
-% system(sprintf('freeview -v %s',filelist{2}));
-% 
-% system(sprintf('freeview -v %s',filelist{3}));
-% 
-% system(sprintf('freeview -v %s',filelist{4}));
 
 % Only include good session numbers here!!!
 gind = [1,3,4];
