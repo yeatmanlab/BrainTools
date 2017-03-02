@@ -20,10 +20,10 @@ sub = 'NLR_102_RS'; % set the subject id -- we're not using it at the moment...
 % 'alignLandmarks' as [] so the function below bring up the gui to acpc
 % align and then average.
 %
-filelist = {'/mnt/diskArray/projects/anatomy/NLR_102_RS/t1_acpc.nii.gz', ...
-    '/mnt/diskArray/projects/MRI/NLR_102_RS/20160708/raw/NLR_102_RS_WIP_MEMP_VBM_SENSE_14_1.nii.gz', ...
-    '/mnt/diskArray/projects/MRI/NLR_102_RS/20160726/raw/NLR_102_RS_WIP_MEMP_VBM_SENSE_14_1.nii.gz', ...
-    '/mnt/diskArray/projects/MRI/NLR_102_RS/20160815/raw/NLR_102_RS_WIP_MEMP_VBM_SENSE_14_1.nii.gz'
+filelist = {'/mnt/diskArray/projects/anatomy/NLR_174_HS/t1_acpc.nii.gz', ...
+    '/mnt/diskArray/projects/MRI/NLR_174_HS/20160722/raw/NLR_174_HS_WIP_MEMP_VBM_SENSE_14_1.nii.gz', ...
+    '/mnt/diskArray/projects/MRI/NLR_174_HS/20160812/raw/NLR_174_HS_WIP_MEMP_VBM_SENSE_14_1.nii.gz', ...
+    '/mnt/diskArray/projects/MRI/NLR_174_HS/20160829/raw/NLR_174_HS_WIP_MEMP_VBM_SENSE_16_1.nii.gz'
     };
  
 outpath = sprintf('/mnt/diskArray/projects/anatomy/%s',sub);
@@ -37,15 +37,31 @@ for i = 1: length(filelist)
     if isempty(dir(filelist{i}))
         system(sprintf('parrec2nii -c -o %s %s.par',filelist{i}(1:51),filelist{i}(1:end-7)));
     end
-    temp = readFileNifti(filelist{i});
-    tempmontage = makeMontage(temp.data,50:100 );
-    imagesc(tempmontage), colormap('gray')
-    drawnow;
-    pause;
+    if i == 1
+        [PATHSTR,NAME,EXT] = fileparts(filelist{1})
+        if ~strcmp(NAME,'t1_acpc.nii')
+            temp = readFileNifti(filelist{i});
+            tempmontage = makeMontage(temp.data,100:200);
+            figure
+            imagesc(tempmontage), colormap('gray')
+            drawnow;
+            keydown = waitforbuttonpress;
+%             close(gcf);
+        end
+    else
+        temp = readFileNifti(filelist{i});
+        tempmontage = makeMontage(temp.data,150:250);
+        figure
+        imagesc(tempmontage), colormap('gray')
+        drawnow;
+        keydown = waitforbuttonpress;
+%         close(gcf);
+    end
 end
 
-% Only include good session numbers here!!!
-gind = [1,2,3];
+%%
+% UPDATE this so Only include good session numbers here!!!
+gind = [1,2,3,4];
 
 filelist = filelist(gind);
 
