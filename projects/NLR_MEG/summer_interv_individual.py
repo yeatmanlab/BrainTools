@@ -58,7 +58,7 @@ params = mnefun.Params(tmin=-0.1, tmax=1.0, n_jobs=18,
                        n_jobs_fir='cuda', n_jobs_resample='cuda',
                        filter_length='5s', epochs_type='fif', lp_cut=40.,
 #                       hp_cut=0.15,hp_trans=0.1,
-                       bmin=-0.1, auto_bad=15., plot_raw=False, 
+                       bmin=-0.1, auto_bad=20., plot_raw=False, 
                        bem_type = '5120-5120-5120')
           
 # This sets the position of the head relative to the sensors. These values a
@@ -70,12 +70,13 @@ params.trans_to = (0., 0., .03)
 
 params.sss_type = 'python'
 params.sss_regularize = 'svd' # 'in' by default
-params.tsss_dur = 8. # 60 for adults with not much head movements. This was set to 6.
+params.tsss_dur = 16. # 60 for adults with not much head movements. This was set to 6.
+params.st_correlation = 0.9
 
 params.auto_bad_meg_thresh = 10 # THIS SHOULD NOT BE SO HIGH!
 
 
-out = ['102_rs160618']
+out = ['163_lf160707']
 for n in np.arange(0,len(out)):
     params.subjects = [out[n]]
     
@@ -118,7 +119,7 @@ for n in np.arange(0,len(out)):
     #params.mf_args = '-hpie 30 -hpig .8 -hpicons' # sjjoo-20160826: We are doing SSS using python
     
     # epoch rejection criterion
-    params.reject = dict(grad=5000e-13, mag=5.0e-12)
+    params.reject = dict(grad=6000e-13, mag=6.0e-12)
         
     params.ssp_eog_reject = dict(grad=params.reject['grad'], mag=params.reject['mag'], eog=np.inf)
     params.ssp_ecg_reject = dict(grad=params.reject['grad'], mag=params.reject['mag'], ecg=np.inf)
@@ -126,7 +127,6 @@ for n in np.arange(0,len(out)):
     params.flat = dict(grad=1e-13, mag=1e-15)
     
     params.auto_bad_reject = dict(grad=2*params.reject['grad'], mag=2*params.reject['mag']) # This should be high...
-    params.tsss_dur = 16.
        
     params.auto_bad_flat = params.flat
       
@@ -182,14 +182,14 @@ for n in np.arange(0,len(out)):
     mnefun.do_processing(
         params,
         fetch_raw=False,     # Fetch raw recording files from acquisition machine
-        do_score=True,      # Do scoring to slice data into trials
+        do_score=False,      # Do scoring to slice data into trials
     
         # Before running SSS, make SUBJ/raw_fif/SUBJ_prebad.txt file with
         # space-separated list of bad MEG channel numbers
         push_raw=False,      # Push raw files and SSS script to SSS workstation
         do_sss=True,        # Run SSS remotely (on sws) or locally with mne-python
         fetch_sss=False,     # Fetch SSSed files from SSS workstation
-        do_ch_fix=True,     # Fix channel ordering
+        do_ch_fix=False,     # Fix channel ordering
     
         # Before running SSP, examine SSS'ed files and make
         # SUBJ/bads/bad_ch_SUBJ_post-sss.txt; usually, this should only contain EEG
