@@ -1,10 +1,9 @@
 
 sub = {'NLR_110_HH', 'NLR_145_AC', 'NLR_150_MG', 'NLR_151_RD', 'NLR_152_TC', ...
-    'NLR_160_EK', 'NLR_161_AK', 'NLR_162_EF',  'NLR_163_LF','NLR_164_SF', ...
+    'NLR_160_EK', 'NLR_161_AK','NLR_162_EF',  'NLR_163_LF','NLR_164_SF', ...
     'NLR_170_GM','NLR_172_TH','RI_124_AT', 'RI_143_CH', ...
     'RI_138_LA', 'RI_141_GC', 'RI_144_OL','NLR_199_AM', 'NLR_130_RW', ...
     'NLR_133_ML', 'NLR_146_TF', 'NLR_195_AW'};
-
 
 % Change filelist per subject
 % ATTN: If acpc aligned anatomy has been created, we should set the first
@@ -30,12 +29,12 @@ for ss = 1:length(sub)
     % subject's 'raw' folder
     % start with the second session, since the first is already
     % acpc-aligned and stored in the anatomy folder
-    filelist = {};
+    filelist = {}; namelist = {};
     for ii = 2:numel(sessions)
         cd(fullfile('/home/ehuber/analysis/MRI/',sub{ss},sessions{ii},'raw'))
         temp = dir(fullfile(pwd, '*VBM*.PAR'));
-        parlist = fullfile('/home/ehuber/analysis/MRI/',sub{ss},sessions{ii},'raw',temp.name);
-        system(sprintf('parrec2nii -c -o %s %s',pwd,parlist));
+        parlist = fullfile('/home/ehuber/analysis/MRI/',sub{ss},sessions{ii},'raw',temp(numel(temp)).name);
+        system(sprintf('parrec2nii -c --overwrite -o %s %s',pwd,parlist));
         [PATHSTR,NAME,EXT] = fileparts(parlist);
         filelist{ii} = fullfile(PATHSTR, strcat(NAME, '.nii.gz'));
         namelist{ii} = NAME;
@@ -61,8 +60,7 @@ for ss = 1:length(sub)
         keepfile(i) = waitforbuttonpress
     end
     
-    %%
-    % UPDATE this so Only include good session numbers here!!!
+    %% align and average files
     gind = find(keepfile); % just include the sessions coded with a 1
     
     filelist = filelist(gind);
@@ -70,5 +68,6 @@ for ss = 1:length(sub)
     % outImg = mrAnatAverageAcpcNifti(fileNameList, outFileName, [alignLandmarks=[]], [newMmPerVox=[1 1 1]], [weights=ones(size(fileNameList))], [bb=[-90,90; -126,90; -72,108]'], [showFigs=true], [clipVals])
     outImg = mrAnatAverageAcpcNifti(filelist, sprintf('%s/t1_acpc_avg.nii.gz',outpath), false, voxres(1:3));
     
+    close all
 end
 
