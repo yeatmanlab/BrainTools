@@ -33,7 +33,7 @@ raw_dir = '/mnt/diskArray/projects/MEG/nlr/raw'
 #out_dir = '/mnt/scratch/NLR_MEG'
 
 # At local hard drive
-out_dir = '/mnt/scratch/NLR_MEG2'
+out_dir = '/mnt/scratch/NLR_MEG3'
 #out_dir = '/mnt/scratch/adult'
 
 if not os.path.isdir(out_dir):
@@ -47,7 +47,7 @@ os.chdir(out_dir)
 # 151_rd missing the second session
 subs = ['102_rs','103_ac','110_hh','145_ac','150_mg','151_rd','152_tc','160_ek',
     '161_ak','162_ef','163_lf','164_sf','170_gm','172_th','174_hs','179_gm','180_zd','207_ah','210_sb','211_lb',
-    '201_gs','202_dd','203_am','204_am','206_lm','105_bb','127_am']
+    '201_gs','202_dd','203_am','204_am','206_lm','105_bb','127_am','132_wp','187_nb']
 
 # tmin, tmax: sets the epoch
 # bmin, bmax: sets the prestim duration for baseline correction. baseline is set
@@ -61,7 +61,7 @@ subs = ['102_rs','103_ac','110_hh','145_ac','150_mg','151_rd','152_tc','160_ek',
 # correction by setting bmin and bmax. I found that mnefun does baseline 
 # correction by default.
 # sjjoo_20160809: Commented
-params = mnefun.Params(tmin=-0.1, tmax=1.0, t_adjust=-39e-3, n_jobs=18, # t_adjust was -39e-3
+params = mnefun.Params(tmin=-0.1, tmax=0.9, n_jobs=18, # t_adjust was -39e-3
                        decim=2, n_jobs_mkl=1, proj_sfreq=250,
                        n_jobs_fir='cuda', n_jobs_resample='cuda',
                        filter_length='5s', epochs_type='fif', lp_cut=40.,
@@ -106,7 +106,13 @@ print(out)
 badsubs = ['127_am123_md','102_rs150716','110_hh150824','152_tc160510','152_tc160527',
            '201_gs150818','201_gs150824','201_gs150908',
            '203_am150922','203_am151009','202_dd150827','202_dd151013',
-           '204_am151020','206_lm160202'# These are not included
+           '204_am151020','206_lm160202',# These are not included
+           '102_rs160815','105_bb150713','110_hh160809','145_ac160823','150_mg160825',
+           '152_tc160623','160_ek160915','161_ak160916','162_ef160829',
+           '163_lf160920','164_sf160920','170_gm160822','172_th160825',
+           '174_hs160829','179_gm160913','180_zd160826','207_ah160809',
+           '210_sb160822','211_lb160823','201_gs150925','202_dd151103',
+           '203_am151029','204_am151120','206_lm160113','127_am151022' # These are the second session
 #           '102_rs160618','102_rs160815','103_ac150609','110_hh160608','110_hh160809',
 #           '145_ac160621','145_ac160823'
 #            ,'150_mg160606','150_mg160825',
@@ -135,6 +141,11 @@ for n, s in enumerate(out):
     
 for n, s in enumerate(out):
     params.subjects = [s]
+    
+    if int(params.subjects[0][6:]) < 160624:
+        params.t_adjust = -26e-3
+    else:
+        params.t_adjust = -41e-3
     
     #print("Running " + str(len(params.subjects)) + ' Subjects') 
 #    print("\n\n".join(params.subjects))
@@ -272,14 +283,14 @@ for n, s in enumerate(out):
     mnefun.do_processing(
         params,
         fetch_raw=False,     # Fetch raw recording files from acquisition machine
-        do_score=False,      # Do scoring to slice data into trials
+        do_score=True,      # Do scoring to slice data into trials
     
         # Before running SSS, make SUBJ/raw_fif/SUBJ_prebad.txt file with
         # space-separated list of bad MEG channel numbers
         push_raw=False,      # Push raw files and SSS script to SSS workstation
         do_sss=True,        # Run SSS remotely (on sws) or locally with mne-python
         fetch_sss=False,     # Fetch SSSed files from SSS workstation
-        do_ch_fix=False,     # Fix channel ordering
+        do_ch_fix=True,     # Fix channel ordering
     
         # Before running SSP, examine SSS'ed files and make
         # SUBJ/bads/bad_ch_SUBJ_post-sss.txt; usually, this should only contain EEG

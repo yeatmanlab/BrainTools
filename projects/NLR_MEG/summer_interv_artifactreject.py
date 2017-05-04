@@ -16,7 +16,7 @@ Ss 102_rs No matching events found for word_c254_p50_dot (event id 102)
 import numpy as np
 import mnefun
 import os
-import glob
+#import glob
 os.chdir('/home/sjjoo/git/BrainTools/projects/NLR_MEG')
 from score import score
 from nlr_organizeMEG_mnefun import nlr_organizeMEG_mnefun
@@ -45,9 +45,12 @@ os.chdir(out_dir)
 # 208_lh missing
 # 210_sb missing first session 
 # 151_rd missing the second session
-subs = ['102_rs','103_ac','110_hh','145_ac','150_mg','151_rd','152_tc','160_ek',
-    '161_ak','162_ef','163_lf','164_sf','170_gm','172_th','174_hs','179_gm','180_zd','207_ah','210_sb','211_lb',
-    '201_gs','202_dd','203_am','204_am','206_lm','105_bb','127_am']
+subs = ['101_lg','102_rs','103_ac','105_bb','110_hh','127_am','130_rw',
+        '132_wp','133_ml','145_ac','150_mg','151_rd','152_tc','160_ek',
+        '161_ak','162_ef','163_lf','164_sf','170_gm','172_th','174_hs',
+        '179_gm','180_zd','187_nb','201_gs','202_dd','203_am','204_am',
+        '205_ac','206_lm','207_ah','210_sb','211_lb'
+        ]
 
 # tmin, tmax: sets the epoch
 # bmin, bmax: sets the prestim duration for baseline correction. baseline is set
@@ -61,7 +64,7 @@ subs = ['102_rs','103_ac','110_hh','145_ac','150_mg','151_rd','152_tc','160_ek',
 # correction by setting bmin and bmax. I found that mnefun does baseline 
 # correction by default.
 # sjjoo_20160809: Commented
-params = mnefun.Params(tmin=-0.1, tmax=1.0, t_adjust=-39e-3, n_jobs=18, # t_adjust was -39e-3
+params = mnefun.Params(tmin=-0.1, tmax=0.9, n_jobs=18, # t_adjust was -39e-3
                        decim=2, n_jobs_mkl=1, proj_sfreq=250,
                        n_jobs_fir='cuda', n_jobs_resample='cuda',
                        filter_length='5s', epochs_type='fif', lp_cut=40.,
@@ -79,6 +82,7 @@ params.trans_to = (0., 0., .03)
 params.sss_type = 'python'
 params.sss_regularize = 'svd' # 'in' by default
 params.tsss_dur = 16. # 60 for adults with not much head movements. This was set to 6.
+params.st_correlation = 0.9
 
 params.auto_bad_meg_thresh = 10 # THIS SHOULD NOT BE SO HIGH!
 
@@ -103,38 +107,70 @@ print(out)
 """
 
 # REMOVE BAD SUBJECTS
-badsubs = ['127_am123_md','102_rs150716','110_hh150824','152_tc160510','152_tc160527',
-           '201_gs150818','201_gs150824','201_gs150908',
-           '203_am150922','203_am151009','202_dd150827','202_dd151013',
-           '204_am151020','206_lm160202'# These are not included
-#           '102_rs160618','102_rs160815','103_ac150609','110_hh160608','110_hh160809',
-#           '145_ac160621','145_ac160823'
-#            ,'150_mg160606','150_mg160825',
-#           '151_rd160620','152_tc160422','152_tc160623','160_ek160627','160_ek160915',
-#           '161_ak160627','161_ak160916',
-#           '162_ef160829','163_lf160707','163_lf160920','164_sf160707','164_sf160920',
-#           '170_gm160613',
-#           '170_gm160822',
-#           '172_th160614','172_th160825','174_hs160620','174_hs160829',
-#           '179_gm160701','179_gm160913','180_zd160621','180_zd160826',
-#           '207_ah160608','207_ah160809','210_sb160822','211_lb160617',
-#           '211_lb160823','201_gs150729','201_gs150925',
-#           '202_dd150919','202_dd151103','203_am150831',
-#           '203_am151029','204_am150829','204_am151120',# These are already processed successfully
-#           '206_lm151119','206_lm160113'
-        ]
-for n, s in enumerate(badsubs):
-    subnum = out.index(s)
-    print('Removing subject ' + str(subnum) + ' ' + out[subnum])
-    out.remove(s)
-    ind[subnum] = []
-    ind.remove([])
+#badsubs = ['127_am123_md','101_lg150618','102_rs150716','110_hh150824',
+#           '152_tc160510','152_tc160527',
+#           '201_gs150818','201_gs150824','201_gs150908',
+#           '203_am150922','203_am151009','202_dd150827','202_dd151013',
+#           '204_am151020','206_lm160202',# These are not included
+#           '102_rs160815','110_hh160809','145_ac160823','150_mg160825',
+#           '152_tc160623','160_ek160915','161_ak160916','162_ef160829',
+#           '163_lf160920','164_sf160920','170_gm160822','172_th160825',
+#           '174_hs160829','179_gm160913','180_zd160826','207_ah160809',
+#           '210_sb160822','211_lb160823','201_gs150925','202_dd151103',
+#           '203_am151029','204_am151120','206_lm160113' # These are the second session
+##           '102_rs160618','102_rs160815','103_ac150609','110_hh160608','110_hh160809',
+##           '145_ac160621','145_ac160823'
+##            ,'150_mg160606','150_mg160825',
+##           '151_rd160620','152_tc160422','152_tc160623','160_ek160627','160_ek160915',
+##           '161_ak160627','161_ak160916',
+##           '162_ef160829','163_lf160707','163_lf160920','164_sf160707','164_sf160920',
+##           '170_gm160613',
+##           '170_gm160822',
+##           '172_th160614','172_th160825','174_hs160620','174_hs160829',
+##           '179_gm160701','179_gm160913','180_zd160621','180_zd160826',
+##           '207_ah160608','207_ah160809','210_sb160822','211_lb160617',
+##           '211_lb160823','201_gs150729','201_gs150925',
+##           '202_dd150919','202_dd151103','203_am150831',
+##           '203_am151029','204_am150829','204_am151120',# These are already processed successfully
+##           '206_lm151119','206_lm160113'
+#        ]
+#for n, s in enumerate(badsubs):
+#    subnum = out.index(s)
+#    print('Removing subject ' + str(subnum) + ' ' + out[subnum])
+#    out.remove(s)
+#    ind[subnum] = []
+#    ind.remove([])
 
+out = ['101_lg150618', '102_rs160618', '102_rs160815', '103_ac150609', 
+       '105_bb150713', '105_bb161011', '110_hh150824', '110_hh160608', '110_hh160809', 
+       '127_am151022', '127_am161004', '130_rw151221', '132_wp151117', 
+       '132_wp160919', '132_wp161122', '133_ml151124', '145_ac160621', '145_ac160823', 
+       '150_mg160606', '150_mg160825', '151_rd160620', '152_tc160422', 
+       '152_tc160623', '160_ek160627', '160_ek160915', 
+       '161_ak160627', '161_ak160916', '162_ef160829', '163_lf160707', '163_lf160920', 
+       '164_sf160707', '164_sf160920', '170_gm160613', '170_gm160822', '172_th160614', 
+       '172_th160825', '174_hs160620', '174_hs160829', '179_gm160701', '179_gm160913', 
+       '180_zd160621', '180_zd160826', '187_nb161017', '201_gs150729', 
+       '201_gs150925', 
+       '202_dd150919', '202_dd151103', '203_am150831', '203_am151029', '204_am150829', '204_am151120', 
+       '205_ac151123', '205_ac160202', '206_lm151119', '206_lm160113', 
+       '207_ah160608', '207_ah160809', '210_sb160822', '211_lb160617', 
+       '211_lb160823']
+
+out = ['205_ac151208', '205_ac160202', '206_lm151119', '206_lm160113', 
+       '207_ah160608', '207_ah160809', '210_sb160822', '211_lb160617', 
+       '211_lb160823']
+       
 for n, s in enumerate(out):
     print(s)    
     
 for n, s in enumerate(out):
     params.subjects = [s]
+    
+    if int(params.subjects[0][6:]) < 160624:
+        params.t_adjust = -29e-3
+    else:
+        params.t_adjust = -44e-3
     
     #print("Running " + str(len(params.subjects)) + ' Subjects') 
 #    print("\n\n".join(params.subjects))
@@ -144,10 +180,6 @@ for n, s in enumerate(out):
     
     params.subject_indices = np.arange(0,len(params.subjects))
     
-    #params.subject_indices = np.concatenate((np.arange(0,3), np.arange(4,10), np.arange(11,16), np.arange(17,20),
-    #                                         np.arange(21, 24),[25], np.arange(27,len(params.subjects)))
-    #                                         , axis=0)
-    #params.subject_indices = np.arange(27,len(params.subjects))
     params.structurals =[None] * len(params.subjects)
     
     if s == '164_sf160707':
@@ -160,6 +192,10 @@ for n, s in enumerate(out):
         params.run_names = ['%s_1', '%s_3', '%s_4', '%s_5', '%s_6'] # 201_gs150729
     elif s == '204_am151120':
         params.run_names = ['%s_1', '%s_3', '%s_4', '%s_5', '%s_6'] # 204_am151120
+    elif s == '101_lg150618':
+        params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4','%s_5','%s_6','%s_7','%s_8']
+    elif s == '105_bb161011':
+        params.run_names = ['%s_1', '%s_2', '%s_4','%s_5','%s_6']
     else:
         params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4','%s_5','%s_6']
     
@@ -272,7 +308,7 @@ for n, s in enumerate(out):
     mnefun.do_processing(
         params,
         fetch_raw=False,     # Fetch raw recording files from acquisition machine
-        do_score=False,      # Do scoring to slice data into trials
+        do_score=True,      # Do scoring to slice data into trials
     
         # Before running SSS, make SUBJ/raw_fif/SUBJ_prebad.txt file with
         # space-separated list of bad MEG channel numbers

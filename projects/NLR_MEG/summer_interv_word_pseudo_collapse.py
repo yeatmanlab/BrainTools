@@ -33,7 +33,7 @@ raw_dir = '/mnt/diskArray/projects/MEG/nlr/raw'
 #out_dir = '/mnt/scratch/NLR_MEG'
 
 # At local hard drive
-out_dir = '/mnt/scratch/NLR_MEG2'
+out_dir = '/mnt/scratch/NLR_MEG3'
 #out_dir = '/mnt/scratch/adult'
 
 if not os.path.isdir(out_dir):
@@ -61,7 +61,7 @@ subs = ['102_rs','103_ac','110_hh','145_ac','150_mg','151_rd','152_tc','160_ek',
 # correction by setting bmin and bmax. I found that mnefun does baseline 
 # correction by default.
 # sjjoo_20160809: Commented
-params = mnefun.Params(tmin=-0.1, tmax=1.0, t_adjust=-39e-3, n_jobs=18, # t_adjust was -39e-3
+params = mnefun.Params(tmin=-0.1, tmax=0.9, t_adjust=-1e-3, n_jobs=18, # t_adjust was -39e-3
                        decim=2, n_jobs_mkl=1, proj_sfreq=250,
                        n_jobs_fir='cuda', n_jobs_resample='cuda',
                        filter_length='5s', epochs_type='fif', lp_cut=40.,
@@ -233,11 +233,11 @@ for n, s in enumerate(out):
     
     # The scoring function needs to produce an event file with these values
     params.in_names = ['word_c254_p20_dot', 'word_c254_p50_dot', 'word_c137_p20_dot',
-                       'word_c254_p80_dot', 'word_c137_p80_dot',
-                       'bigram_c254_p20_dot', 'bigram_c254_p50_dot', 'bigram_c137_p20_dot',
-                       'word_c254_p20_word', 'word_c254_p50_word', 'word_c137_p20_word',
-                       'word_c254_p80_word', 'word_c137_p80_word',
-                       'bigram_c254_p20_word', 'bigram_c254_p50_word', 'bigram_c137_p20_word']
+                     'word_c254_p80_dot', 'word_c137_p80_dot',
+                     'word_c254_p20_dot', 'word_c254_p50_dot', 'word_c137_p20_dot',
+                     'word_c254_p20_word', 'word_c254_p50_word', 'word_c137_p20_word',
+                     'word_c254_p80_word', 'word_c137_p80_word',
+                     'word_c254_p20_word', 'word_c254_p50_word', 'word_c137_p20_word']
     
     params.in_numbers = [101, 102, 103, 104, 105, 106, 107, 108,
                          201, 202, 203, 204, 205, 206, 207, 208]
@@ -252,16 +252,16 @@ for n, s in enumerate(out):
         ['ALL'],
         ['word_c254_p20_dot', 'word_c254_p50_dot', 'word_c137_p20_dot',
          'word_c254_p80_dot', 'word_c137_p80_dot',
-         'bigram_c254_p20_dot', 'bigram_c254_p50_dot', 'bigram_c137_p20_dot',
+         'word_c254_p20_dot', 'word_c254_p50_dot', 'word_c137_p20_dot',
          'word_c254_p20_word', 'word_c254_p50_word', 'word_c137_p20_word',
          'word_c254_p80_word', 'word_c137_p80_word',
-         'bigram_c254_p20_word', 'bigram_c254_p50_word', 'bigram_c137_p20_word']
+         'word_c254_p20_word', 'word_c254_p50_word', 'word_c137_p20_word']
     ]
     
     params.out_numbers = [
         [1] * len(params.in_numbers),
-        [101, 102, 103, 104, 105, 106, 107, 108,
-         201, 202, 203, 204, 205, 206, 207, 208]
+        [101, 102, 103, 104, 105, 101, 102, 103,
+         201, 202, 203, 204, 205, 201, 202, 203]
         ]
     
     params.must_match = [
@@ -272,7 +272,7 @@ for n, s in enumerate(out):
     mnefun.do_processing(
         params,
         fetch_raw=False,     # Fetch raw recording files from acquisition machine
-        do_score=False,      # Do scoring to slice data into trials
+        do_score=True,      # Do scoring to slice data into trials
     
         # Before running SSS, make SUBJ/raw_fif/SUBJ_prebad.txt file with
         # space-separated list of bad MEG channel numbers
