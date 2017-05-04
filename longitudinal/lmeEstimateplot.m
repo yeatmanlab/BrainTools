@@ -10,9 +10,10 @@ decision = 1;
 if decision == 1
     %% Create Single LME Mean Model Plot
     figure; hold;
-    c = lines(length(test_names));
-    num_sessions = 4; % number of sessions including session 0
-    sessions = [1 2 3 4];
+    dmap = lines;
+    dmap = vertcat(dmap(2,:), dmap(1,:), dmap(5,:));
+    num_sessions = 5; % number of sessions including session 0
+    sessions = [0 1 2 3 4];
     %Plot Individual Trends
     for ii = 1:length(test_names)
         estimates = zeros(num_sessions, 1);
@@ -26,19 +27,19 @@ if decision == 1
         for num = 2:num_sessions
             estimates(num, 1) = (estimates(1,1) + estimates(num, 1));
         end
-        h = plot(sessions', estimates, '-o', 'Color', c(ii,:), 'MarkerFaceColor', c(ii,:), 'MarkerSize', 6, 'MarkerEdgeColor', c(ii,:));
+        h = plot(sessions', estimates, '-o', 'Color', dmap(ii,:), 'MarkerFaceColor', dmap(ii,:), 'LineWidth', 2, 'MarkerSize', 6, 'MarkerEdgeColor', dmap(ii,:));
 %         
     end
     
     %Format Plot
     ax = gca;
-    ax.XLim = [0.5000 4.5000];
-    ax.YLim = [70 (max(estimates) + 5)];
+    ax.XLim = [-0.1 4.1];
+    ax.YLim = [70 100];
     ax.XAxis.TickValues = [0 1 2 3 4];
-    xlabel('Hours of Intervention'); ylabel('Standard Score');
+    xlabel('Session'); ylabel('Standard Score');
     title('Growth in Reading Skill');
     grid('on');
-    axis('tight');
+%     axis('tight');
     legend(strrep(test_names, '_', '\_'), 'Location', 'eastoutside');
 
     
@@ -56,12 +57,12 @@ if decision == 1
         for num = 2:num_sessions
             estimates(num, 1) = (estimates(1,1) + estimates(num, 1));
         end
-        errorbar(sessions', estimates, se, '.k', 'LineWidth', 0.75);
+        errorbar(sessions', estimates, se, '.k', 'Color', dmap(ii,:), 'LineWidth', 2);
     end
     % Save image
     test = num2str(cell2mat(test_names(ii)));
     test = strrep(test, '\_', '-');
-    fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.eps', 'LMEestimate', 'Skills', date);
+    fname = sprintf('C:/Users/Patrick/Desktop/figures/LMB/%s-%s-%s.eps', 'LMEestimate', 'Composites', date);
     print(fname, '-depsc');
     
 elseif decision == 2

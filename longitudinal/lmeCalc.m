@@ -36,11 +36,11 @@ if dummyon == 0
     data_table.sid = categorical(data_table.sid);
   
     % Fit the model on the uncentered data as changing linearly
-    lme_linear = fitlme(data_table, 'score ~ long_var + (1|sid)');
+    lme_linear = fitlme(data_table, 'score ~ 1 + long_var +(1|sid) + (long_var - 1|sid)');
     % Fit the model on uncentered data as changing quadratically
-    lme_quad = fitlme(data_table, 'score ~ long_var + long_var_sq + (long_var|sid) + (long_var_sq|sid)');
+    lme_quad = fitlme(data_table, 'score ~ 1 + long_var^2 + (1 | sid) + (long_var-1| sid)');
     % Fit the model on the uncentered data as changing cubically
-    lme_cube = fitlme(data_table, 'score ~ long_var + long_var_sq + long_var_cube +(long_var|sid) + (long_var_sq|sid) + (long_var_cube|sid)');
+    lme_cube = fitlme(data_table, 'score ~ 1 + long_var^2 + long_var^3 + (1 | sid) + (long_var-1| sid)');
     
     
 
@@ -70,9 +70,16 @@ elseif dummyon == 1
     % Calculate LME fit
     % Make sid a categorical variable
     data_table.sid = categorical(data_table.sid);
-    % Fit the model on the centered data as changing linearly
-    lme_linear = fitlme(data_table, 'score ~ long_var + (long_var|sid)');
+    % Fit the model on the uncentered data as changing linearly
+    lme_linear = fitlme(data_table, 'score ~ 1 + long_var +(1|sid) + (long_var - 1|sid)');
+%     % Fit the model on uncentered data as changing quadratically
+%     lme_quad = fitlme(data_table, 'score ~ 1 + long_var^2 + (1 | sid) + (long_var-1| sid)');
+%     % Fit the model on the uncentered data as changing cubically
+%     lme_cube = fitlme(data_table, 'score ~ 1 + long_var^2 + long_var^3 + (1 | sid) + (long_var-1| sid)');
     lme_quad = [];
+    lme_cube = [];
+    
+    
 end
 
 
