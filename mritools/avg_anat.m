@@ -1,10 +1,7 @@
+%%
+sub = {'NLR_205_AC'};
 
-sub = {'NLR_110_HH', 'NLR_145_AC', 'NLR_150_MG', 'NLR_151_RD', 'NLR_152_TC', ...
-    'NLR_160_EK', 'NLR_161_AK','NLR_162_EF',  'NLR_163_LF','NLR_164_SF', ...
-    'NLR_170_GM','NLR_172_TH','RI_124_AT', 'RI_143_CH', ...
-    'RI_138_LA', 'RI_141_GC', 'RI_144_OL','NLR_199_AM', 'NLR_130_RW', ...
-    'NLR_133_ML', 'NLR_146_TF', 'NLR_195_AW'};
-
+workingDir = '/home/sjjoo/git/BrainTools/mritools';
 % Change filelist per subject
 % ATTN: If acpc aligned anatomy has been created, we should set the first
 % filelist as the acpc aligned one in the 'anatomy' folder. And set the
@@ -16,14 +13,15 @@ sub = {'NLR_110_HH', 'NLR_145_AC', 'NLR_150_MG', 'NLR_151_RD', 'NLR_152_TC', ...
 % 'alignLandmarks' as [] so the function below bring up the gui to acpc
 % align and then average.
 
+%%
 for ss = 1:length(sub)
-    
-    outpath = sprintf('/home/ehuber/analysis/anatomy/%s',sub{ss});
+    cd(workingDir)
+    outpath = sprintf('/home/sjjoo/analysis/anatomy/%s',sub{ss});
     if isempty(dir(outpath))
         mkdir(outpath);
     end
     
-    sessions = getsessions(strcat('/home/ehuber/analysis/MRI/',sub{ss}));
+    sessions = getsessions(strcat('/mnt/diskArray/projects/MRI/',sub{ss}));
     
     % find raw par/rec files, make a compressed nifti and store in the
     % subject's 'raw' folder
@@ -31,21 +29,35 @@ for ss = 1:length(sub)
     % acpc-aligned and stored in the anatomy folder
     filelist = {}; namelist = {};
     for ii = 2:numel(sessions)
-        cd(fullfile('/home/ehuber/analysis/MRI/',sub{ss},sessions{ii},'raw'))
+        mkdir(sprintf('%s/%s', outpath, sessions{ii}));
+        cd(fullfile('/mnt/diskArray/projects/MRI/',sub{ss},sessions{ii},'raw'))
         temp = dir(fullfile(pwd, '*VBM*.PAR'));
-        parlist = fullfile('/home/ehuber/analysis/MRI/',sub{ss},sessions{ii},'raw',temp(numel(temp)).name);
-        system(sprintf('parrec2nii -c --overwrite -o %s %s',pwd,parlist));
-        [PATHSTR,NAME,EXT] = fileparts(parlist);
-        filelist{ii} = fullfile(PATHSTR, strcat(NAME, '.nii.gz'));
-        namelist{ii} = NAME;
-        temp = readFileNifti(filelist{ii});
-        temp = niftiCheckQto(temp);
-        delete(filelist{ii})
-        niftiWrite(temp, filelist{ii});
+        if ~isempty(temp)
+            parlist = fullfile('/mnt/diskArray/projects/MRI/',sub{ss},sessions{ii},'raw',temp(numel(temp)).name);
+            system(sprintf('parrec2nii -c --overwrite -o %s %s',sprintf('%s/%s',outpath,sessions{ii}),parlist));
+            [PATHSTR,NAME,EXT] = fileparts(parlist);
+    %         filelist{ii} = fullfile(PATHSTR, strcat(NAME, '.nii.gz'));
+            filelist{ii} = sprintf('%s/%s', sprintf('%s/%s', outpath, sessions{ii}), strcat(NAME, '.nii.gz'));
+            namelist{ii} = NAME;
+    %         temp = readFileNifti(filelist{ii});
+    %         temp = niftiCheckQto(temp);
+    %         delete(filelist{ii})
+    %         niftiWrite(temp, filelist{ii});--out_orientation
+            system(sprintf('mri_convert --out_orientation RAS --out_type nii %s %s', filelist{ii}, filelist{ii}));
+        end
     end
     
     filelist{1} = strcat(outpath,'/t1_acpc.nii.gz');
     namelist{1} = 't1_acpc.nii.gz';
+    
+    % Let's check if there is an empty cell
+    idx = [];
+    for i = 1: length(filelist)
+        if isempty(filelist{i})
+            idx = [idx i];
+        end
+    end
+    filelist(idx) = [];
     
     voxres = [0.8, 0.8, 0.8];
     

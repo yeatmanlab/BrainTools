@@ -33,7 +33,7 @@ raw_dir = '/mnt/diskArray/projects/MEG/nlr/raw'
 #out_dir = '/mnt/scratch/NLR_MEG'
 
 # At local hard drive
-out_dir = '/mnt/scratch/NLR_MEG3'
+out_dir = '/mnt/scratch/adult'
 #out_dir = '/mnt/scratch/adult'
 
 if not os.path.isdir(out_dir):
@@ -45,11 +45,8 @@ os.chdir(out_dir)
 # 208_lh missing
 # 210_sb missing first session 
 # 151_rd missing the second session
-subs = ['101_lg','102_rs','103_ac','105_bb','110_hh','127_am','130_rw',
-        '132_wp','133_ml','145_ac','150_mg','151_rd','152_tc','160_ek',
-        '161_ak','162_ef','163_lf','164_sf','170_gm','172_th','174_hs',
-        '179_gm','180_zd','187_nb','201_gs','202_dd','203_am','204_am',
-        '205_ac','206_lm','207_ah','210_sb','211_lb'
+subs = ['huber_libby','maddox_ross','mccloy_dan','mizrahi_julia',
+        'wronkiewicz_mark'
         ]
 
 # tmin, tmax: sets the epoch
@@ -81,85 +78,22 @@ params.trans_to = (0., 0., .03)
 
 params.sss_type = 'python'
 params.sss_regularize = 'svd' # 'in' by default
-params.tsss_dur = 16. # 60 for adults with not much head movements. This was set to 6.
-params.st_correlation = 0.9
+params.tsss_dur = 60. # 60 for adults with not much head movements. This was set to 6.
+#params.st_correlation = 0.9
 
 params.auto_bad_meg_thresh = 10 # THIS SHOULD NOT BE SO HIGH!
 
-# Regular subjects
-#out,ind = nlr_organizeMEG_mnefun(raw_dir=raw_dir,out_dir=out_dir,subs=subs)
-#
-#print(out)
+#Regular subjects
+out,ind = nlr_organizeMEG_mnefun(raw_dir=raw_dir,out_dir=out_dir,subs=subs)
 
-#params.subjects.sort() # Sort the subject list
-#print("Done sorting subjects.\n")
+print(out)
 
-""" Attention!!!
-164_sf160707_4_raw.fif: continuous HPI was not active in this file!
-170_gm160613_5_raw.fif: in _fix_raw_eog_cals...non equal eog arrays???
-172_th160825_6_raw.fif: origin of head out of helmet
-201_gs150729_2_raw.fif: continuous HPI was not active in this file!
+params.subjects.sort() # Sort the subject list
+print("Done sorting subjects.\n")
 
-174_hs160620_1_raw.fif: Too many bad channels (62 based on grad=4000e-13, mag=4.0e-12)
-174_hs160829_1_raw.fif: Too many bad channels (62 based on grad=4000e-13, mag=4.0e-12)
-163_lf160707          : Too many bad channels --> Use grad=5000e-13, mag=5.0e-12
-163_lf160920          : : Too many bad channels --> Use grad=5000e-13, mag=5.0e-12
-"""
-
-# REMOVE BAD SUBJECTS
-#badsubs = ['127_am123_md','101_lg150618','102_rs150716','110_hh150824',
-#           '152_tc160510','152_tc160527',
-#           '201_gs150818','201_gs150824','201_gs150908',
-#           '203_am150922','203_am151009','202_dd150827','202_dd151013',
-#           '204_am151020','206_lm160202',# These are not included
-#           '102_rs160815','110_hh160809','145_ac160823','150_mg160825',
-#           '152_tc160623','160_ek160915','161_ak160916','162_ef160829',
-#           '163_lf160920','164_sf160920','170_gm160822','172_th160825',
-#           '174_hs160829','179_gm160913','180_zd160826','207_ah160809',
-#           '210_sb160822','211_lb160823','201_gs150925','202_dd151103',
-#           '203_am151029','204_am151120','206_lm160113' # These are the second session
-##           '102_rs160618','102_rs160815','103_ac150609','110_hh160608','110_hh160809',
-##           '145_ac160621','145_ac160823'
-##            ,'150_mg160606','150_mg160825',
-##           '151_rd160620','152_tc160422','152_tc160623','160_ek160627','160_ek160915',
-##           '161_ak160627','161_ak160916',
-##           '162_ef160829','163_lf160707','163_lf160920','164_sf160707','164_sf160920',
-##           '170_gm160613',
-##           '170_gm160822',
-##           '172_th160614','172_th160825','174_hs160620','174_hs160829',
-##           '179_gm160701','179_gm160913','180_zd160621','180_zd160826',
-##           '207_ah160608','207_ah160809','210_sb160822','211_lb160617',
-##           '211_lb160823','201_gs150729','201_gs150925',
-##           '202_dd150919','202_dd151103','203_am150831',
-##           '203_am151029','204_am150829','204_am151120',# These are already processed successfully
-##           '206_lm151119','206_lm160113'
-#        ]
-#for n, s in enumerate(badsubs):
-#    subnum = out.index(s)
-#    print('Removing subject ' + str(subnum) + ' ' + out[subnum])
-#    out.remove(s)
-#    ind[subnum] = []
-#    ind.remove([])
-
-out = ['102_rs160618', '102_rs160815', '103_ac150609', 
-       '105_bb150713', '105_bb161011', '110_hh150824', '110_hh160608', '110_hh160809', 
-       '127_am151022', '127_am161004', '130_rw151221', '132_wp151117', 
-       '132_wp160919', '132_wp161122', '133_ml151124', '145_ac160621', '145_ac160823', 
-       '150_mg160606', '150_mg160825', '151_rd160620', '152_tc160422', 
-       '152_tc160623', '160_ek160627', '160_ek160915', 
-       '161_ak160627', '161_ak160916', '162_ef160829', '163_lf160707', '163_lf160920', 
-       '164_sf160707', '164_sf160920', '170_gm160613', '170_gm160822', '172_th160614', 
-       '172_th160825', '174_hs160620', '174_hs160829', '179_gm160701', '179_gm160913', 
-       '180_zd160621', '180_zd160826', '187_nb161017', '201_gs150729', 
-       '201_gs150925', 
-       '202_dd150919', '202_dd151103', '203_am150831', '203_am151029', '204_am150829', '204_am151120', 
-       '205_ac160202', '206_lm151119', '206_lm160113', 
-       '207_ah160608', '207_ah160809', '210_sb160822', '211_lb160617', 
-       '211_lb160823']
-       
 for n, s in enumerate(out):
     print(s)    
-    
+
 for n, s in enumerate(out):
     params.subjects = [s]
     
@@ -182,9 +116,11 @@ for n, s in enumerate(out):
     elif s == '172_th160825':
         params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4', '%s_5'] # 172_th160825
     elif s == '201_gs150729':
-        params.run_names = ['%s_1', '%s_3', '%s_4', '%s_5', '%s_6', '%s_8'] # 201_gs150729
+        params.run_names = ['%s_1', '%s_3', '%s_4', '%s_5', '%s_6'] # 201_gs150729
     elif s == '204_am151120':
         params.run_names = ['%s_1', '%s_3', '%s_4', '%s_5', '%s_6'] # 204_am151120
+    elif s == '101_lg150618':
+        params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4','%s_5','%s_6','%s_7','%s_8']
     elif s == '105_bb161011':
         params.run_names = ['%s_1', '%s_2', '%s_4','%s_5','%s_6']
     else:
