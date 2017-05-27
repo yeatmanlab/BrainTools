@@ -94,7 +94,7 @@ n_subjects = len(subs)
 """
 Forward model...
 """
-sourceFlag = np.zeros((n_subjects,1))
+sourceFlag = np.ones((n_subjects,1))
 
 for n, s in enumerate(session1):
     os.chdir(os.path.join(raw_dir,session1[n]))
@@ -120,30 +120,17 @@ for n, s in enumerate(session1):
 #    mne.viz.plot_trans(info, trans, subject=subs[n], dig=True,
 #                       meg_sensors=True, subjects_dir=fs_dir)
                        
-    # Create source space
-    os.chdir(os.path.join(fs_dir,subject,'bem'))
-
-    if s == '205_ac151208' or s == '205_ac160202':
-        spacing='oct6' # 8196 = 4098 * 2
+    ### Read source space
+#    spacing='oct6' #'ico5' # 10242 * 2
+    fn2 = subject + '-' + 'oct-6' + '-src.fif' # ico-5
+    if s == '205_ac151208' or s == '205_ac160202': # NLR_205 has too small head for ico-5
         fn2 = subject + '-' + 'oct-6' + '-src.fif'
-    else:
-        spacing='ico5' # 10242 * 2
-        fn2 = subject + '-' + 'ico-5' + '-src.fif'
-    
-    if sourceFlag[subs.index(subject)] == 0:
-        src = mne.setup_source_space(subject=subject, spacing=spacing, # source spacing = 5 mm
-                                     subjects_dir=fs_dir, add_dist=False, n_jobs=2, overwrite=True)
-        src = mne.add_source_space_distances(src, dist_limit=np.inf, n_jobs=18, verbose=None)
-        mne.write_source_spaces(fn2, src, overwrite=True)
-        sourceFlag[subs.index(subject)] = 1
-    else:
-        os.chdir(os.path.join(fs_dir,subject,'bem'))
-        src = mne.read_source_spaces(fn2)
-        os.chdir(os.path.join(raw_dir,session1[n]))
-        os.chdir('forward')
-        
+
+    os.chdir(os.path.join(fs_dir,subject,'bem'))
+    src = mne.read_source_spaces(fn2)
     os.chdir(os.path.join(raw_dir,session1[n]))
     os.chdir('forward')
+        
     #import numpy as np  # noqa
     #from mayavi import mlab  # noqa
     #from surfer import Brain  # noqa
@@ -159,18 +146,18 @@ for n, s in enumerate(session1):
     # Create BEM model
     conductivity = (0.3,)  # for single layer
     #conductivity = (0.3, 0.006, 0.3)  # for three layers
-    model = mne.make_bem_model(subject=subject, ico=5,
+    model = mne.make_bem_model(subject=subject, ico=5, # 5=20484, 4=5120
                                conductivity=conductivity, 
                                subjects_dir=fs_dir)
     bem = mne.make_bem_solution(model)
-    fn = session1[n] + '-bem-sol.fif'
+    fn = session1[n] + '-bem-sol-oct6.fif'
     mne.write_bem_solution(fn,bem)
     
     # Now create forward model
     fwd = mne.make_forward_solution(info, trans=trans, src=src, bem=bem,
                                     fname=None, meg=True, eeg=False,
-                                    mindist=3.0, n_jobs=18)
-    fn = session1[n] + '-fwd.fif'
+                                    mindist=5.0, n_jobs=18)
+    fn = session1[n] + '-fwd-oct6.fif'
     mne.write_forward_solution(fn,fwd,overwrite=True)
     
     
@@ -183,5 +170,5 @@ for n, s in enumerate(session1):
     os.chdir('../inverse')
     inv = mne.minimum_norm.make_inverse_operator(info, fwd, cov, loose=0.2, depth=0.8)
     
-    fn = session1[n] + '-inv.fif'
+    fn = session1[n] + '-inv-oct6.fif'
     mne.minimum_norm.write_inverse_operator(fn,inv)

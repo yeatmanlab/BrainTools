@@ -44,21 +44,18 @@ subs = ['NLR_102_RS','NLR_103_AC','NLR_105_BB','NLR_110_HH','NLR_127_AM',
         'NLR_207_AH','NLR_210_SB','NLR_211_LB'
         ]
 
-
-
 for n, s in enumerate(subs):    
     subject = s
                        
     # Create source space
     os.chdir(os.path.join(fs_dir,subject,'bem'))
-
-#    if s == '205_ac151208' or s == '205_ac160202':
     """ NLR_205: Head is too small to create ico5 """
-    spacing='oct6' # 8196 = 4098 * 2
-    fn2 = subject + '-' + 'oct-6' + '-src.fif'
-#    else:
-#        spacing='ico5' # 10242 * 2
-#        fn2 = subject + '-' + 'ico-5' + '-src.fif'
+    if s == 'NLR_205_AC':
+        spacing='oct6' # ico5 = 10242, oct6 = 4098 ...8196 = 4098 * 2
+        fn2 = subject + '-' + 'oct-6' + '-src.fif'
+    else:
+        spacing='ico5' # 10242 * 2
+        fn2 = subject + '-' + 'ico-5' + '-src.fif'
 
     src = mne.setup_source_space(subject=subject, spacing=spacing, # source spacing = 5 mm
                                  subjects_dir=fs_dir, add_dist=False, n_jobs=18, overwrite=True)
