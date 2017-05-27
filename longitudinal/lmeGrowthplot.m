@@ -83,17 +83,17 @@ if time_course ~= 3
     figure; hold;
     
     for ii = 1:length(test_names)
-        cube_data(ii,:) = table(test_names(ii), stats(ii).lme_cube.Coefficients.Estimate(3), stats(ii).lme_cube.Coefficients.SE(3));
+        cube_data(ii,:) = table(test_names(ii), stats(ii).lme_cube.Coefficients.Estimate(4), stats(ii).lme_cube.Coefficients.SE(4));
         cube_data.Properties.VariableNames = {'test_name', 'Growth', 'SE'};
     end
     h = bar(cube_data.Growth, 'FaceColor', 'w', 'EdgeColor', 'k');
     errorbar(cube_data.Growth, cube_data.SE, 'kx');
     
     for jj = 1:length(test_names)
-        if stats(jj).lme_cube.Coefficients.pValue(3) <= 0.001
+        if stats(jj).lme_cube.Coefficients.pValue(4) <= 0.001
             text(jj, cube_data.Growth(jj) + cube_data.SE(jj) + 2, ...
                 '**', 'HorizontalAlignment', 'center', 'Color', 'b');
-        elseif stats(jj).lme_cube.Coefficients.pValue(3) <= 0.05
+        elseif stats(jj).lme_cube.Coefficients.pValue(4) <= 0.05
             text(jj, cube_data.Growth(jj) + cube_data.SE(jj) + 2, ...
                 '*', 'HorizontalAlignment', 'center', 'Color', 'b');
         end
