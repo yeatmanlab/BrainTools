@@ -311,22 +311,22 @@ for n, s in enumerate(session1):
     
     all_con[:,:,:,:,n] = con
     
-#    n_rows, n_cols = con.shape[:2]
-#    names = ['Frontal', 'Temporal', 'Ventral', 'V1']
-#    k = 1
-#    plt.figure()
-#    plt.clf()
-#    for i in np.arange(0,4,1):
-#        for j in np.arange(0,4,1):
-#            plt.subplot(4,4,k)
-#            mat = con[i,j,:,:]
-#            ax = sns.heatmap(np.flipud(mat), xticklabels=60, yticklabels = ylabels[::-1], vmin=-0.35, vmax=0.35)
-#            k = k + 1
-#            if j == 0:
-#                ax.set_ylabel(names[i])
-#            if i == (n_rows - 1):
-#                ax.set_xlabel(names[j])
-#            if i == 0:
-#                ax.set_title(names[j])
-#    
-#    plt.show()
+    n_rows, n_cols = con.shape[:2]
+    names = ['Frontal', 'Temporal', 'Ventral', 'V1']
+    k = 1
+    plt.figure()
+    plt.clf()
+    for i in np.arange(0,4,1):
+        for j in np.arange(0,4,1):
+            plt.subplot(4,4,k)
+            mat = con[i,j,:,:]
+            ax = sns.heatmap(np.flipud(mat), xticklabels=60, yticklabels = ylabels[::-1], vmin=-0.35, vmax=0.35)
+            k = k + 1
+            if j == 0:
+                ax.set_ylabel(names[i])
+            if i == (n_rows - 1):
+                ax.set_xlabel(names[j])
+            if i == 0:
+                ax.set_title(names[j])
+    
+    plt.show()

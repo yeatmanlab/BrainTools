@@ -82,13 +82,13 @@ session1 = ['102_rs160618','102_rs160815','103_ac150609','105_bb150713','105_bb1
             '206_lm160113','207_ah160608','207_ah160809','210_sb160822','211_lb160617','211_lb160823'
             ]
 
-subs = ['NLR_205_AC','NLR_206_LM',
-        'NLR_207_AH','NLR_210_SB','NLR_211_LB'
-        ]
-session1 = ['205_ac151208','205_ac160202',
-            '206_lm151119',
-            '206_lm160113','207_ah160608','207_ah160809','210_sb160822','211_lb160617','211_lb160823'
-            ]
+#subs = ['NLR_205_AC','NLR_206_LM',
+#        'NLR_207_AH','NLR_210_SB','NLR_211_LB'
+#        ]
+#session1 = ['205_ac151208','205_ac160202',
+#            '206_lm151119',
+#            '206_lm160113','207_ah160608','207_ah160809','210_sb160822','211_lb160617','211_lb160823'
+#            ]
 
 n_subjects = len(subs)
 """
@@ -106,7 +106,7 @@ for n, s in enumerate(session1):
     evoked = mne.read_evokeds(fn, condition=0, 
                               baseline=(None,0), kind='average', proj=True)
     
-    info = evoked.info
+    info = evoked.info 
     
     if os.path.isdir('../forward'):
         os.chdir('../forward')
@@ -122,7 +122,7 @@ for n, s in enumerate(session1):
                        
     ### Read source space
 #    spacing='oct6' #'ico5' # 10242 * 2
-    fn2 = subject + '-' + 'oct-6' + '-src.fif' # ico-5
+    fn2 = subject + '-' + 'ico-5' + '-src.fif' # ico-5
     if s == '205_ac151208' or s == '205_ac160202': # NLR_205 has too small head for ico-5
         fn2 = subject + '-' + 'oct-6' + '-src.fif'
 
@@ -150,14 +150,14 @@ for n, s in enumerate(session1):
                                conductivity=conductivity, 
                                subjects_dir=fs_dir)
     bem = mne.make_bem_solution(model)
-    fn = session1[n] + '-bem-sol-oct6.fif'
+    fn = session1[n] + '-bem-sol.fif'
     mne.write_bem_solution(fn,bem)
     
     # Now create forward model
     fwd = mne.make_forward_solution(info, trans=trans, src=src, bem=bem,
                                     fname=None, meg=True, eeg=False,
-                                    mindist=5.0, n_jobs=18)
-    fn = session1[n] + '-fwd-oct6.fif'
+                                    mindist=3.0, n_jobs=18)
+    fn = session1[n] + '-fwd.fif'
     mne.write_forward_solution(fn,fwd,overwrite=True)
     
     
@@ -170,5 +170,5 @@ for n, s in enumerate(session1):
     os.chdir('../inverse')
     inv = mne.minimum_norm.make_inverse_operator(info, fwd, cov, loose=0.2, depth=0.8)
     
-    fn = session1[n] + '-inv-oct6.fif'
+    fn = session1[n] + '-inv.fif'
     mne.minimum_norm.write_inverse_operator(fn,inv)

@@ -247,76 +247,56 @@ if load_data == False:
         stcs = mne.minimum_norm.apply_inverse_epochs(epo, inv, lambda2, method,
                                     pick_ori="normal", return_generator=True)
         
-        labels_parc = mne.read_labels_from_annot(subs[n], parc='aparc',
-                                         subjects_dir=fs_dir)
+
         os.chdir(os.path.join(fs_dir,subs[n]))
         os.chdir('bem')
         fn = subs[n] + '-ico-5-src.fif'
         src = mne.read_source_spaces(fn, patch_stats=False, verbose=None)
         src = inv['src']
-        label_ts = mne.extract_label_time_course(stcs, labels, src, #labels_parc
+        label = mne.read_label('TE2p_label_lh')
+        seed_ts = mne.extract_label_time_course(stcs, label, src, #labels_parc
                                                  mode='mean_flip',
                                                  allow_empty=True,
                                                  return_generator=False)
-                                                 
-        # We compute the connectivity in the alpha band and plot it using a circular
-        # graph layout
-        fmin = 13.
-        fmax = 30.
-        sfreq = 600  # the sampling frequency
-        con, freqs, times, n_epochs, n_tapers = mne.connectivity.spectral_connectivity(
-            label_ts, method='pli', mode='multitaper', sfreq=sfreq, fmin=fmin,
-            fmax=fmax, faverage=True, mt_adaptive=True, n_jobs=18)
         
-        # We create a list of Label containing also the sub structures
-#        labels_aseg = mne.get_volume_labels_from_src(src, subject=subs[n], subjects_dir=fs_dir)
-#        labels = labels_parc
+        comb_ts = zip(seed_ts, stcs)
+                                                
+        #Construct indices to estimate connectivity between the label time course
+        # and all source space time courses
+        vertices = [src[i]['vertno'] for i in range(2)]
+        n_signals_tot = 1 + len(vertices[0]) + len(vertices[1])
+        
+        indices = mne.connectivity.seed_target_indices([0], np.arange(1, n_signals_tot))
         
         # read colors
         node_colors = [label.color for label in labels]
         
-        # We reorder the labels based on their location in the left hemi
-        label_names = [label.name for label in labels]
-        lh_labels = [name for name in label_names if name.endswith('lh')]
-        rh_labels = [name for name in label_names if name.endswith('rh')]
+        # Compute the PSI in the frequency range 8Hz..30Hz. We exclude the baseline
+        # period from the connectivity estimation
+        fmin = 8.
+        fmax = 30.
+        tmin_con = 0.
+        sfreq = 600  # the sampling frequency
         
-        # Get the y-location of the label
-        label_ypos_lh = list()
-        for name in lh_labels:
-            idx = label_names.index(name)
-            ypos = np.mean(labels[idx].pos[:, 1])
-            label_ypos_lh.append(ypos)
-        try:
-            idx = label_names.index('Brain-Stem')
-            ypos = np.mean(labels[idx].pos[:, 1])
-            lh_labels.append('Brain-Stem')
-            label_ypos_lh.append(ypos)
-        except ValueError:
-            pass
+        psi, freqs, times, n_epochs, _ = mne.connectivity.phase_slope_index(
+            comb_ts, mode='multitaper', indices=indices, sfreq=sfreq,
+            fmin=fmin, fmax=fmax, tmin=tmin_con)
         
+        # Generate a SourceEstimate with the PSI. This is simple since we used a single
+        # seed (inspect the indices variable to see how the PSI scores are arranged in
+        # the output)
+        psi_stc = mne.SourceEstimate(psi, vertices=vertices, tmin=0, tstep=1,
+                                     subject='sample')
         
-        # Reorder the labels based on their location
-        lh_labels = [label for (yp, label) in sorted(zip(label_ypos_lh, lh_labels))]
-        
-        # For the right hemi
-        rh_labels = [label[:-2] + 'rh' for label in lh_labels
-                     if label != 'Brain-Stem' and label[:-2] + 'rh' in rh_labels]
-        
-        # Save the plot order
-        node_order = list()
-        node_order = lh_labels[::-1] + rh_labels
-        
-        node_angles = mne.viz.circular_layout(label_names, node_order, start_pos=90,
-                                      group_boundaries=[0, len(label_names) // 2])
-        
-        
-        # Plot the graph using node colors from the FreeSurfer parcellation. We only
-        # show the 300 strongest connections.
-        conmat = con[:, :, 0]
-        mne.viz.plot_connectivity_circle(conmat, label_names, n_lines=100,
-                                 node_angles=node_angles, node_colors=node_colors,
-                                 title='Dot task--Low noise'
-                                       'Condition (PLI)')
+        # Now we can visualize the PSI using the plot method. We use a custom colormap
+        # to show signed values
+        v_max = np.max(np.abs(psi))
+        brain = psi_stc.plot(surface='inflated', hemi='lh',
+                             time_label='Phase Slope Index (PSI)',
+                             subjects_dir=subjects_dir,
+                             clim=dict(kind='percent', pos_lims=(95, 97.5, 100)))
+        brain.show_view('medial')
+        brain.add_label(fname_label, color='green', alpha=0.7)
 
     os.chdir(raw_dir)
     np.save(fname_data, X13)

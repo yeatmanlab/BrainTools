@@ -31,30 +31,30 @@ this_env = copy.copy(os.environ)
 fs_dir = '/mnt/diskArray/projects/avg_fsurfer'
 this_env['SUBJECTS_DIR'] = fs_dir
 
-raw_dir = '/mnt/scratch/NLR_MEG2'
+raw_dir = '/mnt/scratch/NLR_MEG3'
 
 os.chdir(raw_dir)
 
 subs2 = ['NLR_102_RS','NLR_110_HH',
         'NLR_145_AC',
-        'NLR_152_TC','NLR_160_EK','NLR_161_AK','NLR_163_LF','NLR_164_SF',
-        'NLR_170_GM','NLR_172_TH','NLR_174_HS','NLR_179_GM','NLR_180_ZD',
+        'NLR_152_TC','NLR_160_EK','NLR_161_AK','NLR_164_SF', # 'NLR_163_LF'
+        'NLR_170_GM','NLR_172_TH','NLR_179_GM','NLR_180_ZD', # 'NLR_174_HS',
         'NLR_203_AM','NLR_204_AM','NLR_205_AC',
-        'NLR_207_AH','NLR_211_LB','NLR_150_MG','NLR_162_EF','NLR_210_SB'
+        'NLR_207_AH','NLR_211_LB','NLR_210_SB' # 'NLR_162_EF',
         ] 
 
-brs2 = [98, 88, 102, 99, 91, 88, 105, 86, 81, 88, 89, 77, 83, 85, 86, 98, 116, 86, 110, 79, 104]
+brs2 = [98, 88, 102, 99, 91, 88, 86, 81, 88, 77, 83, 85, 86, 98, 116, 86, 110, 79, 104] #105, 89, 
 brs2 = np.array(brs2)
 
 session2 = ['102_rs160815',
             '110_hh160809','145_ac160823',
             '152_tc160623','160_ek160915',
-            '161_ak160916','163_lf160920',
+            '161_ak160916',
             '164_sf160920','170_gm160822',
-            '172_th160825','174_hs160829','179_gm160913',
+            '172_th160825','179_gm160913',
             '180_zd160826','203_am151029','204_am151120','205_ac160202',
             '207_ah160809',
-            '211_lb160823','150_mg160825','162_ef160829','210_sb160822'
+            '211_lb160823','210_sb160822'
             ] 
 
 n_subjects2 = len(subs2)
@@ -78,6 +78,15 @@ lambda2 = 1. / snr ** 2
 
 fname_data = op.join(raw_dir, 'session2_data.npy')
 
+m1 = np.ones(len(subs2))
+m1[2] = False
+m1[6] = False
+m1[7] = False
+m1[8] = False
+all_subject = []
+temp = np.where(m1)[0]
+all_subject.extend(temp)
+
 session1_loaded = False
 if session1_loaded == True:
     m3 = []
@@ -89,6 +98,7 @@ if session1_loaded == True:
         growth[n] = np.subtract(brs2[n], brs[subs.index(subs2[n])])
     growth = np.array(growth)
 
+fname_data = op.join(raw_dir, 'session2_data_ico5.npy')
 #%%
 """
 Here we do the real deal...
@@ -120,7 +130,7 @@ if load_data == False:
         os.chdir('inverse')
         
         fn = 'Conditions_40-sss_eq_'+session2[n]+'-ave.fif'
-        fn_inv = session2[n] + '-inv.fif'
+        fn_inv = session2[n] + '-inv-ico5.fif'
         inv = mne.minimum_norm.read_inverse_operator(fn_inv, verbose=None)
         
         for iCond in np.arange(0,len(conditions1)):
@@ -129,7 +139,7 @@ if load_data == False:
             
             n_epochs2[n][iCond] = evoked.nave
             
-            stc = mne.minimum_norm.apply_inverse(evoked,inv,lambda2, method=method, pick_ori=None)
+            stc = mne.minimum_norm.apply_inverse(evoked,inv,lambda2, method=method, pick_ori="normal")
             
             stc.crop(-0.1, 0.9)
             tmin = stc.tmin
@@ -171,15 +181,6 @@ labels = mne.read_labels_from_annot('fsaverage', parc='HCPMMP1', surf_name='whit
 #%%
 """ Task effects """
 
-#TE2p_mask_lh = mne.Label.get_vertices_used(TE2p_label[0])
-#TE2p_mask_rh = mne.Label.get_vertices_used(TE2p_label[1])
-k = 1
-#tmin = 0
-
-tp1 = [0.08, 0.13, 0.15, 0.20, 0.30]
-tp2 = [0.12, 0.17, 0.19, 0.24, 0.35]
-mask = times == 0.15
-
 PHT_label_lh = [label for label in labels if label.name == 'L_PHT_ROI-lh'][0]
 PHT_label_rh = [label for label in labels if label.name == 'R_PHT_ROI-rh'][0]
 
@@ -196,6 +197,11 @@ PH_label_rh = [label for label in labels if label.name == 'R_PH_ROI-rh'][0]
 FFC_label_lh = [label for label in labels if label.name == 'L_FFC_ROI-lh'][0]
 FFC_label_rh = [label for label in labels if label.name == 'R_FFC_ROI-rh'][0]
 
+a8C_label_lh = [label for label in labels if label.name == 'L_8C_ROI-lh'][0]
+a8C_label_rh = [label for label in labels if label.name == 'R_8C_ROI-rh'][0]
+
+p946v_label_lh = [label for label in labels if label.name == 'L_p9-46v_ROI-lh'][0]
+p946v_label_rh = [label for label in labels if label.name == 'R_p9-46v_ROI-rh'][0]
 
 IFSp_label_lh = [label for label in labels if label.name == 'L_IFSp_ROI-lh'][0]
 IFSp_label_rh = [label for label in labels if label.name == 'R_IFSp_ROI-rh'][0]
@@ -224,53 +230,54 @@ STSvp_label_rh = [label for label in labels if label.name == 'R_STSvp_ROI-rh'][0
 STSdp_label_lh = [label for label in labels if label.name == 'L_STSdp_ROI-lh'][0]
 STSdp_label_rh = [label for label in labels if label.name == 'R_STSdp_ROI-rh'][0]
 
+TPOJ1_label_lh = [label for label in labels if label.name == 'L_TPOJ1_ROI-lh'][0]
+TPOJ1_label_rh = [label for label in labels if label.name == 'R_TPOJ1_ROI-rh'][0]
+
 V1_label_lh = [label for label in labels if label.name == 'L_V1_ROI-lh'][0]
 V1_label_rh = [label for label in labels if label.name == 'R_V1_ROI-rh'][0]
 
-new_data = X2[:,:,:,:]
-data1 = np.subtract(np.mean(new_data[:,:,:,[5]],axis=3), np.mean(new_data[:,:,:,[8]],axis=3))
-del new_data
-data11 = data1[:,:,:]
-del data1
+LIPd_label_lh = [label for label in labels if label.name == 'L_LIPd_ROI-lh'][0]
+LIPd_label_rh = [label for label in labels if label.name == 'R_LIPd_ROI-rh'][0]
+LIPv_label_lh = [label for label in labels if label.name == 'L_LIPv_ROI-lh'][0]
+LIPv_label_rh = [label for label in labels if label.name == 'R_LIPv_ROI-rh'][0]
 
-data11 = np.transpose(data11,[2,1,0])
+new_data = X2[:,:,all_subject,:]
+#data1 = np.subtract(np.mean(new_data[:,:,:,[5]],axis=3), np.mean(new_data[:,:,:,[0]],axis=3))
+data1 = np.mean(new_data[:,:,:,[0,5]],axis=3)
+del new_data
+
+data11 = np.transpose(data1,[2,1,0])
+
 stat_fun = partial(mne.stats.ttest_1samp_no_p)
 
-temp3 = mne.SourceEstimate(np.transpose(stat_fun(data11)), fs_vertices, tmin,
-                                 tstep,subject='fsaverage')
-#     
-#brain3_1 = temp3.plot(hemi='lh', subjects_dir=fs_dir, views = 'lat', #views=['lat','ven','med'], #transparent = True,
-#          initial_time=0.15) # clim=dict(kind='value', lims=[2.0, 2.1, np.max(temp3.data[:,:])])
-#brain3_1.add_label(PHT_label_lh, borders=True, color=c_table[0])
-#brain3_1.add_label(TE2p_label_lh, borders=True, color=c_table[1])
-#brain3_1.add_label(PH_label_lh, borders=True, color=c_table[2])
-#brain3_1.add_label(FFC_label_lh, borders=True, color=c_table[3])
-#brain3_1.add_label(TE1p_label_lh, borders=True, color=c_table[4])
-#brain3_1.add_label(IFSp_label_lh, borders=True, color=c_table[5])
-#brain3_1.add_label(IFJp_label_lh, borders=True, color=c_table[6])
-#brain3_1.add_label(IFJa_label_lh, borders=True, color=c_table[7])
-#brain3_1.add_label(a45_label_lh, borders=True, color=c_table[8])
-#brain3_1.add_label(a44_label_lh, borders=True, color=c_table[8])
-#brain3_1.add_label(PGi_label_lh, borders=True, color=c_table[9])
-#brain3_1.add_label(PGs_label_lh, borders=True, color=c_table[9])
-#brain3_1.add_label(STSvp_label_lh, borders=True, color=c_table[11])
-#brain3_1.add_label(STSdp_label_lh, borders=True, color=c_table[11])
-#brain3_1.add_label(V1_label_lh, borders=True, color='k')
-#
-##brain3_1.save_movie('LexicalTask_NoNoise-Noise_lh.mp4',time_dilation = 4.0,framerate = 24)
-#
-#brain3_2 = temp3.plot(hemi='rh', subjects_dir=fs_dir,  views='lat',
-#          clim=dict(kind='value', lims=[2.9, 3, np.max(temp3.data[:,:])]),
-#          initial_time=0.15)
-#brain3_2.add_label(PHT_label_rh, borders=True, color=c_table[0])
-#brain3_2.add_label(TE2p_label_rh, borders=True, color=c_table[1])
-#brain3_2.add_label(PH_label_rh, borders=True, color=c_table[2])
-#brain3_2.add_label(FFC_label_rh, borders=True, color=c_table[3])
-#brain3_2.add_label(TE1p_label_rh, borders=True, color=c_table[4])
-#brain3_2.add_label(IFSp_label_rh, borders=True, color=c_table[5])
-#brain3_2.add_label(IFJp_label_rh, borders=True, color=c_table[6])
-#brain3_2.add_label(IFJa_label_rh, borders=True, color=c_table[7])
-#brain3_2.add_label(a45_label_rh, borders=True, color=c_table[8])
+temp3 = mne.SourceEstimate(np.transpose(stat_fun(data11)), fs_vertices, tmin, tstep,subject='fsaverage') # np.transpose(stat_fun(data11))
+
+#temp3 = mne.SourceEstimate(X13[:,:,1,1], fs_vertices, tmin,
+#                                 tstep,subject='fsaverage')
+
+brain3_1 = temp3.plot(hemi='lh', subjects_dir=fs_dir, views = ['lat'], #views=['lat','ven','med'], #transparent = True,
+          initial_time=0.40,clim=dict(kind='value', lims=[1.5, 1.72, np.max(temp3.data[:,:])]))
+brain3_1.add_label(PHT_label_lh, borders=True, color=c_table[0])
+brain3_1.add_label(TE2p_label_lh, borders=True, color=c_table[1])
+brain3_1.add_label(PH_label_lh, borders=True, color=c_table[2])
+brain3_1.add_label(FFC_label_lh, borders=True, color=c_table[3])
+brain3_1.add_label(TE1p_label_lh, borders=True, color=c_table[4])
+
+brain3_1.add_label(IFSp_label_lh, borders=True, color=c_table[5])
+brain3_1.add_label(IFJp_label_lh, borders=True, color=c_table[6])
+brain3_1.add_label(IFJa_label_lh, borders=True, color=c_table[7])
+brain3_1.add_label(a45_label_lh, borders=True, color=c_table[8])
+brain3_1.add_label(a44_label_lh, borders=True, color=c_table[8])
+brain3_1.add_label(a8C_label_lh, borders=True, color=c_table[8])
+brain3_1.add_label(p946v_label_lh, borders=True, color=c_table[8])
+
+brain3_1.add_label(PGi_label_lh, borders=True, color=c_table[9])
+brain3_1.add_label(PGs_label_lh, borders=True, color=c_table[9])
+brain3_1.add_label(STSvp_label_lh, borders=True, color=c_table[11])
+brain3_1.add_label(STSdp_label_lh, borders=True, color=c_table[11])
+brain3_1.add_label(V1_label_lh, borders=True, color='k')
+brain3_1.add_label(LIPd_label_lh, borders=True, color='k')
+brain3_1.add_label(LIPv_label_lh, borders=True, color='k')
 
 """ Frontal """
 temp = temp3.in_label(a44_label_lh)
@@ -285,8 +292,8 @@ broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
 #temp = temp3.in_label(IFJp_label_lh)
 #broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
 
-temp = temp3.in_label(IFJa_label_lh)
-broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
+#temp = temp3.in_label(IFJa_label_lh)
+#broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
 
 """ Ventral """
 temp = temp3.in_label(TE2p_label_lh)
@@ -294,521 +301,289 @@ ventral_vertices = temp.vertices[0]
 
 temp = temp3.in_label(PH_label_lh)
 ventral_vertices = np.unique(np.append(ventral_vertices, temp.vertices[0]))
+#
+#temp = temp3.in_label(FFC_label_lh)
+#ventral_vertices = np.unique(np.append(ventral_vertices, temp.vertices[0]))
 
 """ Temporal """
-temp = temp3.in_label(PGi_label_lh)
+temp = temp3.in_label(STSvp_label_lh)
 w_vertices = temp.vertices[0]
 
-temp = temp3.in_label(PGs_label_lh)
+temp = temp3.in_label(STSdp_label_lh)
 w_vertices = np.unique(np.append(w_vertices, temp.vertices[0]))
+
+#temp = temp3.in_label(TPOJ1_label_lh)
+#w_vertices = np.unique(np.append(w_vertices, temp.vertices[0]))
 
 """ V1 """
 temp = temp3.in_label(V1_label_lh)
 v1_vertices = temp.vertices[0]
 
-#%%
-""" All subjects """
-plt.figure(10)
-plt.clf()
+###############################################################################
+""" Just to visualize the new ROI """
+mask = np.logical_and(times >= 0.08, times <= 0.12)
 
-X22 = X2[ventral_vertices,:,:,:]
-M = np.mean(np.mean(X22[:,:,m3,:],axis=0),axis=1)
+lh_label = temp3.in_label(V1_label_lh)
+data = np.max(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-plt.subplot(3,2,1)
-plt.hold(True)
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+v1_vertices = temp.vertices[0]
+new_label = mne.Label(v1_vertices, hemi='lh')
+brain3_1.add_label(new_label, borders=True, color='k')
+###############################################################################
+mask = np.logical_and(times >= 0.38, times <= 0.42)
+lh_label = temp3.in_label(TE2p_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-plt.plot(times, np.mean(M[:,[0]],axis=1),'--',color=c_table[5],label='Word-No noise')
-yerr = np.std(np.mean(M[:,[0]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[0]],axis=1)-yerr, np.mean(M[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+ventral_vertices = temp.vertices[0]
 
+lh_label = temp3.in_label(PH_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-plt.plot(times, np.mean(M[:,[1]],axis=1),'--',color=c_table[3],label='Word-Med noise')
-yerr = np.std(np.mean(M[:,[1]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[1]],axis=1)-yerr, np.mean(M[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+ventral_vertices = np.unique(np.append(ventral_vertices, temp.vertices[0]))
 
+lh_label = temp3.in_label(TE1p_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-plt.plot(times, np.mean(M[:,[3]],axis=1),'--',color=c_table[1],label='Noise')
-yerr = np.std(np.mean(M[:,[3]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[3]],axis=1)-yerr, np.mean(M[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Dot task: Ventral')
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+ventral_vertices = np.unique(np.append(ventral_vertices, temp.vertices[0]))
 
-plt.subplot(3,2,2)
-plt.hold(True)
-plt.plot(times, np.mean(M[:,[5]],axis=1),'-',color=c_table[5],label='Word-No noise')
-yerr = np.std(np.mean(M[:,[5]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[5]],axis=1)-yerr, np.mean(M[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
+new_label = mne.Label(ventral_vertices, hemi='lh')
+brain3_1.add_label(new_label, borders=True, color='k')
+###############################################################################
+mask = np.logical_and(times >= 0.22, times <= 0.26)
+lh_label = temp3.in_label(STSvp_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-plt.plot(times, np.mean(M[:,[6]],axis=1),'-',color=c_table[3],label='Word-Med noise')
-yerr = np.std(np.mean(M[:,[6]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[6]],axis=1)-yerr, np.mean(M[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+w_vertices = temp.vertices[0]
 
-plt.plot(times, np.mean(M[:,[8]],axis=1),'-',color=c_table[1],label='Noise')
-yerr = np.std(np.mean(M[:,[8]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[8]],axis=1)-yerr, np.mean(M[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Lexical task: Ventral')
+lh_label = temp3.in_label(STSdp_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-X22 = X2[broca_vertices,:,:,:]
-M = np.mean(np.mean(X22[:,:,m3,:],axis=0),axis=1)
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+w_vertices = np.unique(np.append(w_vertices, temp.vertices[0]))
 
-plt.subplot(3,2,3)
-plt.hold(True)
+new_label = mne.Label(w_vertices, hemi='lh')
+brain3_1.add_label(new_label, borders=True, color='k')
+###############################################################################
+mask = np.logical_and(times >= 0.12, times <= 0.16)
+lh_label = temp3.in_label(a44_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-plt.plot(times, np.mean(M[:,[0]],axis=1),'--',color=c_table[5],label='Word-No noise')
-yerr = np.std(np.mean(M[:,[0]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[0]],axis=1)-yerr, np.mean(M[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+broca_vertices = temp.vertices[0]
 
+lh_label = temp3.in_label(IFJa_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-plt.plot(times, np.mean(M[:,[1]],axis=1),'--',color=c_table[3],label='Word-Med noise')
-yerr = np.std(np.mean(M[:,[1]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[1]],axis=1)-yerr, np.mean(M[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
 
+lh_label = temp3.in_label(p946v_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-plt.plot(times, np.mean(M[:,[3]],axis=1),'--',color=c_table[1],label='Noise')
-yerr = np.std(np.mean(M[:,[3]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[3]],axis=1)-yerr, np.mean(M[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Dot task: Frontal')
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
 
-plt.subplot(3,2,4)
-plt.hold(True)
-plt.plot(times, np.mean(M[:,[5]],axis=1),'-',color=c_table[5],label='Word-No noise')
-yerr = np.std(np.mean(M[:,[5]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[5]],axis=1)-yerr, np.mean(M[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
+new_label = mne.Label(broca_vertices, hemi='lh')
+brain3_1.add_label(new_label, borders=True, color='k')
+###############################################################################
+mask = np.logical_and(times >= 0.12, times <= 0.16)
+lh_label = temp3.in_label(PGi_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-plt.plot(times, np.mean(M[:,[6]],axis=1),'-',color=c_table[3],label='Word-Med noise')
-yerr = np.std(np.mean(M[:,[6]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[6]],axis=1)-yerr, np.mean(M[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+STGp_vertices = temp.vertices[0]
 
-plt.plot(times, np.mean(M[:,[8]],axis=1),'-',color=c_table[1],label='Noise')
-yerr = np.std(np.mean(M[:,[8]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[8]],axis=1)-yerr, np.mean(M[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Lexical task: Frontal')
+lh_label = temp3.in_label(PGs_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-X22 = X2[w_vertices,:,:,:]
-M = np.mean(np.mean(X22[:,:,m3,:],axis=0),axis=1)
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+STGp_vertices = np.unique(np.append(STGp_vertices, temp.vertices[0]))
 
-plt.subplot(3,2,5)
-plt.hold(True)
+new_label = mne.Label(STGp_vertices, hemi='lh')
+brain3_1.add_label(new_label, borders=True, color='k')
+###############################################################################
+mask = np.logical_and(times >= 0.12, times <= 0.16)
+lh_label = temp3.in_label(LIPv_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-plt.plot(times, np.mean(M[:,[0]],axis=1),'--',color=c_table[5],label='Word-No noise')
-yerr = np.std(np.mean(M[:,[0]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[0]],axis=1)-yerr, np.mean(M[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+LIP_vertices = temp.vertices[0]
 
+lh_label = temp3.in_label(LIPd_label_lh)
+data = np.mean(lh_label.data[:,mask],axis=1)
+lh_label.data[data < 1.72] = 0.
 
-plt.plot(times, np.mean(M[:,[1]],axis=1),'--',color=c_table[3],label='Word-Med noise')
-yerr = np.std(np.mean(M[:,[1]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[1]],axis=1)-yerr, np.mean(M[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = temp3.in_label(temp_labels)
+LIP_vertices = np.unique(np.append(LIP_vertices, temp.vertices[0]))
 
-
-plt.plot(times, np.mean(M[:,[3]],axis=1),'--',color=c_table[1],label='Noise')
-yerr = np.std(np.mean(M[:,[3]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[3]],axis=1)-yerr, np.mean(M[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Dot task: Temporal')
-
-plt.subplot(3,2,6)
-plt.hold(True)
-plt.plot(times, np.mean(M[:,[5]],axis=1),'-',color=c_table[5],label='Word-No noise')
-yerr = np.std(np.mean(M[:,[5]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[5]],axis=1)-yerr, np.mean(M[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M[:,[6]],axis=1),'-',color=c_table[3],label='Word-Med noise')
-yerr = np.std(np.mean(M[:,[6]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[6]],axis=1)-yerr, np.mean(M[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M[:,[8]],axis=1),'-',color=c_table[1],label='Noise')
-yerr = np.std(np.mean(M[:,[8]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[8]],axis=1)-yerr, np.mean(M[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Lexical task: Temporal')
+new_label = mne.Label(LIP_vertices, hemi='lh')
+brain3_1.add_label(new_label, borders=True, color='k')
 
 #%% 
-""" V1 """
-plt.figure(20)
+""" Dot task: V1 """
+plt.figure(1)
 plt.clf()
 
-X22 = X2[v1_vertices,:,:,:]
-M = np.mean(np.mean(X22[:,:,m3,:],axis=0),axis=1)
+#X11 = np.mean(X2[v1_vertices,:,:,:], axis=0)
+#M = np.mean(X11[:,all_subject,:],axis=1)
+#errM = np.std(X11[:,all_subject,:],axis=1) / np.sqrt(X2.shape[2])
+X11 = X2[v1_vertices,:,:,:]
+M = np.mean(np.mean(X11[:,:,all_subject,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[:,:,all_subject,:],axis=0),axis=1) / np.sqrt(len(all_subject))
 
-plt.subplot(3,2,1)
+plt.subplot(2,3,1)
 plt.hold(True)
 
-plt.plot(times, np.mean(M[:,[0]],axis=1),'--',color=c_table[5],label='Word-No noise')
-yerr = np.std(np.mean(M[:,[0]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[0]],axis=1)-yerr, np.mean(M[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,0],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,0]-errM[:,0], M[:,0]+errM[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
 
+plt.plot(times, M[:,1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,1]-errM[:,1], M[:,1]+errM[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
 
-plt.plot(times, np.mean(M[:,[1]],axis=1),'--',color=c_table[3],label='Word-Med noise')
-yerr = np.std(np.mean(M[:,[1]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[1]],axis=1)-yerr, np.mean(M[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,3]-errM[:,3], M[:,3]+errM[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
 
-
-plt.plot(times, np.mean(M[:,[3]],axis=1),'--',color=c_table[1],label='Noise')
-yerr = np.std(np.mean(M[:,[3]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[3]],axis=1)-yerr, np.mean(M[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
 plt.grid(b=True)
-plt.ylim([0, 4])
+plt.ylim([-1,3])
+plt.legend()
 plt.title('Dot task: V1')
 
-plt.subplot(3,2,2)
-plt.hold(True)
-plt.plot(times, np.mean(M[:,[5]],axis=1),'-',color=c_table[5],label='Word-No noise')
-yerr = np.std(np.mean(M[:,[5]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[5]],axis=1)-yerr, np.mean(M[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M[:,[6]],axis=1),'-',color=c_table[3],label='Word-Med noise')
-yerr = np.std(np.mean(M[:,[6]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[6]],axis=1)-yerr, np.mean(M[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M[:,[8]],axis=1),'-',color=c_table[1],label='Noise')
-yerr = np.std(np.mean(M[:,[8]],axis=1)) / np.sqrt(len(m3))
-plt.fill_between(times, np.mean(M[:,[8]],axis=1)-yerr, np.mean(M[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Lexical task: V1')
-
-#M1 = np.mean(np.mean(X22[:,:,good_interv,:],axis=0),axis=1)   
-#M2 = np.mean(np.mean(X22[:,:,poor_interv,:],axis=0),axis=1)
-#plt.subplot(3, 2, 3)
-#plt.hold(True)
-#
-#plt.plot(times, np.mean(M1[:,[0]],axis=1),'--',color=c_table[5])
-#yerr = np.std(np.mean(M1[:,[0]],axis=1)) / np.sqrt(len(good_interv))
-#plt.fill_between(times, np.mean(M1[:,[0]],axis=1)-yerr, np.mean(M1[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-#
-#plt.plot(times, np.mean(M1[:,[1]],axis=1),'--',color=c_table[3])
-#yerr = np.std(np.mean(M1[:,[1]],axis=1)) / np.sqrt(len(good_interv))
-#plt.fill_between(times, np.mean(M1[:,[1]],axis=1)-yerr, np.mean(M1[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-#
-#plt.plot(times, np.mean(M1[:,[3]],axis=1),'--',color=c_table[1])
-#yerr = np.std(np.mean(M1[:,[3]],axis=1)) / np.sqrt(len(good_interv))
-#plt.fill_between(times, np.mean(M1[:,[3]],axis=1)-yerr, np.mean(M1[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-#plt.grid(b=True)
-#plt.ylim([0, 4])
-#plt.title('Dot task (GR): V1')
-#
-#plt.subplot(3, 2, 4)
-#plt.hold(True)
-#
-#plt.plot(times, np.mean(M1[:,[5]],axis=1),'-',color=c_table[5])
-#yerr = np.std(np.mean(M1[:,[5]],axis=1)) / np.sqrt(len(good_interv))
-#plt.fill_between(times, np.mean(M1[:,[5]],axis=1)-yerr, np.mean(M1[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-#
-#plt.plot(times, np.mean(M1[:,[6]],axis=1),'-',color=c_table[3])
-#yerr = np.std(np.mean(M1[:,[6]],axis=1)) / np.sqrt(len(good_interv))
-#plt.fill_between(times, np.mean(M1[:,[6]],axis=1)-yerr, np.mean(M1[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-#
-#plt.plot(times, np.mean(M1[:,[8]],axis=1),'-',color=c_table[1])
-#yerr = np.std(np.mean(M1[:,[8]],axis=1)) / np.sqrt(len(good_interv))
-#plt.fill_between(times, np.mean(M1[:,[8]],axis=1)-yerr, np.mean(M1[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-#plt.grid(b=True)
-#plt.ylim([0, 4])
-#plt.title('Lexical task (GR): V1')
-#
-#plt.subplot(3, 2, 5)
-#plt.hold(True)
-#
-#plt.plot(times, np.mean(M2[:,[0]],axis=1),'--',color=c_table[5])
-#yerr = np.std(np.mean(M2[:,[0]],axis=1)) / np.sqrt(len(poor_interv))
-#plt.fill_between(times, np.mean(M2[:,[0]],axis=1)-yerr, np.mean(M2[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-#
-#plt.plot(times, np.mean(M2[:,[1]],axis=1),'--',color=c_table[3])
-#yerr = np.std(np.mean(M2[:,[1]],axis=1)) / np.sqrt(len(poor_interv))
-#plt.fill_between(times, np.mean(M2[:,[1]],axis=1)-yerr, np.mean(M2[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-#
-#plt.plot(times, np.mean(M2[:,[3]],axis=1),'--',color=c_table[1])
-#yerr = np.std(np.mean(M2[:,[3]],axis=1)) / np.sqrt(len(poor_interv))
-#plt.fill_between(times, np.mean(M2[:,[3]],axis=1)-yerr, np.mean(M2[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-#plt.grid(b=True)
-#plt.ylim([0, 4])
-#plt.title('Dot task (PR): V1')
-#
-#plt.subplot(3, 2, 6)
-#plt.hold(True)
-#
-#plt.plot(times, np.mean(M2[:,[5]],axis=1),'-',color=c_table[5])
-#yerr = np.std(np.mean(M2[:,[5]],axis=1)) / np.sqrt(len(poor_interv))
-#plt.fill_between(times, np.mean(M2[:,[5]],axis=1)-yerr, np.mean(M2[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-#
-#plt.plot(times, np.mean(M2[:,[6]],axis=1),'-',color=c_table[3])
-#yerr = np.std(np.mean(M2[:,[6]],axis=1)) / np.sqrt(len(poor_interv))
-#plt.fill_between(times, np.mean(M2[:,[6]],axis=1)-yerr, np.mean(M2[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-#
-#plt.plot(times, np.mean(M2[:,[8]],axis=1),'-',color=c_table[1])
-#yerr = np.std(np.mean(M2[:,[8]],axis=1)) / np.sqrt(len(poor_interv))
-#plt.fill_between(times, np.mean(M2[:,[8]],axis=1)-yerr, np.mean(M2[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-#plt.grid(b=True)
-#plt.ylim([0, 4])
-#plt.title('Lexical task (PR): V1')
-
-""" Plot individual V1 responses """
-for iSub in np.arange(0,len(m3)):
-    plt.figure(100+iSub)
-    plt.clf()
-    plt.subplot(1,2,1)
-    plt.hold(True)
-    plt.plot(times, np.mean(X2[v1_vertices,:,m3[iSub],0],axis=0), '--', color=c_table[5])
-    plt.plot(times, np.mean(X2[v1_vertices,:,m3[iSub],1],axis=0), '--', color=c_table[3])
-    plt.plot(times, np.mean(X2[v1_vertices,:,m3[iSub],3],axis=0), '--', color=c_table[1])
-    plt.plot([0.1, 0.1],[0, 8],'-',color='k')
-    plt.title(subs2[m3[iSub]])
-    plt.subplot(1,2,2)
-    plt.hold(True)
-    plt.plot(times, np.mean(X2[v1_vertices,:,m3[iSub],5],axis=0), '-', color=c_table[5])
-    plt.plot(times, np.mean(X2[v1_vertices,:,m3[iSub],6],axis=0), '-', color=c_table[3])
-    plt.plot(times, np.mean(X2[v1_vertices,:,m3[iSub],8],axis=0), '-', color=c_table[1])
-    plt.plot([0.1, 0.1],[0, 8],'-',color='k')
-    plt.title(subs2[m3[iSub]])
-    
-#%%
-""" Good readers """
-plt.figure(30)
-plt.clf()
-
-X22 = X2[ventral_vertices,:,:,:]
-M1 = np.mean(np.mean(X2[:,:,good_interv,:],axis=0),axis=1)   
-
-plt.subplot(3, 2, 1)
+plt.subplot(2,3,4)
 plt.hold(True)
 
-plt.plot(times, np.mean(M1[:,[0]],axis=1),'--',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[0]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[0]],axis=1)-yerr, np.mean(M1[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,0],'-',color=c_table[5],label='High contrast')
+plt.fill_between(times, M[:,0]-errM[:,0], M[:,0]+errM[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
 
-plt.plot(times, np.mean(M1[:,[1]],axis=1),'--',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[1]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[1]],axis=1)-yerr, np.mean(M1[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,2],'-',color=c_table[7],label='Low contrast')
+plt.fill_between(times, M[:,2]-errM[:,2], M[:,2]+errM[:,2], facecolor=c_table[7], alpha=0.2, edgecolor='none')
 
-plt.plot(times, np.mean(M1[:,[3]],axis=1),'--',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[3]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[3]],axis=1)-yerr, np.mean(M1[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
 plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Dot task (GR): Ventral')
-
-plt.subplot(3, 2, 2)
-plt.hold(True)
-
-plt.plot(times, np.mean(M1[:,[5]],axis=1),'-',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[5]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[5]],axis=1)-yerr, np.mean(M1[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[6]],axis=1),'-',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[6]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[6]],axis=1)-yerr, np.mean(M1[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[8]],axis=1),'-',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[8]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[8]],axis=1)-yerr, np.mean(M1[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Lexical task (GR): Ventral')
-
-X22 = X2[broca_vertices,:,:,:]
-M1 = np.mean(np.mean(X22[:,:,good_interv,:],axis=0),axis=1)
-
-plt.subplot(3, 2, 3)
-plt.hold(True)
-
-plt.plot(times, np.mean(M1[:,[0]],axis=1),'--',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[0]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[0]],axis=1)-yerr, np.mean(M1[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[1]],axis=1),'--',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[1]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[1]],axis=1)-yerr, np.mean(M1[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[3]],axis=1),'--',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[3]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[3]],axis=1)-yerr, np.mean(M1[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Dot task (GR): Frontal')
-
-plt.subplot(3, 2, 4)
-plt.hold(True)
-
-plt.plot(times, np.mean(M1[:,[5]],axis=1),'-',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[5]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[5]],axis=1)-yerr, np.mean(M1[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[6]],axis=1),'-',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[6]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[6]],axis=1)-yerr, np.mean(M1[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[8]],axis=1),'-',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[8]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[8]],axis=1)-yerr, np.mean(M1[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Lexical task (GR): Frontal')
-
-X22 = X2[w_vertices,:,:,:]
-M1 = np.mean(np.mean(X22[:,:,good_interv,:],axis=0),axis=1)   
-
-plt.subplot(3, 2, 5)
-plt.hold(True)
-
-plt.plot(times, np.mean(M1[:,[0]],axis=1),'--',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[0]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[0]],axis=1)-yerr, np.mean(M1[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[1]],axis=1),'--',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[1]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[1]],axis=1)-yerr, np.mean(M1[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[3]],axis=1),'--',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[3]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[3]],axis=1)-yerr, np.mean(M1[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Dot task (GR): Temporal')
-
-plt.subplot(3, 2, 6)
-plt.hold(True)
-
-plt.plot(times, np.mean(M1[:,[5]],axis=1),'-',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[5]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[5]],axis=1)-yerr, np.mean(M1[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[6]],axis=1),'-',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[6]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[6]],axis=1)-yerr, np.mean(M1[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[8]],axis=1),'-',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[8]],axis=1)) / np.sqrt(len(good_interv))
-plt.fill_between(times, np.mean(M1[:,[8]],axis=1)-yerr, np.mean(M1[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Lexical task (GR): Temporal')
+plt.ylim([-1,3])
+plt.legend()
 
 #%%
-""" Poor readers """
-plt.figure(40)
+""" Dot task: All subjects """
+plt.figure(2)
 plt.clf()
 
-X22 = X2[ventral_vertices,:,:,:]
-M1 = np.mean(np.mean(X2[:,:,poor_interv,:],axis=0),axis=1)   
+X11 = X2[ventral_vertices,:,:,:]
+M = np.mean(np.mean(X11[:,:,all_subject,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[:,:,all_subject,:],axis=0),axis=1) / np.sqrt(len(all_subject))
 
-plt.subplot(3, 2, 1)
+plt.subplot(1,3,1)
 plt.hold(True)
 
-plt.plot(times, np.mean(M1[:,[0]],axis=1),'--',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[0]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[0]],axis=1)-yerr, np.mean(M1[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,5],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,0]-errM[:,0], M[:,0]+errM[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
 
-plt.plot(times, np.mean(M1[:,[1]],axis=1),'--',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[1]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[1]],axis=1)-yerr, np.mean(M1[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,6],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,1]-errM[:,1], M[:,1]+errM[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
 
-plt.plot(times, np.mean(M1[:,[3]],axis=1),'--',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[3]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[3]],axis=1)-yerr, np.mean(M1[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,8],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,3]-errM[:,3], M[:,3]+errM[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
 plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Dot task (PR): Ventral')
+plt.ylim([-1, 3])
+plt.title('Dot task: VWFA')
 
-plt.subplot(3, 2, 2)
+X11 = X2[broca_vertices,:,:,:]
+M = np.mean(np.mean(X11[:,:,all_subject,:],axis=0),axis=1)
+
+errM = np.std(np.mean(X11[:,:,all_subject,:],axis=0),axis=1) / np.sqrt(len(all_subject))
+
+plt.subplot(1,3,2)
 plt.hold(True)
 
-plt.plot(times, np.mean(M1[:,[5]],axis=1),'-',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[5]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[5]],axis=1)-yerr, np.mean(M1[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,0],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,0]-errM[:,0], M[:,0]+errM[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
 
-plt.plot(times, np.mean(M1[:,[6]],axis=1),'-',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[6]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[6]],axis=1)-yerr, np.mean(M1[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,1]-errM[:,1], M[:,1]+errM[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
 
-plt.plot(times, np.mean(M1[:,[8]],axis=1),'-',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[8]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[8]],axis=1)-yerr, np.mean(M1[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,3]-errM[:,3], M[:,3]+errM[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
 plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Lexical task (PR): Ventral')
+plt.ylim([-1, 3])
+plt.title('Dot task: Frontal')
 
-X22 = X2[broca_vertices,:,:,:]
-M1 = np.mean(np.mean(X22[:,:,poor_interv,:],axis=0),axis=1)
+X11 = X2[w_vertices,:,:,:]
+M = np.mean(np.mean(X11[:,:,all_subject,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[:,:,all_subject,:],axis=0),axis=1) / np.sqrt(len(all_subject))
 
-plt.subplot(3, 2, 3)
+plt.subplot(1,3,3)
 plt.hold(True)
 
-plt.plot(times, np.mean(M1[:,[0]],axis=1),'--',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[0]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[0]],axis=1)-yerr, np.mean(M1[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,0],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,0]-errM[:,0], M[:,0]+errM[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
 
-plt.plot(times, np.mean(M1[:,[1]],axis=1),'--',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[1]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[1]],axis=1)-yerr, np.mean(M1[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,1]-errM[:,1], M[:,1]+errM[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
 
-plt.plot(times, np.mean(M1[:,[3]],axis=1),'--',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[3]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[3]],axis=1)-yerr, np.mean(M1[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,3]-errM[:,3], M[:,3]+errM[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
 plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Dot task (PR): Frontal')
+plt.ylim([-1, 3])
+plt.title('Dot task: STS')
 
-plt.subplot(3, 2, 4)
-plt.hold(True)
-
-plt.plot(times, np.mean(M1[:,[5]],axis=1),'-',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[5]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[5]],axis=1)-yerr, np.mean(M1[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[6]],axis=1),'-',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[6]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[6]],axis=1)-yerr, np.mean(M1[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[8]],axis=1),'-',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[8]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[8]],axis=1)-yerr, np.mean(M1[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Lexical task (PR): Frontal')
-
-X22 = X2[w_vertices,:,:,:]
-M1 = np.mean(np.mean(X22[:,:,poor_interv,:],axis=0),axis=1)   
-
-plt.subplot(3, 2, 5)
-plt.hold(True)
-
-plt.plot(times, np.mean(M1[:,[0]],axis=1),'--',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[0]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[0]],axis=1)-yerr, np.mean(M1[:,[0]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[1]],axis=1),'--',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[1]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[1]],axis=1)-yerr, np.mean(M1[:,[1]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[3]],axis=1),'--',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[3]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[3]],axis=1)-yerr, np.mean(M1[:,[3]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Dot task (PR): Temporal')
-
-plt.subplot(3, 2, 6)
-plt.hold(True)
-
-plt.plot(times, np.mean(M1[:,[5]],axis=1),'-',color=c_table[5])
-yerr = np.std(np.mean(M1[:,[5]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[5]],axis=1)-yerr, np.mean(M1[:,[5]],axis=1)+yerr, facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[6]],axis=1),'-',color=c_table[3])
-yerr = np.std(np.mean(M1[:,[6]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[6]],axis=1)-yerr, np.mean(M1[:,[6]],axis=1)+yerr, facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, np.mean(M1[:,[8]],axis=1),'-',color=c_table[1])
-yerr = np.std(np.mean(M1[:,[8]],axis=1)) / np.sqrt(len(poor_interv))
-plt.fill_between(times, np.mean(M1[:,[8]],axis=1)-yerr, np.mean(M1[:,[8]],axis=1)+yerr, facecolor=c_table[1], alpha=0.2, edgecolor='none')
-plt.grid(b=True)
-plt.ylim([0, 4])
-plt.title('Lexical task (PR): Temporal')
+#for iSub in np.arange(0,len(all_subject)):
+#    plt.figure(100+iSub)
+#    plt.clf()
+#    plt.subplot(1,2,1)
+#    plt.hold(True)
+#    plt.plot(times, np.mean(X2[ventral_vertices,:,all_subject[iSub],0],axis=0), '-', color=c_table[5])
+#    plt.plot(times, np.mean(X2[ventral_vertices,:,all_subject[iSub],1],axis=0), '-', color=c_table[3])
+#    plt.plot(times, np.mean(X2[ventral_vertices,:,all_subject[iSub],3],axis=0), '-', color=c_table[1])
+##    plt.plot([0.1, 0.1],[0, 8],'-',color='k')
+#    plt.title(subs2[all_subject[iSub]])
+#    plt.subplot(1,2,2)
+#    plt.hold(True)
+#    plt.plot(times, np.mean(X2[ventral_vertices,:,all_subject[iSub],5],axis=0), '-', color=c_table[5])
+#    plt.plot(times, np.mean(X2[ventral_vertices,:,all_subject[iSub],6],axis=0), '-', color=c_table[3])
+#    plt.plot(times, np.mean(X2[ventral_vertices,:,all_subject[iSub],8],axis=0), '-', color=c_table[1])
+##    plt.plot([0.1, 0.1],[0, 8],'-',color='k')
+#    plt.title(subs2[all_subject[iSub]])
