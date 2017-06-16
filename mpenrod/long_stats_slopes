@@ -22,7 +22,8 @@
 #
 # Reporting: freesurfer@nmr.mgh.harvard.edu
 #
-#
+# BUG FIXES BY: MARK PENROD
+# DATE: 6/16/2017
 
 import warnings
 warnings.filterwarnings('ignore', '.*negative int.*')
