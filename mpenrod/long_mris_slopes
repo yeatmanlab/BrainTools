@@ -22,8 +22,10 @@
 #
 # Reporting: freesurfer@nmr.mgh.harvard.edu
 #
+# BUG FIXES DONE BY: MARK PENROD
+# DATE: 6/16/2017
 #
-
+#
 import warnings
 warnings.filterwarnings('ignore', '.*negative int.*')
 import os
@@ -34,6 +36,7 @@ import logging
 import subprocess
 import tempfile
 import shutil
+from sys import platform as _platform
 from subject_info import *
 from LongQdecTable import *
 
@@ -169,21 +172,21 @@ Choose one or more of the following options:
 
 * 'do-rate' for rate, this will compute the slope of a linear fit across
      time within each subject. Depending on the time variable this will
-     yield the thinning in mm/time (if the time variable is measured in
-     years, such as age: mm/year).
+     yield the thickening in mm/time_unit (if the time variable is measured
+     in years, such as age: mm/year). Negative values mean thinning!
 * 'do-pc1' is the percent change, this is the rate normalized by the
-     measure at the first time point times 100, e.g. percent thinning per
+     measure at the first time point times 100, e.g. percent thickening per
      year.
 * 'do-pc1fit' is the percent change with respect to the value at
      tp1, evalutated from the linear fit. This is the rate normalized by the
      estimated measure at the first time point times 100, e.g. percent
-     thinning per year. Using the linear fit instead of the measure at time
+     thickening per year. Using the linear fit instead of the measure at time
      point 1 directly reduces noise as tp1 data is more noisy than the fit,
      therefore we recommend pc1fit over pc1.
 * 'do-spc' for symmetrized percent change. Here we normalize by the temporal
      average instead of taking it from the first time point. The average
      is computed from the linear fit at the middle of the time interval.
-     This is a symmetric 'percent thinning per year' and more robust, as
+     This is a symmetric 'percent thickening per year' and more robust, as
      TP1 can be an outlier.
 * 'do-avg' for output of the temporal average (linear fit evaluated at mid
      time).
@@ -333,7 +336,7 @@ def options_parse():
     Command Line Options Parser for long_mris_slopes
     initiate the option parser and return the parsed object
     """
-    parser = optparse.OptionParser(version='$Id: long_mris_slopes,v 1.38 2012/05/30 22:57:25 mreuter Exp $', usage=HELPTEXT)
+    parser = optparse.OptionParser(version='$Id: long_mris_slopes,v 1.42 2015/12/08 19:06:38 zkaufman Exp $', usage=HELPTEXT)
     
     # help text
 #    h_fsgd = '(REQUIRED) fsdg file specifying the subjects and time points'
@@ -349,7 +352,7 @@ def options_parse():
     h_dospc     = 'compute and output the sym. pct. change (w.r.t. temp. average) (recommended)'
     h_dostack   = 'save the stacked within subject file (time series)'
     h_dolabel   = 'compute and output intersected cortex label (recommended)'
-    h_resid     = 'residual tp (pass 1 for tp1) to export (default no export)'
+    h_resid     = 'residual tp (pass 1 for tp1 etc., pass 0 for average) to export (default no export)'
 
     h_name_avg  = 'filename (without hemi ?h) to store temporal average in <template>/surf/<hemi>.<NAME_AVG>.mgh (default: long.<meas>-avg)'
     h_name_rate = 'filename (without hemi ?h) to store rate in <template>/surf/<hemi>.<NAME_RATE>.mgh (default: long.<meas>-rate)'
@@ -444,7 +447,7 @@ def options_parse():
     if options.qdec is None:
 #        print 'ERROR: Specify --fsgd or --qedc'
         parser.print_help()
-        print '\nERROR: Specify --qedc (and other required arguments)\n'
+        print ('\nERROR: Specify --qedc (and other required arguments)\n')
         sys.exit(1)
 
 #    if options.fsgd is not None and options.qdec is not None:
@@ -452,81 +455,73 @@ def options_parse():
 #        sys.exit(1)
         
     if options.hemi is None:
-        print 'ERROR: Specify --hemi (e.g. \'lh\')\n'
+        print ('ERROR: Specify --hemi (e.g. \'lh\')\n')
         sys.exit(1)
  
-    if options.do_avg and options.name_avg is None:
+    if options.name_avg is None:
         options.name_avg = 'long.'+options.meas+'-avg'
-#    elif options.name_avg is not None:
-#        options.do_avg = True
-    if options.do_rate and options.name_rate is None:
+    if options.name_rate is None:
         options.name_rate = 'long.'+options.meas+'-rate'
-#    elif options.name_rate is not None:
-#        options.do_rate = True
-    if options.do_pc1fit and options.name_pc1fit is None:
+    if options.name_pc1fit is None:
         options.name_pc1fit = 'long.'+options.meas+'-pc1fit'
-    if options.do_pc1 and options.name_pc1 is None:
+    if options.name_pc1 is None:
         options.name_pc1 = 'long.'+options.meas+'-pc1'
-#    elif options.name_pc1 is not None:
-#        options.do_pc1 = True
-    if options.do_spc and options.name_spc is None:
+    if options.name_spc is None:
         options.name_spc = 'long.'+options.meas+'-spc'
-#    elif options.name_spc is not None:
-#        options.do_spc = True
-    if options.do_stack and options.out_stack is None:
+    if options.out_stack is None:
         options.out_stack = 'long.'+options.meas+'-stack'
-#    elif options.out_stack is not None:
-#        options.do_stack = True
     if options.resid > 0 and options.name_resid is None:
         options.name_resid = 'long.'+options.meas+'-resid'+str(options.resid)
-    if options.resid < 1 and options.name_resid is not None:
-        print 'ERROR: Please also specify the tp number to export residuals (starting at 1) with --resid !\n'
+    if options.resid == 0 and options.name_resid is None:
+        options.name_resid = 'long.'+options.meas+'-resid-mean'
+    if options.resid < 0 and options.name_resid is not None:
+        print ('ERROR: Please also specify the tp number to export residuals (starting at 1, or 0 for mean) with --resid !\n')
         sys.exit(1)
         
 
-    do_analysis = options.do_avg or options.do_pc1fit or options.do_pc1 or options.do_spc or options.do_rate or (options.resid > 0)
+    do_analysis = options.do_avg or options.do_pc1fit or options.do_pc1 or options.do_spc or options.do_rate or (options.resid >= 0)
     if options.meas is None and do_analysis:
-        print 'ERROR: Specify --meas (e.g. \'thickness\')\n'
+        print ('ERROR: Specify --meas (e.g. \'thickness\')\n')
         sys.exit(1)
     
     if options.sd is None:
-        print 'ERROR: Specify the subject dir with --sd <fullpath>\n'
+        print ('ERROR: Specify the subject dir with --sd <fullpath>\n')
         sys.exit(1)   
     
     if options.meas is None: options.meas = "label" #needed later to create tmp dir
 
     do_stacking = options.stack_spc is not None or options.stack_pc1fit is not None or options.stack_pc1 is not None or options.stack_rate is not None or options.stack_avg is not None
     if do_stacking and options.qcache is None:
-        print 'ERROR: --stack-??? requires target subject (e.g. fsaverage) as specified with --qcache\n'
+        print ('ERROR: --stack-??? requires target subject (e.g. fsaverage) as specified with --qcache\n')
         sys.exit(1)
 
     # if we run analysis, but no label is created or passed
     if do_analysis and not options.do_label and options.in_label is None:
-        print 'ERROR: either create intersected labels with --do-label or specify input label names with --in-label\n'
+        print ('ERROR: either create intersected labels with --do-label or specify input label names with --in-label\n')
         sys.exit(1)
 
     # if labels should be created and are also passed:
     if options.do_label and options.in_label is not None:
-        print 'ERROR: either create intersected labels with --do-label or specify input label names with --in-label\n'
+        print ('ERROR: either create intersected labels with --do-label or specify input label names with --in-label\n')
 
     # switch on do_label if output is specified but no input
     if options.isec_labels is not None and options.in_label is None:
         options.do_label = True 
            
     if not do_analysis and not options.do_label and not do_stacking and options.isec_labels is None:
-        print 'ERROR: Analysis type should be specified, use one or more of --do-avg, --do-rate, --do-pc1, --do-spc, --do-label, --stack-??? or --isec-labels\n'
+        print ('ERROR: Analysis type should be specified, use one or more of --do-avg, --do-rate, --do-pc1, --do-spc, --do-label, --stack-??? or --isec-labels\n')
         sys.exit(1)
     
     if options.fwhm is not None and options.nosmooth:
-        print 'ERROR: either specify --fwhm <int> or --nosmooth\n'
+        print ('ERROR: either specify --fwhm <int> or --nosmooth\n')
         sys.exit(1)
         
     if (options.name_pc1fit is not None or options.name_pc1 is not None or options.name_spc is not None) and options.fwhm is None and not options.nosmooth and options.qcache is None:
-        print 'ERROR: when computing SPC or PC1 (pct. change) you should specify smoothing --fwhm <int>. If you really do not want to smooth pass --nosmooth\n'
+        print ('ERROR: when computing SPC or PC1 (pct. change) you should specify smoothing --fwhm <int>. If you really do not want to smooth pass --nosmooth\n')
         sys.exit(1)
     
     if options.isec_labels is not None and options.qcache is None:
-        print 'ERROR: --isec-labels requires target subject (e.g. fsaverage) as specified with --qcache\n'
+        print ('ERROR: --isec-labels requires target subject (e.g. fsaverage) as specified with --qcache\n')
         sys.exit(1)
     
     return options
@@ -553,13 +548,13 @@ def run_cmd(cmd,err_msg):
     """
     execute the comand
     """
-    print cmd+'\n'
+    print (cmd+'\n')
     args = shlex.split(cmd)
     retcode = subprocess.call(args)
     if retcode != 0 :
-        print 'ERROR '+str(retcode)+' : '+err_msg
+        print ('ERROR '+str(retcode)+' : '+err_msg)
         sys.exit(1)
-    print '\n'
+    print ('\n')
 
 def intersect_labels(labellist,outlabel):
     # will intersect the labels in labelist (full paths)
@@ -571,7 +566,7 @@ def intersect_labels(labellist,outlabel):
     first = True
     for label in labellist:
         if not os.path.exists(label):
-            print 'ERROR: '+str(label)+' does not exist!'
+            print ('ERROR: '+str(label)+' does not exist!')
             sys.exit(1)
         
         if first:
@@ -582,16 +577,16 @@ def intersect_labels(labellist,outlabel):
             
         run_cmd(cmd,'mris_label_calc intersect did not work?')
         if not os.path.exists(outlabel):
-            print 'ERROR: Cannot write '+str(outlabel)+' (write permissions?)!'
+            print ('ERROR: Cannot write '+str(outlabel)+' (write permissions?)!')
             sys.exit(1)
 
 
 def stack_map(srcid,trgid,src_type,trg_type,inlist,outlist,tmpdir,hemi,jac):
     if len(inlist) != len(outlist):
-        print 'ERROR: stack_map: in and outlist have different lengths!'
+        print ('ERROR: stack_map: in and outlist have different lengths!')
         sys.exit(1)        
     if len(inlist) ==0:
-        print 'ERROR: stack_map: inlist should have at least one element!'
+        print ('ERROR: stack_map: inlist should have at least one element!')
         sys.exit(1)      
         
     # jac is for mapping area and volume maps      
@@ -632,7 +627,7 @@ def stack_map(srcid,trgid,src_type,trg_type,inlist,outlist,tmpdir,hemi,jac):
         istr= '%04d' % i
         tmpfn=os.path.join(tmpdir,hemi+'.tmp'+istr+'.mgh')
         if not os.path.exists(tmpfn):
-            print 'ERROR: '+str(tmpfn)+' does not exist!'
+            print ('ERROR: '+str(tmpfn)+' does not exist!')
             sys.exit(1)        
         cmd = 'mv '+tmpfn+' '+fn
         run_cmd(cmd,'mv '+tmpfn+' '+fn+'   did not work?')
@@ -658,18 +653,18 @@ if __name__=="__main__":
 #            print 'ERROR: fsgd file '+str(e)+' not found!'
 #            sys.exit(1)
 #    else:
-    print 'Parsing the qdec table: '+options.qdec
+    print ('Parsing the qdec table: '+options.qdec)
     try:
         slopelogger.debug('Processing file ' + options.qdec)
         qdectable = LongQdecTable(options.qdec)
         #subjects_tp_map, variables, subjectdir = qdecparse.parse()
-    except BadFileError, e:
-        print 'ERROR: qdec table '+options.qdec+' not found or empty?'
+    except BadFileError as e:
+        print ('ERROR: qdec table '+options.qdec+' not found or empty?')
         sys.exit(1)
     
     # make sure we have a long table containing the bases
     if qdectable.cross:
-        print '\nERROR: qdec table '+options.qdec+' is cross sectional\n       (2nd column not \'fsid-base\')!\n'
+        print ('\nERROR: qdec table '+options.qdec+' is cross sectional\n       (2nd column not \'fsid-base\')!\n')
         sys.exit(1)
         
     # use the first column by default for time variable
@@ -680,9 +675,9 @@ if __name__=="__main__":
     if len(variables) < 1:
         varidx = -1
         if not options.generic_time:
-            print '\nERROR: qdec table '+options.qdec+' needs 3rd column with time value,'
-            print '       e.g. age or time since baseline scan ...!\n'
-            print '       Or pass --generic-time assuming tps are ordered 1,2,3...\n'
+            print ('\nERROR: qdec table '+options.qdec+' needs 3rd column with time value,')
+            print ('       e.g. age or time since baseline scan ...!\n')
+            print ('       Or pass --generic-time assuming tps are ordered 1,2,3...\n')
             sys.exit(1)
         
     # if time variable is passed on command line, make sure it is part of variables
@@ -690,13 +685,13 @@ if __name__=="__main__":
         defaultvar = options.time
         # compute correct index (starting with 1, 0 is the tpID)
         foundidx = False
-        for index in (i for i in xrange(len(variables)) if variables[i].upper()==defaultvar.upper()):
-            varidx = index
-            foundidx = True
-            #print 'found: '+str(varidx)+' '+variables[varidx]
-            break
+        for index in (i for i in (range(len(variables))) if variables[i].upper()==defaultvar.upper()):
+                varidx = index
+                foundidx = True
+                #print 'found: '+str(varidx)+' '+variables[varidx]
+                break
         if not foundidx:
-            print '\nERROR: DefaultVariable \''+str(defaultvar)+'\' not found in variables: '+str(variables)+'\n'
+            print ('\nERROR: DefaultVariable \''+str(defaultvar)+'\' not found in variables: '+str(variables)+'\n')
             sys.exit(1)
         varidx = varidx +1;
         
@@ -709,25 +704,28 @@ if __name__=="__main__":
     if subjectsdir is None:
         subjectsdir = qdectable.subjectsdir
     if subjectsdir is None:
-        print'\nERROR: no subjects dir specified, use --sd <fullpath>'
+        print('\nERROR: no subjects dir specified, use --sd <fullpath>')
         sys.exit(1)
-    print '\nWorking in SUBJECTS_DIR: '+subjectsdir+'\n'
+    print ('\nWorking in SUBJECTS_DIR: '+subjectsdir+'\n')
     os.environ['SUBJECTS_DIR'] =  subjectsdir
+    
+    if _platform == "darwin":
+        os.environ['DYLD_LIBRARY_PATH'] = os.path.join(os.getenv('FREESURFER_HOME'), 'lib/gcc/lib')
     
     if options.qcache is not None:
         # check if qcache target exists
         qsdir = os.path.join(subjectsdir,options.qcache)
         if not os.path.exists(qsdir):
-            print 'ERROR: Qcache Target dir '+str(qsdir)+' not found!'
+            print ('ERROR: Qcache Target dir '+str(qsdir)+' not found!')
             sys.exit(1)
 
     hemis = [ options.hemi ]
     if hemis[0] == "both": hemis = [ "lh" , "rh" ]
 
     for hemi in hemis:
-        print
-        print 'Working on hemi: '+hemi
-        print
+        print ()
+        print ('Working on hemi: '+hemi)
+        print ()
        
     
         # process
@@ -740,12 +738,12 @@ if __name__=="__main__":
         tspc    = {}
         tresid  = {}
         for subjectid, tplist in qdectable.subjects_tp_map.items():
-            print '\nSubject-Template: '+subjectid
+            print ('\nSubject-Template: '+subjectid)
             
             # check if basedir exists
             basedir = os.path.join(subjectsdir,subjectid)
             if not os.path.exists(basedir):
-                print '\nERROR: Template dir '+str(basedir)+' does not exist!\n '
+                print ('\nERROR: Template dir '+str(basedir)+' does not exist!\n ')
                 sys.exit(1)
 
             basesurfdir=os.path.join(basedir,'surf')
@@ -764,15 +762,15 @@ if __name__=="__main__":
                 times = [float(x) for x in range(1,len(tplist)+1)]
             num   = len(times)
             meant = sum(times) / num
-            print '\n\nINFO: '+str(num)+' TPs in '+subjectid+' , mean age: '+str(meant)+'\n'
+            print ('\n\nINFO: '+str(num)+' TPs in '+subjectid+' , mean age: '+str(meant)+'\n')
             #print str(times)
             #sys.exit(0)
             
             # intersect cortex ?
             label=""
             if options.do_label: 
-                print "\n==============================================================================="
-                print "SUBJECT "+subjectid+"  Intersecting Within-Subject Cortex Label\n"
+                print  ("\n===============================================================================")
+                print ("SUBJECT "+subjectid+"  Intersecting Within-Subject Cortex Label\n")
                 label = hemi+'.'+options.out_label+'.label'
                 label = os.path.join(basedir,'label',label)
                 llist = [ os.path.join(subjectsdir,entry,'label',hemi+'.cortex.label') for entry in tpids]
@@ -781,8 +779,8 @@ if __name__=="__main__":
                 
                 # map label of this subject to common qcache target:
                 if options.qcache is not None:
-                    print "\n==============================================================================="
-                    print "SUBJECT "+subjectid+"  mapping label to QCache\n"
+                    print ("\n===============================================================================")
+                    print ("SUBJECT "+subjectid+"  mapping label to QCache\n")
                     label = hemi+'.'+options.out_label+'.label'
                     label = os.path.join(basedir,'label',label)
                     outlabel = hemi+'.'+options.out_label+'.'+options.qcache+'.label'
@@ -801,7 +799,7 @@ if __name__=="__main__":
                         label = hemi+'.'+options.in_label+'.label'
                         label = os.path.join(basedir,'label',label)
                         if not os.path.exists(label):
-                            print '\nERROR: cannot find '+options.in_label+' or '+label+'\n'
+                            print ('\nERROR: cannot find '+options.in_label+' or '+label+'\n')
                             sys.exit(1)
                 tlabels.append(label)
 
@@ -854,12 +852,12 @@ if __name__=="__main__":
                         tavg[fwhm].append(outtname)
             
             # if no subject base processing, continue:
-            if not (options.do_pc1fit or options.do_pc1 or options.do_avg or options.do_spc or options.do_rate or options.resid > 0):
+            if not (options.do_pc1fit or options.do_pc1 or options.do_avg or options.do_spc or options.do_rate or options.resid >= 0):
                 continue #skip within subject processing and mapping to target
             
             # check if 2 or more time points
             if len(tplist) < 2 :
-                print 'ERROR: '+str(basedir)+' must have at least 2 time points!'
+                print ('ERROR: '+str(basedir)+' must have at least 2 time points!')
                 sys.exit(1)
             
             
@@ -871,14 +869,14 @@ if __name__=="__main__":
             prefix = './tmp-'+subjectid+'_'+hemi+'_'+options.meas+'_'
             dirname = tempfile.mkdtemp('',prefix,'')
             if not os.path.exists(dirname):
-                print 'ERROR: tmp dir '+str(dirname)+' cannot be created (write permissions?)!'
+                print ('ERROR: tmp dir '+str(dirname)+' cannot be created (write permissions?)!')
                 sys.exit(1)
             
             # stack measure maps:
             meas_target = os.path.join(dirname,hemi+'.long.'+options.meas+'-stack.mgh')
             if options.do_stack:
-                print "\n==============================================================================="
-                print "SUBJECT "+subjectid+"  Stacking Within-Subject Maps\n"
+                print ("\n===============================================================================")
+                print ("SUBJECT "+subjectid+"  Stacking Within-Subject Maps\n")
                 meas_target = os.path.join(basesurfdir,hemi+'.'+options.out_stack)
                 if meas_target[-4:] != '.mgh':
                     meas_target=meas_target+'.mgh'
@@ -926,11 +924,11 @@ if __name__=="__main__":
     #        else: # more than 2 time points, run GLM
             
             if 1==1:
-                print "\n==============================================================================="
-                print "SUBJECT "+subjectid+"  Running Within-Subject GLM\n"
+                print ("\n===============================================================================")
+                print ("SUBJECT "+subjectid+"  Running Within-Subject GLM\n")
                 #write X-matrix (times):
                 x_target    = os.path.join(dirname,'X-long.mat')
-                print 'Writing '+x_target+' ...\n'
+                print ('Writing '+x_target+' ...\n')
                 if os.path.exists(x_target):
                     os.remove(x_target)
                 xfp = open(x_target, 'w')
@@ -944,7 +942,7 @@ if __name__=="__main__":
                 if num==2:
                     zerodof=" --allow-zero-dof "
                 saveeres=""
-                if options.resid > 0:
+                if options.resid >= 0:
                     saveeres=" --eres-save "   
                 labelpara=""
                 if label != "" :
@@ -960,7 +958,7 @@ if __name__=="__main__":
                 betam  = os.path.join(dirname,'betam.mgh')
                 outresid = "" 
                 if not os.path.exists(betafn):
-                    print 'ERROR: GLM results '+str(betafn)+' does not exist!'
+                    print ('ERROR: GLM results '+str(betafn)+' does not exist!')
                     sys.exit(1)
                 
                 # split beta
@@ -983,6 +981,12 @@ if __name__=="__main__":
                     cmd = 'mri_convert --frame '+str(options.resid - 1)+' '+eres+' '+outresid 
                     run_cmd(cmd,'mri_convert split residual frames '+str(options.resid)+' did not work?')      
                 
+                # get residuals if needed
+                if options.resid == 0:
+                    eres =  os.path.join(glmdir,'eres.mgh' )
+                    outresid = os.path.join(dirname,options.name_resid+'.mgh')
+                    cmd = 'mri_concat --abs --mean --i '+eres+' --o '+outresid 
+                    run_cmd(cmd,'mri_concat mean abs did not work?')
             
             # either of the cases:        
             
@@ -1002,8 +1006,8 @@ if __name__=="__main__":
                 residfwhm = ''
                 # Smooth data on subject level (before computations)
                 if fwhm > 0:
-                    print "\n==============================================================================="
-                    print "SUBJECT "+subjectid+"  Smoothing at "+str(fwhm)+"\n"
+                    print ("\n===============================================================================")
+                    print ("SUBJECT "+subjectid+"  Smoothing at "+str(fwhm)+"\n")
                     smooth = ' --fwhm '+str(fwhm)+' --smooth-only'
                     labelpara=""
                     if label != "" :
@@ -1021,7 +1025,7 @@ if __name__=="__main__":
                         tp1fwhm =  os.path.join(dirname,'tp1'+fwhmstr+'.mgh') 
                         cmd = 'mris_fwhm --hemi '+hemi+' --s '+tpids[0]+' --i '+measures[0]+labelpara+smooth+' --o '+tp1fwhm
                         run_cmd(cmd,'mris_fwhm smoothing tp1 did not work?')
-                    if options.resid > 0:
+                    if options.resid >= 0:
                         residfwhm =  os.path.join(dirname,'resid'+fwhmstr+'.mgh') 
                         cmd = 'mris_fwhm --hemi '+hemi+' --s '+subjectid+' --i '+outresid+labelpara+smooth+' --o '+residfwhm
                         run_cmd(cmd,'mris_fwhm smoothing resid did not work?')
@@ -1040,9 +1044,9 @@ if __name__=="__main__":
             
                 # create ouput (depending on type)
                 
-                if options.resid > 0:
-                    print "\n==============================================================================="
-                    print "SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing residuals tp "+str(options.resid)+"\n"
+                if options.resid >= 0:
+                    print ("\n===============================================================================")
+                    print ("SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing residuals tp "+str(options.resid)+"\n")
                     outname = os.path.join(basesurfdir,hemi+'.'+options.name_resid+fwhmstr+'.mgh')
                     # copy (potentially smoothed) residual map to base (final within-subject output)
                     cmd = 'cp '+residfwhm+' '+outname
@@ -1053,8 +1057,8 @@ if __name__=="__main__":
                         alltout.append(outtname)
                         
                 if options.do_pc1fit:
-                    print "\n==============================================================================="
-                    print "SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing PC1FIT\n"
+                    print ("\n===============================================================================")
+                    print ("SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing PC1FIT\n")
                     outname = os.path.join(basesurfdir,hemi+'.'+options.name_pc1fit+fwhmstr+'.mgh')
                     # compute symmetrized pc1fit change:
                     cmd = 'mris_calc -o '+outname+' '+beta1fwhm+' div '+beta0fwhm
@@ -1067,8 +1071,8 @@ if __name__=="__main__":
                         alltout.append(outtname)
 
                 if options.do_spc:
-                    print "\n==============================================================================="
-                    print "SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing SPC\n"
+                    print ("\n===============================================================================")
+                    print ("SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing SPC\n")
                     outname = os.path.join(basesurfdir,hemi+'.'+options.name_spc+fwhmstr+'.mgh')
                     # compute symmetrized pct change:
                     cmd = 'mris_calc -o '+outname+' '+beta1fwhm+' div '+betamfwhm
@@ -1081,8 +1085,8 @@ if __name__=="__main__":
                         alltout.append(outtname)
 
                 if options.do_pc1:
-                    print "\n==============================================================================="
-                    print "SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing PC1\n"
+                    print ("\n===============================================================================")
+                    print ("SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing PC1\n")
                     outname = os.path.join(basesurfdir,hemi+'.'+options.name_pc1+fwhmstr+'.mgh')
                     # compute pct change:
                     cmd = 'mris_calc -o '+outname+' '+beta1fwhm+' div '+tp1fwhm
@@ -1095,8 +1099,8 @@ if __name__=="__main__":
                         alltout.append(outtname)
                 
                 if options.do_rate: 
-                    print "\n==============================================================================="
-                    print "SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing Rate\n"
+                    print ("\n===============================================================================")
+                    print ("SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing Rate\n")
                     outname = os.path.join(basesurfdir,hemi+'.'+options.name_rate+fwhmstr+'.mgh')
                     # mul 1 to remove everything outside the label:
                     cmd = 'mris_calc -o '+outname+' --label '+label+' '+beta1fwhm+' mul 1'
@@ -1107,8 +1111,8 @@ if __name__=="__main__":
                         alltout.append(outtname)
                 
                 if  options.do_avg:
-                    print "\n==============================================================================="
-                    print "SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing AVG\n"
+                    print ("\n===============================================================================")
+                    print ("SUBJECT "+subjectid+" fwhm "+str(fwhm)+"  computing AVG\n")
                     outname = os.path.join(basesurfdir,hemi+'.'+options.name_avg+fwhmstr+'.mgh')
                     # mul 1 to remove everything outside the label:
                     cmd = 'mris_calc -o '+outname+' --label '+label+' '+betamfwhm+' mul 1'
@@ -1126,8 +1130,8 @@ if __name__=="__main__":
             
                 # stack ALL measure files and map to template and unstack again:
                 if len(allout) > 0:
-                    print "\n==============================================================================="
-                    print "SUBJECT "+subjectid+"  mapping all measure files to QCache (as stack)\n"
+                    print ("\n===============================================================================")
+                    print ("SUBJECT "+subjectid+"  mapping all measure files to QCache (as stack)\n")
                     stack_map(subjectid,options.qcache,'mgh','mgh', allout , alltout ,dirname,hemi, options.jac)
                
                        
@@ -1135,9 +1139,9 @@ if __name__=="__main__":
             shutil.rmtree(dirname)
                         
             if len(allout) > 0:   
-                print 'You can look at the result with, e.g.:'
-                print '  tksurfer '+subjectid+' '+hemi+' pial -overlay '+allout[-1]
-                print
+                print ('You can look at the result with, e.g.:')
+                print ('  tksurfer '+subjectid+' '+hemi+' pial -overlay '+allout[-1])
+                print ()
                       
         # end iterate subjects    
         
@@ -1145,8 +1149,8 @@ if __name__=="__main__":
         if options.qcache is not None:
 
             if options.isec_labels is not None:
-                print "\n==============================================================================="
-                print "Intersecting all lables in template QCache\n"
+                print ("\n===============================================================================")
+                print ("Intersecting all lables in template QCache\n")
                 # intersect labels on common qcache target:
                 first=True
                 for label in tlabels:
@@ -1161,7 +1165,7 @@ if __name__=="__main__":
                 # erode a little
                 tpial = os.path.join(subjectsdir,options.qcache,"surf",hemi+'.pial')
                 if not os.path.exists(tpial):
-                    print 'ERROR: qtemplate pial '+str(tpial)+' does not exist!'
+                    print ('ERROR: qtemplate pial '+str(tpial)+' does not exist!')
                     sys.exit(1)
                 cmd="mris_label_calc erode 2 "+options.isec_labels+" "+tpial+" "+options.isec_labels
                 run_cmd(cmd,'mris_label_calc erode failed?')
@@ -1169,8 +1173,8 @@ if __name__=="__main__":
             
             # stack maps on qcache geometry if wanted:
             if options.stack_spc is not None or options.stack_pc1fit is not None or options.stack_pc1 is not None or options.stack_avg is not None or options.stack_rate is not None or options.stack_resid is not None:
-                print "\n==============================================================================="
-                print "Stacking all maps in template QCache\n"
+                print ("\n===============================================================================")
+                print ("Stacking all maps in template QCache\n")
             
                 fwhms = [ 0 ] 
                 if options.fwhm is None:
@@ -1230,4 +1234,3 @@ if __name__=="__main__":
     
     # always exit with 0 exit code
     sys.exit(0)
-
