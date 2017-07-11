@@ -35,36 +35,66 @@ for ss = 1:numel(subID)
         end
     end
 end
-processedSubs = {'NLR_105_BB_2', 'NLR_105_BB_3', 'NLR_105_BB_4', ...
-    'NLR_110_HH_2', 'NLR_110_HH_3', 'NLR_110_HH_4', 'NLR_132_WP_1', ...
-    'NLR_152_TC_2', 'NLR_152_TC_3', 'NLR_152_TC_4', 'NLR_152_TC_5', ...
-    'NLR_160_EK_1', 'NLR_160_EK_2', 'NLR_162_EF_1', 'NLR_163_LF_1', ...
-    'NLR_163_LF_2', 'NLR_163_LF_3', 'NLR_163_LF_4', 'NLR_180_ZD_3', ...
-    'NLR_180_ZD_4', 'NLR_208_LH_1', 'NLR_208_LH_2', 'NLR_211_LB_1', ...
-    'NLR_211_LB_2', 'NLR_211_LB_3', 'NLR_211_LB_4'};
-for ii = 1:numel(outsubIDs)
-    for jj = 1:numel(processedSubs)
-        if outsubIDs{ii} == processedSubs{jj}
-            outsubIDs{ii} = {};
-            filepaths{ii} = {};
-            ITKs{ii} = {};
-            break
-        end
-    end
-end
+
+% ignore this as it was only necessary when this script was written
+% processedSubs = {'NLR_105_BB_2', 'NLR_105_BB_3', 'NLR_105_BB_4', ...
+%     'NLR_110_HH_2', 'NLR_110_HH_3', 'NLR_110_HH_4', 'NLR_132_WP_1', ...
+%     'NLR_152_TC_2', 'NLR_152_TC_3', 'NLR_152_TC_4', 'NLR_152_TC_5', ...
+%     'NLR_160_EK_1', 'NLR_160_EK_2', 'NLR_162_EF_1', 'NLR_163_LF_1', ...
+%     'NLR_163_LF_2', 'NLR_163_LF_3', 'NLR_163_LF_4', 'NLR_180_ZD_3', ...
+%     'NLR_180_ZD_4', 'NLR_208_LH_1', 'NLR_208_LH_2', 'NLR_211_LB_1', ...
+%     'NLR_211_LB_2', 'NLR_211_LB_3', 'NLR_211_LB_4'};
+% for ii = 1:numel(outsubIDs)
+%     for jj = 1:numel(processedSubs)
+%         if outsubIDs{ii} == processedSubs{jj}
+%             outsubIDs{ii} = {};
+%             filepaths{ii} = {};
+%             ITKs{ii} = {};
+%             break
+%         end
+%     end
+% end
 %% parallel process the MRI data
-parfor (id = 5:numel(filepaths)/2)
+parfor id = 1:numel(filepaths)
     if ~iscell(filepaths{id}) && ~iscell(outsubIDs{id})
         cmd = sprintf('recon-all -i %s -subjid %s -all',filepaths{id},outsubIDs{id});
         system(cmd);
     end
 end
 
-for rr = 5:numel(filepaths)
+for rr = 1:numel(filepaths)
     if ~iscell(filepaths{rr}) && ~iscell(ITKs{rr}) && ~iscell(outsubIDs{rr})
         % reformat freesurfer segmentation for mrVista ITKgray
         fs_ribbon2itk(outsubIDs{rr}, ITKs{rr},[], filepaths{rr})
     end
 end
+%% run base/long command in parallel
+parfor ff = 1:19
+    if ~strcmp(subID{ff},'NLR_145_AC') && ~strcmp(subID{ff},'NLR_208_LH') ...
+            && ~strcmp(subID{ff},'NLR_132_WP')
+        fs_base_recon(subID{ff});
+    end
+end
 
+% collect all the recon-all -long commands
+all_long_cmds = cell('whatever size needed');
+tt = 1;
+index = 1;
+while tt <= numel(subID)
+    if ~strcmp(subID{tt},'NLR_145_AC') ...
+            && ~strcmp(subID{tt},'NLR_132_WP')
+        sub_long_cmds = fs_long_recon(subID{tt});
+        for ll = 1:numel(sub_long_cmds)
+            all_long_cmds{index + (ll-1)} = sub_long_cmds{ll};
+        end
+    end
+    index = index + numel(sub_long_cmds);
+    tt = tt + 1;
+end
+all_long_cmds = all_long_cmds(1:(index-1));
+
+% run all recon-all -long commands
+parfor cc = 1:numel(all_long_cmds)
+    system(all_long_cmds{cc});
+end
 
