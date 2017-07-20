@@ -1,5 +1,9 @@
 % function which constructs and runs the recon-all -base command based on a
 % given subject ID
+%
+% Author: Mark Penrod
+% Date: June 2017
+
 function fs_base_recon(ID)
     freesurf_dir = '/mnt/scratch/projects/freesurfer/';
     addpath(genpath(freesurf_dir));

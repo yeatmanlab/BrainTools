@@ -1,5 +1,9 @@
 % function which constructs and runs the recon-all -long command based on a
 % given subject ID
+%
+% Author: Mark Penrod
+% Date: June 2017
+
 function long_cmds = fs_long_recon(ID)
     freesurf_dir = '/mnt/scratch/projects/freesurfer/';
     long_cmds = cell(5);

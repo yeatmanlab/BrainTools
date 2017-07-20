@@ -1,4 +1,7 @@
 % script which creates the fsgd file for all subjects (both control and intervention)
+%
+% Author: Mark Penrod
+% Date: July 2017
 
 % original file is in this folder
 cd('/mnt/scratch/projects/freesurfer')

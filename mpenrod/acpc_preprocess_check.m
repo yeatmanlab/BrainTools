@@ -1,5 +1,8 @@
 % Script which runs through all the sessions for the subjects and makes
 % sure all sessions were acpc preprocessed
+%
+% Author: Mark Penrod
+% Date: June 2017
 
 % Set up directory info
 %%

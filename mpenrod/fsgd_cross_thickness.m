@@ -15,6 +15,9 @@
 % - the specific glmdir folder which within its subfolder contains various 
 % files (notably the sig.mgh file) which can be mapped onto the cortical
 % surface for visualization (saved into $SUBJECTS_DIR/glmdir)
+%
+% Author: Mark Penrod
+% Date: July 2017
 
 
 function fsgd_cross_thickness(fsgd,mtx)
