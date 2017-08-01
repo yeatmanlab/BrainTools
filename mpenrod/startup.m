@@ -21,7 +21,7 @@ clear fsfasthome fsfasttoolbox;
 addpath(genpath('~/git/yeatmanlab'));
 addpath(genpath('~/Documents/MATLAB/spm8/'))
 addpath(genpath('~/git/AFQ/'))
-addpath(genpath('~/git/BrainTools/'))
+addpath(genpath('~/git/BrainTools/mritools'))
 addpath(genpath('~/git/vistasoft/'))
 addpath(genpath('~/matlab/'))
 addpath(genpath('/mnt/scratch/projects/freesurfer/'))

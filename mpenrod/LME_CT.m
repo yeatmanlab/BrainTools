@@ -11,9 +11,9 @@ rhcortex = fs_read_label('fsaverage/label/rh.cortex.label');
 
 % Intervention data and design matrix
 [inter_tpID,inter_M,inter_lhY,inter_mri,inter_ni] = ...
-    long_prepare_LME('./thickness_preproc/lh_intervention.thickness.stack.fwhm10.mgh','./qdec/inter_long.qdec.table.dat');
+    long_prepare_LME('./thickness_preproc/lh_intervention.thickness.stack.fwhm10.mgh','./qdec/inter_qdec/inter_long.qdec.table.dat');
 [inter_tpID,inter_M,inter_rhY,inter_mri,inter_ni] = ...
-    long_prepare_LME('./thickness_preproc/rh_intervention.thickness.stack.fwhm10.mgh','./qdec/inter_long.qdec.table.dat');
+    long_prepare_LME('./thickness_preproc/rh_intervention.thickness.stack.fwhm10.mgh','./qdec/inter_qdec/inter_long.qdec.table.dat');
 
 % Control data and design matrix, excluding dyslexic controls
 [control_exRI_tpID,control_exRI_M,control_exRI_lhY,control_exRI_mri,control_exRI_ni] = ...
@@ -71,7 +71,8 @@ inter_lhstats = lme_mass_fit_Rgw(inter_M,[1],inter_lhY,inter_ni,inter_lhTh0,inte
 inter_rhstats = lme_mass_fit_Rgw(inter_M,[1],inter_rhY,inter_ni,inter_rhTh0,inter_rhRgs,rhsphere);
 
 
-CM.C = [0,-1,1,0,0;0,0,-1,1,0;0,0,0,-1,1];
+% CM.C = [0,-1,1,0,0;0,0,-1,1,0;0,0,0,-1,1];
+CM.C = [0,-1,1,0,0;0,0,-1,0,1;0,-1,0,0,1];
 inter_lh_fstats = lme_mass_F(inter_lhstats,CM,6);
 inter_rh_fstats = lme_mass_F(inter_rhstats,CM,6);
 
