@@ -12,6 +12,7 @@
 %   (1) The subject IDs
 %   (2) The average cortical thickness for the ROI 
 %   (3) The timepoint 
+%   (4) The ROI
 % ROIs: A list of all the ROIs 
 %
 % Author: Mark Penrod
@@ -21,7 +22,7 @@
 function [consol_mtx,ROIs] = consol_long_mtx(long_mtx)
 mtx_size = size(long_mtx);
 rr = 1;
-ROIs = [];
+
 for subj = 1:mtx_size(1)
     for ll = 1:mtx_size(3)
         for session = 1:4
