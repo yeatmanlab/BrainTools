@@ -1,7 +1,7 @@
 %%
-sub = {'NLR_205_AC'};
+sub = {'RI_144_OL'};
 
-workingDir = '/home/sjjoo/git/BrainTools/mritools';
+workingDir = '/home/mpenrod/git/BrainTools/mritools';
 % Change filelist per subject
 % ATTN: If acpc aligned anatomy has been created, we should set the first
 % filelist as the acpc aligned one in the 'anatomy' folder. And set the
@@ -16,12 +16,12 @@ workingDir = '/home/sjjoo/git/BrainTools/mritools';
 %%
 for ss = 1:length(sub)
     cd(workingDir)
-    outpath = sprintf('/home/sjjoo/analysis/anatomy/%s',sub{ss});
+    outpath = sprintf('/mnt/scratch/anatomy/%s',sub{ss});
     if isempty(dir(outpath))
         mkdir(outpath);
     end
     
-    sessions = getsessions(strcat('/mnt/diskArray/projects/MRI/',sub{ss}));
+    sessions = getsessions(strcat('/mnt/scratch/MRI/',sub{ss}));
     
     % find raw par/rec files, make a compressed nifti and store in the
     % subject's 'raw' folder
@@ -30,10 +30,10 @@ for ss = 1:length(sub)
     filelist = {}; namelist = {};
     for ii = 2:numel(sessions)
         mkdir(sprintf('%s/%s', outpath, sessions{ii}));
-        cd(fullfile('/mnt/diskArray/projects/MRI/',sub{ss},sessions{ii},'raw'))
+        cd(fullfile('/mnt/scratch/MRI/',sub{ss},sessions{ii},'raw'))
         temp = dir(fullfile(pwd, '*VBM*.PAR'));
         if ~isempty(temp)
-            parlist = fullfile('/mnt/diskArray/projects/MRI/',sub{ss},sessions{ii},'raw',temp(numel(temp)).name);
+            parlist = fullfile('/mnt/scratch/MRI/',sub{ss},sessions{ii},'raw',temp(numel(temp)).name);
             system(sprintf('parrec2nii -c --overwrite -o %s %s',sprintf('%s/%s',outpath,sessions{ii}),parlist));
             [PATHSTR,NAME,EXT] = fileparts(parlist);
     %         filelist{ii} = fullfile(PATHSTR, strcat(NAME, '.nii.gz'));

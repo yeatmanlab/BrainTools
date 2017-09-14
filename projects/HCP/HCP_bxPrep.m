@@ -24,12 +24,18 @@ subs = zeros(1,numel(afq.sub_names));
 % Find subjects of interest LET'S WORRY ABOUT THIS CODE AT SOME POINT
 for ii = 1:numel(afq.sub_names)
     subs(ii) = find(T.Subject == str2double(afq.sub_names{ii}));
+    subsAFQ(ii) = str2double(afq.sub_names{ii});
 end
 
 % Construct new table with only data from subjects of interest
 % (This is an unnecessary intermediary step that will be removed after
 % testing)
 subT = T(subs,:);
+
+% Check that the rows match the afq structure
+if ~all(subsAFQ' == subT.Subject)
+    error('\n row mismatch between table and afq struct\n')
+end
 
 % Get the names of all the variables in the table
 vn = fieldnames(subT);
@@ -39,8 +45,6 @@ vn = fieldnames(subT);
 for ii = 1:length(vn)
     afq = AFQ_set(afq, 'metadata', vn{ii}, subT.(vn{ii}));
 end
-% lET'S ALSO WORRY THAT WE SOME HOW MISMATCHED THE ROWS THAT CORRESPOND TO
-% EACH SUBJECT
 
 if exist('afq_outname', 'var') && ~isempty(afq_outname)
    save(afq_outname, 'afq') 
