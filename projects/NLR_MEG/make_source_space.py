@@ -43,14 +43,16 @@ subs = ['NLR_102_RS','NLR_103_AC','NLR_105_BB','NLR_110_HH','NLR_127_AM',
         'NLR_201_GS','NLR_202_DD','NLR_203_AM','NLR_204_AM','NLR_205_AC','NLR_206_LM',
         'NLR_207_AH','NLR_210_SB','NLR_211_LB'
         ]
-
+subs = ['NLR_GB310','NLR_KB218','NLR_JB423','NLR_GB267','NLR_JB420','NLR_HB275','NLR_197_BK','NLR_GB355','NLR_GB387']
+subs = ['NLR_HB205','NLR_IB319','NLR_JB227','NLR_JB486','NLR_KB396']
+subs = ['NLR_JB227','NLR_JB486','NLR_KB396']
 for n, s in enumerate(subs):    
     subject = s
                        
     # Create source space
     os.chdir(os.path.join(fs_dir,subject,'bem'))
     """ NLR_205: Head is too small to create ico5 """
-    if s == 'NLR_205_AC':
+    if s == 'NLR_205_AC' or s == 'NLR_JB227':
         spacing='oct6' # ico5 = 10242, oct6 = 4098 ...8196 = 4098 * 2
         fn2 = subject + '-' + 'oct-6' + '-src.fif'
     else:

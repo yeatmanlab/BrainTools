@@ -33,7 +33,7 @@ raw_dir = '/mnt/diskArray/projects/MEG/nlr/raw'
 #out_dir = '/mnt/scratch/NLR_MEG'
 
 # At local hard drive
-out_dir = '/mnt/scratch/NLR_MEG3'
+out_dir = '/mnt/scratch/NLR_MEG4'
 #out_dir = '/mnt/scratch/adult'
 
 if not os.path.isdir(out_dir):
@@ -45,12 +45,15 @@ os.chdir(out_dir)
 # 208_lh missing
 # 210_sb missing first session 
 # 151_rd missing the second session
-subs = ['101_lg','102_rs','103_ac','105_bb','110_hh','127_am','130_rw',
-        '132_wp','133_ml','145_ac','150_mg','151_rd','152_tc','160_ek',
-        '161_ak','162_ef','163_lf','164_sf','170_gm','172_th','174_hs',
-        '179_gm','180_zd','187_nb','201_gs','202_dd','203_am','204_am',
-        '205_ac','206_lm','207_ah','210_sb','211_lb'
-        ]
+subs = ['NLR_102_RS','NLR_103_AC','NLR_110_HH','NLR_127_AM',
+        'NLR_130_RW','NLR_132_WP','NLR_133_ML','NLR_145_AC','NLR_151_RD',
+        'NLR_152_TC','NLR_160_EK','NLR_161_AK','NLR_163_LF','NLR_164_SF',
+        'NLR_170_GM','NLR_172_TH','NLR_174_HS','NLR_179_GM','NLR_180_ZD',
+        'NLR_187_NB','NLR_203_AM','NLR_204_AM','NLR_205_AC','NLR_206_LM',
+        'NLR_207_AH','NLR_211_LB','NLR_150_MG',
+        'NLR_GB310','NLR_KB218','NLR_JB423','NLR_GB267','NLR_JB420',
+        'NLR_HB275','NLR_197_BK','NLR_GB355','NLR_GB387',
+        'NLR_HB205','NLR_IB319','NLR_JB227','NLR_JB486','NLR_KB396']
 
 # tmin, tmax: sets the epoch
 # bmin, bmax: sets the prestim duration for baseline correction. baseline is set
@@ -77,7 +80,7 @@ params = mnefun.Params(tmin=-0.1, tmax=0.9, n_jobs=18, # t_adjust was -39e-3
 # We should also note that for source analysis it is better to leave this as
 # the mne-fun default
           
-params.trans_to = (0., 0., .03)
+params.trans_to = (0., 0., .035)
 
 params.sss_type = 'python'
 params.sss_regularize = 'svd' # 'in' by default
@@ -87,7 +90,9 @@ params.st_correlation = 0.9
 params.auto_bad_meg_thresh = 10 # THIS SHOULD NOT BE SO HIGH!
 
 # Regular subjects
+
 #out,ind = nlr_organizeMEG_mnefun(raw_dir=raw_dir,out_dir=out_dir,subs=subs)
+
 #
 #print(out)
 
@@ -141,22 +146,21 @@ params.auto_bad_meg_thresh = 10 # THIS SHOULD NOT BE SO HIGH!
 #    ind[subnum] = []
 #    ind.remove([])
 
-out = ['102_rs160618', '102_rs160815', '103_ac150609', 
-       '105_bb150713', '105_bb161011', '110_hh150824', '110_hh160608', '110_hh160809', 
-       '127_am151022', '127_am161004', '130_rw151221', '132_wp151117', 
-       '132_wp160919', '132_wp161122', '133_ml151124', '145_ac160621', '145_ac160823', 
-       '150_mg160606', '150_mg160825', '151_rd160620', '152_tc160422', 
-       '152_tc160623', '160_ek160627', '160_ek160915', 
-       '161_ak160627', '161_ak160916', '162_ef160829', '163_lf160707', '163_lf160920', 
-       '164_sf160707', '164_sf160920', '170_gm160613', '170_gm160822', '172_th160614', 
-       '172_th160825', '174_hs160620', '174_hs160829', '179_gm160701', '179_gm160913', 
-       '180_zd160621', '180_zd160826', '187_nb161017', '201_gs150729', 
-       '201_gs150925', 
-       '202_dd150919', '202_dd151103', '203_am150831', '203_am151029', '204_am150829', '204_am151120', 
-       '205_ac160202', '206_lm151119', '206_lm160113', 
-       '207_ah160608', '207_ah160809', '210_sb160822', '211_lb160617', 
-       '211_lb160823']
-       
+out = ['102_rs160618','103_ac150609',
+            '110_hh160608','127_am161004','130_rw151221',
+            '132_wp160919','133_ml151124','145_ac160621',
+            '151_rd160620','152_tc160422','160_ek160627',
+            '161_ak160627','163_lf160707',
+            '164_sf160707','170_gm160613','172_th160614',
+            '174_hs160620','179_gm160701','180_zd160621',
+            '187_nb161017','203_am150831',
+            '204_am150829','205_ac151208','206_lm151119',
+            '207_ah160608','211_lb160617','150_mg160606',
+            'nlr_gb310170614','nlr_kb218170619','nlr_jb423170620','nlr_gb267170620',
+            'nlr_jb420170621','nlr_hb275170622','197_bk170622','nlr_gb355170606','nlr_gb387170608',
+            'nlr_hb205170825','nlr_ib319170825','nlr_jb227170811','nlr_jb486170803','nlr_kb396170808'] 
+#%%
+
 for n, s in enumerate(out):
     print(s)    
     
@@ -218,20 +222,11 @@ for n, s in enumerate(out):
     #params.mf_args = '-hpie 30 -hpig .8 -hpicons' # sjjoo-20160826: We are doing SSS using python
     
     # epoch rejection criterion
-    # 207_ah: grad = 5000e-13, mag = 5.0e-12
-    if s == '163_lf160707' or s == '163_lf160920':
-        params.reject = dict(grad=7000e-13, mag=9.0e-12)
-    elif s == '162_ef160829':
-        params.reject = dict(grad=7000e-13, mag=7.0e-12)
-    elif s == '174_hs160620':
+    if s == '174_hs160620':
         params.reject = dict(grad=5000e-13, mag=9.0e-12)
-    elif s == '174_hs160829':
-        params.reject = dict(grad=10000e-13, mag=12.0e-12)
-    elif s == '205_ac151123':
-        params.reject = dict(grad=10000e-13, mag=5.0e-12)
     else:
-        params.reject = dict(grad=5000e-13, mag=5.0e-12)
-        
+        params.reject = dict(grad=4000e-13, mag=4.0e-12)   
+
     params.ssp_eog_reject = dict(grad=params.reject['grad'], mag=params.reject['mag'], eog=np.inf)
     params.ssp_ecg_reject = dict(grad=params.reject['grad'], mag=params.reject['mag'], ecg=np.inf)
         
@@ -293,20 +288,20 @@ for n, s in enumerate(out):
     mnefun.do_processing(
         params,
         fetch_raw=False,     # Fetch raw recording files from acquisition machine
-        do_score=True,      # Do scoring to slice data into trials
+        do_score=False,      # Do scoring to slice data into trials
     
         # Before running SSS, make SUBJ/raw_fif/SUBJ_prebad.txt file with
         # space-separated list of bad MEG channel numbers
         push_raw=False,      # Push raw files and SSS script to SSS workstation
-        do_sss=True,        # Run SSS remotely (on sws) or locally with mne-python
+        do_sss=False,        # Run SSS remotely (on sws) or locally with mne-python
         fetch_sss=False,     # Fetch SSSed files from SSS workstation
         do_ch_fix=False,     # Fix channel ordering
     
         # Before running SSP, examine SSS'ed files and make
         # SUBJ/bads/bad_ch_SUBJ_post-sss.txt; usually, this should only contain EEG
         # channels.
-        gen_ssp=True,       # Generate SSP vectors
-        apply_ssp=True,     # Apply SSP vectors and filtering
+        gen_ssp=False,       # Generate SSP vectors
+        apply_ssp=False,     # Apply SSP vectors and filtering
         plot_psd=False,      # Plot raw data power spectra
         write_epochs=True,  # Write epochs to disk
         gen_covs=True,      # Generate covariances
