@@ -35,7 +35,7 @@ this_env = copy.copy(os.environ)
 fs_dir = '/mnt/diskArray/projects/avg_fsurfer'
 this_env['SUBJECTS_DIR'] = fs_dir
 
-raw_dir = '/mnt/scratch/NLR_MEG3'
+raw_dir = '/mnt/scratch/NLR_MEG4'
 
 os.chdir(raw_dir)
 
@@ -143,25 +143,25 @@ m2 = np.logical_and(np.transpose(swe) <= 85, np.transpose(age) <= 12)
 
 m1[16] = False # NLR_174_HS: This subject has a lot of noise in the raw data--should have been discarded
 m2[16] = False
-m1[15] = False # NLR_172_TH
-m2[15] = False
-
-m1[19] = False # NLR_187_NB
-m2[19] = False
-m1[24] = False # NLR_207_AH
-m2[24] = False
-
-m1[32] = False # NLR_HB275
-m2[32] = False
-
-m1[26] = False # NLR_150_MG
-m2[26] = False
-m1[29] = False # NLR_JB423
-m2[29] = False
-m1[33] = False # NLR_197_BK
-m2[33] = False
-m1[34] = False # NLR_GB355
-m2[34] = False
+#m1[15] = False # NLR_172_TH
+#m2[15] = False
+#
+#m1[19] = False # NLR_187_NB
+#m2[19] = False
+#m1[24] = False # NLR_207_AH
+#m2[24] = False
+#
+#m1[32] = False # NLR_HB275
+#m2[32] = False
+#
+#m1[26] = False # NLR_150_MG
+#m2[26] = False
+#m1[29] = False # NLR_JB423
+#m2[29] = False
+#m1[33] = False # NLR_197_BK
+#m2[33] = False
+#m1[34] = False # NLR_GB355
+#m2[34] = False
 m1[38] = False # NLR_JB227 n_epochs < 10
 m2[38] = False
 
@@ -173,23 +173,23 @@ a2 = np.logical_not(a1)
 
 a1[16] = False # NLR_174_HS: This subject has a lot of noise in the raw data--should have been discarded
 a2[16] = False
-a1[15] = False # NLR_172_TH
-a2[15] = False
-a1[19] = False # NLR_187_NB
-a2[19] = False
-a1[24] = False # NLR_207_AH
-a2[24] = False
-
-a1[32] = False # NLR_HB275
-a2[32] = False
-a1[33] = False # NLR_197_BK
-a2[33] = False
-a1[26] = False # NLR_150_MG
-a2[26] = False
-a1[29] = False # NLR_JB423
-a2[29] = False
-a1[34] = False # NLR_GB355
-a2[34] = False
+#a1[15] = False # NLR_172_TH
+#a2[15] = False
+#a1[19] = False # NLR_187_NB
+#a2[19] = False
+#a1[24] = False # NLR_207_AH
+#a2[24] = False
+#
+#a1[32] = False # NLR_HB275
+#a2[32] = False
+#a1[33] = False # NLR_197_BK
+#a2[33] = False
+#a1[26] = False # NLR_150_MG
+#a2[26] = False
+#a1[29] = False # NLR_JB423
+#a2[29] = False
+#a1[34] = False # NLR_GB355
+#a2[34] = False
 a1[38] = False # NLR_JB227
 a2[38] = False
 
@@ -220,13 +220,13 @@ for n in np.arange(0,len(poor_readers)):
 #all_readers.extend(poor_readers)
 #all_readers.sort()
 
-fname_data = op.join(raw_dir, 'session1_data_ico5_crop.npy')
+fname_data = op.join(raw_dir, 'session1_data_ico5_headpos.npy')
 #%%
 """
 Here we do the real deal...
 """            
 # Session 1
-load_data = True
+load_data = False
 
 method = "dSPM" 
 snr = 3.
@@ -442,7 +442,7 @@ RI_label_rh = [label for label in labels if label.name == 'R_RI_ROI-rh'][0]
 #del new_data
 
 data11 = X13[:,:,all_subject,[5]]
-#data11 = X13[:,:,good_readers,5] - X13[:,:,good_readers,8]
+data11 = X13[:,:,all_subject,5] - X13[:,:,all_subject,8]
 data11 = np.transpose(data11,[2,1,0])
 
 stat_fun = partial(mne.stats.ttest_1samp_no_p)
@@ -455,6 +455,8 @@ threshold = 1.7 #1.69 2.46
 brain3_1 = temp3.plot(hemi='lh', subjects_dir=fs_dir, views = ['ven'], #views=['lat','ven','med'], #transparent = True,
           initial_time=0.18, clim=dict(kind='value', lims=[1.5, threshold, 7]), background='white', colorbar=False) #np.max(temp3.data[:,:])])) #pos_lims=[0, 4, 4.5] #np.max(temp3.data[:,:])]))
 
+brain3_1.save_movie('AllSubjects_WordMinusNoise.mp4',time_dilation = 4.0,framerate = 30)
+
 #threshold = 1 #1.69 2.46
 #brain3_1 = temp3.plot(hemi='lh', subjects_dir=fs_dir, views = ['ven'], #views=['lat','ven','med'], #transparent = True,
 #          initial_time=0.18, clim=dict(kind='value', lims=[0, threshold, 5]))
@@ -462,7 +464,7 @@ brain3_1 = temp3.plot(hemi='lh', subjects_dir=fs_dir, views = ['ven'], #views=['
 #brain3_1 = temp3.plot(hemi='both', subjects_dir=fs_dir, views = ['ven'], #views=['lat','ven','med'], #transparent = True,
 #          initial_time=0.18, clim=dict(kind='value', lims=[1.5, threshold, 5]))
 
-brain3_1.save_image('LH_180.pdf')
+#brain3_1.save_image('LH_180.pdf')
 
 #brain3_1.add_label(PHT_label_lh, borders=True, color=c_table[0])
 #brain3_1.add_label(TE2a_label_lh, borders=True, color=c_table[1])
