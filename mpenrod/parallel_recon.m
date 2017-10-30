@@ -11,10 +11,12 @@
 %     'NLR_133_ML', 'NLR_146_TF', 'NLR_195_AW', 'NLR_191_DF', 'NLR_197_BK', ...
 %     'NLR_201_GS', 'NLR_202_DD', 'NLR_203_AM', 'NLR_101_LG', 'NLR_103_AC'};
 
-maindir = fullfile('/home','ehuber','analysis','MRI');
+maindir = fullfile('/home','ehuber','projects','anatomy');
 cd(maindir)
 
 temp = dir(fullfile(maindir, '*NLR*'));
+
+clear subID
 
 for ii = 1:size(temp,1)
     subID{ii} = temp(ii).name;
@@ -22,18 +24,23 @@ end
 
 subID = horzcat(subID, {'RI_124_AT', 'RI_143_CH', 'RI_138_LA', 'RI_141_GC', 'RI_144_OL'});
 
+% subID = subID(1);
+
 clobber = 1;
 makesurface = 1;
 % maindir = '/mnt/scratch/MRI/';
-anatdir =  fullfile('/home','ehuber','analysis','anatomy');
+anatdir =  fullfile('/home','ehuber','projects','anatomy');
 addpath(genpath(maindir)), addpath(genpath(anatdir))
 %% create arrays with file paths and subject IDs
 filepaths = {};
 outsubIDs = {};
 ITKs = {};
+
+filebase = 't1_native';
+
 for ss = 1:numel(subID)
     subject = subID{ss};
-    for processed = 1:5
+    for processed = 1:2 % temp ------------------
         file2bprocessed = fullfile(anatdir, subject, (strcat('t1_native_', num2str(processed), '.nii.gz')));
         outsubID = strcat(subject, '_', num2str(processed));
         nextITK = fullfile(anatdir,subject,...
@@ -67,19 +74,37 @@ end
 %     end
 % end
 %% parallel process the MRI data
+
+% temp -------------------
+expertFile = {'/home/ehuber/projects/freesurfer/expert.opts'};
+
+for id = 1:numel(filepaths)
+    if ~exist(strcat(filepaths{id}(1:end-7), '_MSE.nii.gz'), 'file')
+        cmd = sprintf('mri_concat --i %s --o %s --rms', filepaths{id},strcat(filepaths{id}(1:end-7)));
+        system(cmd)
+        filepaths_rms{id} = mri_rms(filepaths{id});
+    else
+        filepaths_rms{id} = strcat(filepaths{id}(1:end-7), '_MSE.nii.gz');
+    end
+    system(sprintf('mri_convert --in_orientation LAS --out_orientation RAS --out_type nii %s %s', filepaths_rms{id}, filepaths_rms{id}));
+end
+
 parfor id = 1:numel(filepaths)
     if ~iscell(filepaths{id}) && ~iscell(outsubIDs{id})
-        cmd = sprintf('recon-all -i %s -subjid %s -all',filepaths{id},outsubIDs{id});
+        cmd = sprintf('recon-all -hires -i %s -subjid %s -all',...
+            filepaths_rms{id},outsubIDs{id});
+%         cmd = sprintf('recon-all -hires -i %s -subjid %s -expert %s -all',...
+%             filepaths{id},outsubIDs{id},expertFile{id});
         system(cmd);
     end
 end
 
-for rr = 1:numel(filepaths)
-    if ~iscell(filepaths{rr}) && ~iscell(ITKs{rr}) && ~iscell(outsubIDs{rr})
-        % reformat freesurfer segmentation for mrVista ITKgray
-        fs_ribbon2itk(outsubIDs{rr}, ITKs{rr},[], filepaths{rr})
-    end
-end
+% for rr = 1:numel(filepaths)
+%     if ~iscell(filepaths{rr}) && ~iscell(ITKs{rr}) && ~iscell(outsubIDs{rr})
+%         % reformat freesurfer segmentation for mrVista ITKgray
+%         fs_ribbon2itk(outsubIDs{rr}, ITKs{rr},[], filepaths{rr})
+%     end
+% end
 %% run base/long command in parallel
 parfor ff = 1:numel(subID)
     if ~strcmp(subID{ff},'NLR_145_AC') && ~strcmp(subID{ff},'NLR_208_LH') ...
