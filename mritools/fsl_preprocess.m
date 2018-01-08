@@ -1,4 +1,4 @@
-function fsl_preprocess(dwi_files, bvecs_file, bvals_file, pe_dir, outdir)
+function fsl_preprocess(dwi_files, bvecs_file, bvals_file, pe_dir, outdir, discardRPE)
 % Correct for EPI distortions, eddy currents and motion with FSL
 %
 % dwi_files  = Cell array of paths to niftis with alternating PE directions
@@ -6,6 +6,11 @@ function fsl_preprocess(dwi_files, bvecs_file, bvals_file, pe_dir, outdir)
 %              acquisition. Each row is for an image and columns are x,y,z
 % bvecs_file = Bvecs file for each nifti image
 % bvals_file = Bvals file for each nifti image
+% outdir     = Path to directory to save everything
+% discardRPE = Logical. Should b0 images collected with a reversed phase
+%              encode be discarded after topup? Our experience is that
+%              these images have different signal intensity and should be
+%              removed.
 %
 % example:
 % dwi_files = ...
@@ -28,15 +33,20 @@ end
 if ~exist(outdir,'dir')
     mkdir(outdir);
 end
+if ~exist('discardRPE', 'var')
+    discardRPE = 1;
+end
 cd(outdir);
 
 %% Concatenate files and pull out b=0 images
-b0_cat = []; dfull = [];
+b0_cat = []; dfull = []; vol_ind = [];
 for ii = 1:length(dwi_files)
     % load image
     im = readFileNifti(dwi_files{ii});
     % make a concetenated image
     dfull = cat(4,dfull,im.data);
+    % note which indices came from which volume
+    vol_ind = vertcat(vol_ind, ones(size(im.data,4),1).*ii);
     % load bvals and bvecs
     bvals{ii} = dlmread(bvals_file{ii});
     bvecs{ii} = dlmread(bvecs_file{ii});
@@ -71,6 +81,21 @@ pe(1:end,4) = .0651;
 acq_file=fullfile(outdir,'acqparams.txt');
 dlmwrite(acq_file,pe,'\t');
 
+% Concatenate bvals and bvecs from the different volumes
+bvals_cat = horzcat(bvals{:});
+% bvalues below 20 will be treated as 0
+bvals_cat(bvals_cat<20) = 0;
+bvecs_cat = horzcat(bvecs{:});
+
+% Discard volumes with reversed phase encode (if desired)
+if discardRPE==1
+    rpe_ind = all(pe_dir ~= -1,2);
+    keepvols = rpe_ind(vol_ind);
+    dfull = dfull(:,:,:,keepvols);
+    bvecs_cat = bvecs_cat(:,keepvols');
+    bvals_cat = bvals_cat(keepvols');  
+end
+
 % Write out a concatenated DWI
 im.data = dfull;
 im.dim(4) = size(im.data,4);
@@ -80,10 +105,6 @@ writeFileNifti(im);
 totalvols = im.dim(4);
 
 % Write out concatenated bvecs and bvals
-bvals_cat = horzcat(bvals{:});
-% bvalues below 20 will be treated as 0
-bvals_cat(bvals_cat<20) = 0;
-bvecs_cat = horzcat(bvecs{:});
 dlmwrite(fullfile(outdir,'bvecs_cat.bvec'),bvecs_cat,'\t');
 dlmwrite(fullfile(outdir,'bvals_cat.bval'),bvals_cat,'\t');
 

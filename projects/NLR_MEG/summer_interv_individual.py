@@ -33,7 +33,7 @@ raw_dir = '/mnt/diskArray/projects/MEG/nlr/raw'
 #out_dir = '/mnt/scratch/NLR_MEG'
 
 # At local hard drive
-out_dir = '/mnt/scratch/NLR_MEG3'
+out_dir = '/mnt/scratch/NLR_MEG2'
 #out_dir = '/mnt/scratch/adult'
 
 if not os.path.isdir(out_dir):
@@ -76,7 +76,7 @@ params.st_correlation = 0.9
 params.auto_bad_meg_thresh = 10 # THIS SHOULD NOT BE SO HIGH!
 
 
-out = ['163_lf160707']
+out = ['174_hs160620']
 for n in np.arange(0,len(out)):
     params.subjects = [out[n]]
     

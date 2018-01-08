@@ -12,6 +12,7 @@ import os
 from os import path as op
 from mnefun._mnefun import safe_inserter, get_raw_fnames
 import mne
+import numpy as np
 
 
 def score(p, subjects, run_indices):
@@ -43,20 +44,62 @@ def score(p, subjects, run_indices):
                 ev = mne.find_events(raw, stim_channel='STI101', shortest_event=1)
                 if op.basename(fname).__contains__('_1_raw'):
                     ev[:, 2] += 100
+                    """ To deal with incorrect trigger values. This only applies summer intervention
+                    2016 """
+#                    c = ev[:,2] > 116 # 116 is the button press
+#                    cid = np.where(c)[0] # get the incorrect triggers
+#                    if len(cid) > 0:
+#                        for ii in np.arange(0, len(cid)):
+#                            ev[cid[ii],2] = ev[cid[ii],2] - 16
                 elif op.basename(fname).__contains__('_2_raw'):
                     ev[:, 2] += 200
+#                    c = ev[:,2] > 216 # 116 is the button press
+#                    cid = np.where(c)[0] # get the incorrect triggers
+#                    if len(cid) > 0:
+#                        for ii in np.arange(0, len(cid)):
+#                            ev[cid[ii],2] = ev[cid[ii],2] - 16
                 elif op.basename(fname).__contains__('_3_raw'):
                     ev[:, 2] += 100
+#                    c = ev[:,2] > 116 # 116 is the button press
+#                    cid = np.where(c)[0] # get the incorrect triggers
+#                    if len(cid) > 0:
+#                        for ii in np.arange(0, len(cid)):
+#                            ev[cid[ii],2] = ev[cid[ii],2] - 16
                 elif op.basename(fname).__contains__('_4_raw'):
                     ev[:, 2] += 200
+#                    c = ev[:,2] > 216 # 116 is the button press
+#                    cid = np.where(c)[0] # get the incorrect triggers
+#                    if len(cid) > 0:
+#                        for ii in np.arange(0, len(cid)):
+#                            ev[cid[ii],2] = ev[cid[ii],2] - 16
                 elif op.basename(fname).__contains__('_5_raw'):
                     ev[:, 2] += 100
+#                    c = ev[:,2] > 116 # 116 is the button press
+#                    cid = np.where(c)[0] # get the incorrect triggers
+#                    if len(cid) > 0:
+#                        for ii in np.arange(0, len(cid)):
+#                            ev[cid[ii],2] = ev[cid[ii],2] - 16
                 elif op.basename(fname).__contains__('_6_raw'):
                     ev[:, 2] += 200
+#                    c = ev[:,2] > 216 # 116 is the button press
+#                    cid = np.where(c)[0] # get the incorrect triggers
+#                    if len(cid) > 0:
+#                        for ii in np.arange(0, len(cid)):
+#                            ev[cid[ii],2] = ev[cid[ii],2] - 16
                 elif op.basename(fname).__contains__('_7_raw'):
                     ev[:, 2] += 100
+#                    c = ev[:,2] > 116 # 116 is the button press
+#                    cid = np.where(c)[0] # get the incorrect triggers
+#                    if len(cid) > 0:
+#                        for ii in np.arange(0, len(cid)):
+#                            ev[cid[ii],2] = ev[cid[ii],2] - 16
                 elif op.basename(fname).__contains__('_8_raw'):
                     ev[:, 2] += 200
+#                    c = ev[:,2] > 216 # 116 is the button press
+#                    cid = np.where(c)[0] # get the incorrect triggers
+#                    if len(cid) > 0:
+#                        for ii in np.arange(0, len(cid)):
+#                            ev[cid[ii],2] = ev[cid[ii],2] - 16
                 fname_out = 'ALL_' + safe_inserter(rii,
                                                    subj) + '-eve.lst'
                 fname_out = op.join(out_dir, fname_out)

@@ -60,9 +60,9 @@ for ii = 1:length(test_names)
     ax = gca;
     axis(ax, 'tight');
     ylabel(test_name); xlabel(x_name); 
-    ax.XAxis.TickValues = [0 40 80 120 160];
-    ax.XLim = [0 160];
-    ax.YLim = [40 140];
+     ax.XAxis.TickValues = [0 1 2 3 4];
+     ax.XLim = [0 5];
+    ax.YLim = [55 125];
     ax.YAxis.TickValues = [40 60 80 100 120 140];
 %     legend(subs, 'Location', 'westoutside');
     grid('on')
@@ -88,11 +88,11 @@ for ii = 1:length(test_names)
 %     end
         
         
-    % Save image
-    test = num2str(cell2mat(test_names(ii)));
-    test = strrep(test, '\_', '-');
-    fname = sprintf('~/Desktop/figures/LMB/%s-%s-%s.eps', x_name, test, date);
-    print(fname, '-depsc');
+%     % Save image
+%     test = num2str(cell2mat(test_names(ii)));
+%     test = strrep(test, '\_', '-');
+%     fname = sprintf('C:/Users/Patrick/Desktop/figures/LMB/%s-%s-%s.eps', x_name, test, date);
+%     print(fname, '-depsc');
 
 end
 
