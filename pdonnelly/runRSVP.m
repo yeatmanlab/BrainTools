@@ -1,7 +1,7 @@
 % function runRSVP(sub_num, trial)
 
 % Set number of runs
-nruns = 20;
+nruns = 5;
 
 % set items in an rsvp stream
 nitems = 10;
@@ -32,7 +32,7 @@ for jj = 1:length(isi)
     % Shuffle the run order since we don't want it to be in a predictable order
     shuffindx = Shuffle(1:size(stim,2));
     stim(:,:,jj) = stim(:,shuffindx,jj);
-    corrresp(:,jj) = corrresp(shuffindx,jj);
+    corresp(:,jj) = corresp(shuffindx,jj);
 end
 
 
@@ -119,5 +119,35 @@ sca;
 Screen('close')
 ListenChar(0);
 
-%% Make a plot where x is ISI and y is % correct
+raw = key;
 
+%% Make a plot where x is ISI and y is % correct
+% convert key strokes to booleans
+for col = 1:length(isi)
+   for row = 1:nruns 
+      if ismember(key(col, row),'RightArrow')
+          key{col, row} = 1;
+      elseif ismember(key(col, row),'DownArrow')
+          key{col, row} = 0;
+      end
+   end
+end
+% transpose corresp matrix to agree
+answers = corresp';
+% calculate number of correct responses
+num_correct = zeros(length(isi), 2);
+for col = 1:length(isi)
+    for row = 1:nruns
+        if answers(col, row) == key{col, row}
+            num_correct(col, 1) = num_correct(col, 1) + 1;
+        end
+    end
+end
+% append col with percentages
+for row = 1:length(isi)
+    num_correct(row, 2) = (num_correct(row,1)/nruns);
+end
+% plot 
+figure; hold;
+x = isi; y = num_correct(:,2)';
+plot(x,y);
