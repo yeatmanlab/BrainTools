@@ -1,7 +1,7 @@
 % function runRSVP(sub_num, trial)
 
 % Set number of runs
-nruns = 5;
+nruns = 20;
 
 % set items in an rsvp stream
 nitems = 10;
@@ -18,7 +18,7 @@ isi = [10 20 40 80 160];
 
 target = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', ...
     'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
-nottarget = {'!' '@' '$' '%' '&' '*' '?'};
+nottarget = {'!' '@' '%' '&' '*' '#' '<' '>' '='};
 
 % Generate RSVP stream
 stim = RandSample(nottarget, [nitems,nruns, length(isi)]);
@@ -150,4 +150,5 @@ end
 % plot 
 figure; hold;
 x = isi; y = num_correct(:,2)';
-plot(x,y);
+bar(x,y);
+
