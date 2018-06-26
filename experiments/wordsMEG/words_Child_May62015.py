@@ -189,7 +189,7 @@ with ExperimentController('ShowImages', full_screen=True) as ec:
        # Change the fixation dot color mid trial
         fix.set_colors(colors=(dcolor3[trial], dcolor3[trial]))
         img[trial].draw(), fix.draw()
-        ec.write_data_line('dotcolorFix', dcolor2[trial])
+        ec.write_data_line('dotcolorFix', dcolor3[trial])
         last_flip = ec.flip(last_flip+imduration/2-adj)
         
         ec.get_presses()
