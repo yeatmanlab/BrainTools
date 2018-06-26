@@ -1,0 +1,4 @@
+2018-06-25 15:24:10,037 - INFO    - Expyfun: Using version 2.0.0.dev0+4c31ad2 (requested dev)
+2018-06-25 15:24:10,458 - INFO    - Expyfun: Setting up Pyglet audio
+2018-06-25 15:24:10,497 - INFO    - Expyfun: Exiting
+2018-06-25 15:24:10,497 - EXP     - Expyfun: Audio stopped and reset.

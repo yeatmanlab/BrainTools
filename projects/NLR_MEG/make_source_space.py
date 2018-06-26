@@ -32,7 +32,7 @@ fs_dir = '/mnt/diskArray/projects/avg_fsurfer'
 this_env['SUBJECTS_DIR'] = fs_dir
 #this_env['FREESURFER_HOME'] = '/usr/local/freesurfer'
 
-raw_dir = '/mnt/scratch/NLR_MEG3'
+raw_dir = '/mnt/scratch/NLR_MEG4'
 
 os.chdir(raw_dir)
 
@@ -43,9 +43,7 @@ subs = ['NLR_102_RS','NLR_103_AC','NLR_105_BB','NLR_110_HH','NLR_127_AM',
         'NLR_201_GS','NLR_202_DD','NLR_203_AM','NLR_204_AM','NLR_205_AC','NLR_206_LM',
         'NLR_207_AH','NLR_210_SB','NLR_211_LB'
         ]
-subs = ['NLR_GB310','NLR_KB218','NLR_JB423','NLR_GB267','NLR_JB420','NLR_HB275','NLR_197_BK','NLR_GB355','NLR_GB387']
-subs = ['NLR_HB205','NLR_IB319','NLR_JB227','NLR_JB486','NLR_KB396']
-subs = ['NLR_JB227','NLR_JB486','NLR_KB396']
+
 for n, s in enumerate(subs):    
     subject = s
                        
@@ -60,6 +58,6 @@ for n, s in enumerate(subs):
         fn2 = subject + '-' + 'ico-5' + '-src.fif'
 
     src = mne.setup_source_space(subject=subject, spacing=spacing, # source spacing = 5 mm
-                                 subjects_dir=fs_dir, add_dist=False, n_jobs=18, overwrite=True)
+                                 subjects_dir=fs_dir, add_dist=False, n_jobs=18)
     src = mne.add_source_space_distances(src, dist_limit=np.inf, n_jobs=18, verbose=None)
     mne.write_source_spaces(fn2, src, overwrite=True)

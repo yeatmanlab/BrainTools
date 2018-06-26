@@ -21,7 +21,7 @@ import statsmodels.formula.api as smf
 from scipy.stats import norm
 from scipy import stats as stats
 
-raw_dir = '/mnt/scratch/NLR_MEG4'
+raw_dir = '/mnt/scratch/NLR_MEG3'
 
 session1 = ['102_rs160618','103_ac150609','105_bb150713','110_hh160608','127_am151022',
        '130_rw151221','132_wp160919','133_ml151124','145_ac160621','150_mg160606',
@@ -116,17 +116,13 @@ poor_readers = np.where(m2)[0]
 #%%
 """
 No Button Responses:
-163_lf160920
-
+174_hs160620
+nlr_hb205170825
+nlr_jb227170811
 """
-""" Lexical task """
 
 d_prime = np.empty((1,len(session1)))[0]
 hit_rate = np.empty((1,len(session1)))[0]
-hit_rate1 = np.empty((1,len(session1)))[0]
-hit_rate2 = np.empty((1,len(session1)))[0]
-hit_rate3 = np.empty((1,len(session1)))[0]
-n_lexical = np.empty((1,len(session1)))[0]
 falsealarm_rate = np.empty((1,len(session1)))[0]
 overall_pseudo_rt = np.empty((1,len(session1)))[0]
 overall_pseudo_rt1 = np.empty((1,len(session1)))[0]
@@ -139,16 +135,13 @@ for ttt, s in enumerate(session1):
     
     if s == '164_sf160707':
         run_names = ['1', '2', '3', '5', '6']
-        n_lexical[ttt] = 2
+        n_lexical = 2
     elif s == '170_gm160613':
         run_names = ['1', '2', '3', '5', '6']
-        n_lexical[ttt] = 2
-    elif s == 'nlr_ib357170912':
-        run_names = ['1', '2', '4', '5', '6']
-        n_lexical[ttt] = 3
+        n_lexical = 2
     else:
         run_names = ['1', '2', '3', '4', '5', '6']
-        n_lexical[ttt] = 3
+        n_lexical = 3
     
     if s == '103_ac150609':
         key_string = '232'
@@ -164,7 +157,7 @@ for ttt, s in enumerate(session1):
     if s != '174_hs160620' and s != 'nlr_hb205170825' and s != 'nlr_jb227170811':
         all_cond = []
         all_rt = []
-        for nn, r_name in enumerate(run_names):
+        for n, r_name in enumerate(run_names):
             if np.mod(int(r_name),2) == 0:
                 fn = 'ALL_' + s + '_' + r_name + '-eve.lst'
                 mat = []
@@ -219,19 +212,13 @@ for ttt, s in enumerate(session1):
         overall_pseudo_rt3[ttt] = np.median(pseudo_rt3)
         overall_word_rt[ttt] = np.median(word_rt)
         
-        hit_rate[ttt] = len(pseudo_rt) / (21.*n_lexical[ttt]) # 7 repetitions 3 different pseudoword conditions
-        hit_rate1[ttt] = len(pseudo_rt1) / (7.*n_lexical[ttt])
-        hit_rate2[ttt] = len(pseudo_rt2) / (7.*n_lexical[ttt])
-        hit_rate3[ttt] = len(pseudo_rt3) / (7.*n_lexical[ttt])
-        falsealarm_rate[ttt] = len(word_rt) / (20.*5*n_lexical[ttt])
-        d_prime[ttt] = norm.ppf(hit_rate[ttt]) - norm.ppf(falsealarm_rate[ttt])
+        hit_rate[ttt] = len(pseudo_rt) / (21.*len(all_cond)) # 7 repetitions 3 different pseudoword conditions
+        falsealarm_rate[ttt] = len(word_rt) / (20.*5*n_lexical)
+        d_prime[ttt] = norm.ppf(hit_rate[ttt]) - norm.ppf( [ttt])
     
     if s == '174_hs160620' or s == 'nlr_hb205170825' or s == 'nlr_jb227170811':
         d_prime[ttt] = np.nan
         hit_rate[ttt] = np.nan
-        hit_rate1[ttt] = np.nan
-        hit_rate2[ttt] = np.nan
-        hit_rate3[ttt] = np.nan
         falsealarm_rate[ttt] = np.nan
         overall_pseudo_rt[ttt] = np.nan
         overall_pseudo_rt1[ttt] = np.nan
@@ -239,253 +226,89 @@ for ttt, s in enumerate(session1):
         overall_pseudo_rt3[ttt] = np.nan
 
 #%%        
-figureDir = '%s/figures' % raw_dir
-
 plt.figure(1)
 plt.clf()
 plt.hold(True)
-plt.bar(0.75, np.nanmean(overall_pseudo_rt1[good_readers]), width=0.2, \
+plt.bar(0.65, np.nanmean(overall_pseudo_rt1[good_readers]), width=0.2, \
         yerr = np.nanstd(overall_pseudo_rt1[good_readers])/np.sqrt(np.sum(~np.isnan(overall_pseudo_rt1[good_readers]))), \
-        color=c_table[5], ecolor = [0,0,0], align='center')
-plt.bar(1, np.nanmean(overall_pseudo_rt2[good_readers]), width=0.2, \
+        color=c_table[5], ecolor = [0,0,0])
+plt.bar(0.9, np.nanmean(overall_pseudo_rt2[good_readers]), width=0.2, \
         yerr = np.nanstd(overall_pseudo_rt2[good_readers])/np.sqrt(np.sum(~np.isnan(overall_pseudo_rt2[good_readers]))), \
-        color=c_table[3], ecolor = [0,0,0], align='center')
-plt.bar(1.25, np.nanmean(overall_pseudo_rt3[good_readers]), width=0.2, \
+        color=c_table[3], ecolor = [0,0,0])
+plt.bar(1.15, np.nanmean(overall_pseudo_rt3[good_readers]), width=0.2, \
         yerr = np.nanstd(overall_pseudo_rt3[good_readers])/np.sqrt(np.sum(~np.isnan(overall_pseudo_rt3[good_readers]))), \
-        color=[0.4, 0.4, 0.4], ecolor = [0,0,0], align='center')
+        color=[0.4, 0.4, 0.4], ecolor = [0,0,0])
 
-plt.bar(1.75, np.nanmean(overall_pseudo_rt1[poor_readers]), width=0.2, \
+plt.bar(1.65, np.nanmean(overall_pseudo_rt1[poor_readers]), width=0.2, \
         yerr = np.nanstd(overall_pseudo_rt1[poor_readers])/np.sqrt(np.sum(~np.isnan(overall_pseudo_rt1[poor_readers]))), \
-        color=c_table[5], ecolor = [0,0,0], align='center')
-plt.bar(2, np.nanmean(overall_pseudo_rt2[poor_readers]), width=0.2, \
+        color=c_table[5], ecolor = [0,0,0])
+plt.bar(1.9, np.nanmean(overall_pseudo_rt2[poor_readers]), width=0.2, \
         yerr = np.nanstd(overall_pseudo_rt2[poor_readers])/np.sqrt(np.sum(~np.isnan(overall_pseudo_rt2[poor_readers]))), \
-        color=c_table[3], ecolor = [0,0,0], align='center')
-plt.bar(2.25, np.nanmean(overall_pseudo_rt3[poor_readers]), width=0.2, \
+        color=c_table[3], ecolor = [0,0,0])
+plt.bar(2.15, np.nanmean(overall_pseudo_rt3[poor_readers]), width=0.2, \
         yerr = np.nanstd(overall_pseudo_rt3[poor_readers])/np.sqrt(np.sum(~np.isnan(overall_pseudo_rt3[poor_readers]))), \
-        color=[0.4, 0.4, 0.4], ecolor = [0,0,0], align='center')
+        color=[0.4, 0.4, 0.4], ecolor = [0,0,0])
 plt.xticks([1,2],('Typical readers','Struggling readers'))
 plt.xlim([0.5,2.5])
 plt.ylim([0.5,1])
 plt.ylabel('Reaction time (s)')
 plt.show()
 
-temp = overall_pseudo_rt1[good_readers]
-b1 = temp[np.where(~np.isnan(temp))[0]]
-temp = overall_pseudo_rt1[poor_readers]
-b2 = temp[np.where(~np.isnan(temp))[0]]
-
-stats.ttest_ind(b1,b2)
-
-
-os.chdir(figureDir)
-plt.savefig('lexical_rt.png',dpi=600)
-plt.savefig('lexical_rt.pdf',dpi=600)
-os.chdir('..')
-
-#plt.figure(2)
-#plt.clf()
-#plt.hold(True)
-#plt.bar(0.9, np.nanmean(d_prime[good_readers]), width=0.2, \
-#        yerr = np.nanstd(d_prime[good_readers])/np.sqrt(np.sum(~np.isnan(d_prime[good_readers]))), \
-#        color=[0.4, 0.4, 0.4], ecolor = [0,0,0])
-#plt.bar(1.9, np.nanmean(d_prime[poor_readers]), width=0.2, \
-#        yerr = np.nanstd(d_prime[poor_readers])/np.sqrt(np.sum(~np.isnan(d_prime[poor_readers]))), \
-#        color=[0.4, 0.4, 0.4], ecolor = [0,0,0])
-#plt.xticks([1,2],('Typical readers','Struggling readers'))
-#plt.xlim([0.5,2.5])
-#plt.ylim([0,2])
-#plt.ylabel('D-prime')
-#plt.show()
-#
-#temp = d_prime[good_readers]
-#a = temp[np.where(~np.isnan(temp))[0]]
-#temp = d_prime[poor_readers]
-#b = temp[np.where(~np.isnan(temp))[0]]
-#
-#stats.ttest_ind(a,b)
-
 plt.figure(2)
 plt.clf()
 plt.hold(True)
-plt.bar(1, np.nanmean(d_prime[good_readers]), width=0.4, \
+plt.bar(0.9, np.nanmean(d_prime[good_readers]), width=0.2, \
         yerr = np.nanstd(d_prime[good_readers])/np.sqrt(np.sum(~np.isnan(d_prime[good_readers]))), \
-        color=[0.4, 0.4, 0.4], ecolor = [0,0,0], align='center')
-plt.bar(1.5, np.nanmean(d_prime[poor_readers]), width=0.4, \
+        color=[0.4, 0.4, 0.4], ecolor = [0,0,0])
+plt.bar(1.9, np.nanmean(d_prime[poor_readers]), width=0.2, \
         yerr = np.nanstd(d_prime[poor_readers])/np.sqrt(np.sum(~np.isnan(d_prime[poor_readers]))), \
-        color=[0.4, 0.4, 0.4], ecolor = [0,0,0], align='center')
-plt.xticks([1,1.5],('Typical readers','Struggling readers'))
-plt.xlim([0.5,2])
+        color=[0.4, 0.4, 0.4], ecolor = [0,0,0])
+plt.xticks([1,2],('Typical readers','Struggling readers'))
+plt.xlim([0.5,2.5])
 plt.ylim([0,2])
-plt.ylabel('d_prime')
+plt.ylabel('D-prime')
 plt.show()
 #print(hit_rate)
 #print(overall_pseudo_rt)
-os.chdir(figureDir)
-plt.savefig('lexical_d_prime.png',dpi=600)
-plt.savefig('lexical_d_prime.pdf',dpi=600)
-os.chdir('..')
-
 
 temp = d_prime[good_readers]
-b1 = temp[np.where(~np.isnan(temp))[0]]
+a = temp[np.where(~np.isnan(temp))[0]]
 temp = d_prime[poor_readers]
-b2 = temp[np.where(~np.isnan(temp))[0]]
+b = temp[np.where(~np.isnan(temp))[0]]
 
-stats.ttest_ind(b1,b2)
-
-hit_rate_temp = hit_rate[all_subject]
-a = np.where(~np.isnan(hit_rate2))[0]
+stats.ttest_ind(a,b)
 
 plt.figure(3)
 plt.clf()
-
-ax = plt.subplot()
-fit = np.polyfit(temp_meg2[a], hit_rate_temp[a], deg=1)
-ax.plot(temp_meg2[a], fit[0] * temp_meg2[a] + fit[1], color=[0, 0, 0])
-ax.scatter(temp_meg2[a], hit_rate_temp[a], s=50, c=[0.4, 0.4, 0.4], edgecolors = [1, 1, 1], alpha=1)
-#for i, txt in enumerate(twre_index):
-#    ax.annotate(txt, (twre_index[i], hit_rate_temp[i]))
-stats.pearsonr(temp_meg2[a],hit_rate_temp[a]) 
-
-os.chdir(figureDir)
-plt.savefig('lexical_corr_swe_hitrate.png',dpi=600)
-plt.savefig('lexical_corr_swe_hitrate.pdf',dpi=600)
-os.chdir('..')
-
-
-overall_pseudo_rt1_temp = overall_pseudo_rt1[all_subject]
-plt.figure(33)
-plt.clf()
-
-ax = plt.subplot()
-fit = np.polyfit(temp_meg2[a], overall_pseudo_rt1_temp[a], deg=1)
-ax.plot(temp_meg2[a], fit[0] * temp_meg2[a] + fit[1], color=[0, 0, 0])
-ax.scatter(temp_meg2[a], overall_pseudo_rt1_temp[a], s=50, c=[0.4, 0.4, 0.4], edgecolors = [1, 1, 1], alpha=1)
-stats.pearsonr(temp_meg2[a],overall_pseudo_rt1_temp[a]) 
-
-os.chdir(figureDir)
-plt.savefig('lexical_corr_brs_pseudo_rt1.png',dpi=600)
-plt.savefig('lexical_corr_brs_pseudo_rt1.pdf',dpi=600)
-os.chdir('..')
-
-#%%
-""" Dot task """
-
-dot_response =[0.8571,0.6735,0.9524,0.9524,0.9762,0.9524,1.0000,0.8571,0.9524,
-    0.8810,0.7143,0.8810,0.8810,0.5952,0.6190,0.9762,0.1190,0.4524,np.nan,0.9048,
-    0.7857,0.9524,0.9762,0.9524,0.6905,0.7857,0.5714,0.4524,0.9286,0.9048,
-    0.6429,0.9762,0.6667,0.6905,0.7857,0.3333,0.9524,0.9048,np.nan,0.4524,0.9762,
-    np.nan,0.8333,0.9524,0.2143]
-dot_response = np.multiply(dot_response,100.)
-dot_rt = [0.4960,0.5303,0.5071,0.6079,0.4918,0.6068,0.4451,0.5978,0.4815,0.5481,
-    0.6374,0.4813,0.6553,0.5769,0.4959,0.4078,1.1473,0.7290,np.nan,0.5469,0.6980,
-    0.4219,0.5928,0.4945,0.4046,0.8493,0.7158,0.5959,0.4548,0.5408,0.5016,0.5614,
-    0.5923,0.5573,0.5237,0.7347,0.6141,0.6000,np.nan,0.4841,0.5277,np.nan,0.5018,
-    0.4099,0.4038]
-dot_rt = np.array(dot_rt)
-
-#%%    
-plt.figure(4)
-plt.clf()
-
 plt.hold(True)
-plt.bar(1, np.nanmean(dot_response[good_readers]), width=0.4, \
-        yerr = np.nanstd(dot_response[good_readers])/np.sqrt(np.sum(~np.isnan(dot_response[good_readers]))), \
-        color=[0.4, 0.4, 0.4], ecolor = [0,0,0], align='center')
-plt.bar(1.5, np.nanmean(dot_response[poor_readers]), width=0.4, \
-        yerr = np.nanstd(dot_response[poor_readers])/np.sqrt(np.sum(~np.isnan(dot_response[poor_readers]))), \
-        color=[0.4, 0.4, 0.4], ecolor = [0,0,0], align='center')
-plt.xticks([1,1.5],('Typical readers','Struggling readers'),fontsize=12)
-plt.yticks(fontsize=12)
-plt.xlim([0.5,2])
-plt.ylim([0,100])
-plt.ylabel('Hit rate',fontsize=14)
-plt.grid(True)
-
-#plt.axes().spines['bottom'].set_facecolor('k')
-#plt.axes().spines['bottom'].set_linewidth(1)
-#plt.axes().set_aspect('auto')
-#plt.axes().tick_params(axis='both',direction='out',width=1,color=[0,0,0],length=5,bottom=True,left=True,top=False,right=False)
-plt.show()
-
-os.chdir('figures')
-plt.savefig('dot_beh_hitrate.png',dpi=600)
-plt.savefig('dot_beh_hitrate.pdf',dpi=600)
-os.chdir('..')
-
-temp = dot_response[good_readers]
-a = temp[np.where(~np.isnan(temp))[0]]
-temp = dot_response[poor_readers]
-b = temp[np.where(~np.isnan(temp))[0]]
-
-stats.ttest_ind(a,b)
-
-plt.figure(5)
-plt.clf()
-plt.hold(True)
-plt.bar(1, np.nanmean(dot_rt[good_readers]), width=0.4, \
-        yerr = np.nanstd(dot_rt[good_readers])/np.sqrt(np.sum(~np.isnan(dot_rt[good_readers]))), \
-        color=[0.4, 0.4, 0.4], ecolor = [0,0,0], align='center')
-plt.bar(1.5, np.nanmean(dot_rt[poor_readers]), width=0.4, \
-        yerr = np.nanstd(dot_rt[poor_readers])/np.sqrt(np.sum(~np.isnan(dot_rt[poor_readers]))), \
-        color=[0.4, 0.4, 0.4], ecolor = [0,0,0], align='center')
-plt.xticks([1,1.5],('Typical readers','Struggling readers'))
-plt.xlim([0.5,2])
+plt.bar(0.9, np.nanmean(hit_rate[good_readers]), width=0.2, \
+        yerr = np.nanstd(hit_rate[good_readers])/np.sqrt(np.sum(~np.isnan(hit_rate[good_readers]))), \
+        color=[0.4, 0.4, 0.4], ecolor = [0,0,0])
+plt.bar(1.9, np.nanmean(hit_rate[poor_readers]), width=0.2, \
+        yerr = np.nanstd(hit_rate[poor_readers])/np.sqrt(np.sum(~np.isnan(hit_rate[poor_readers]))), \
+        color=[0.4, 0.4, 0.4], ecolor = [0,0,0])
+plt.xticks([1,2],('Typical readers','Struggling readers'))
+plt.xlim([0.5,2.5])
 plt.ylim([0,1])
-plt.ylabel('Reaction time (s)')
+plt.ylabel('Hit rate')
 plt.show()
+#print(hit_rate)
+#print(overall_pseudo_rt)
 
-os.chdir('figures')
-plt.savefig('dot_beh_rt.png',dpi=600)
-plt.savefig('dot_beh_rt.pdf',dpi=600)
-os.chdir('..')
-
-temp = dot_rt[good_readers]
+temp = hit_rate[good_readers]
 a = temp[np.where(~np.isnan(temp))[0]]
-temp = dot_rt[poor_readers]
+temp = hit_rate[poor_readers]
 b = temp[np.where(~np.isnan(temp))[0]]
 
 stats.ttest_ind(a,b)
-
-a = np.where(~np.isnan(dot_rt))[0]
-plt.figure(6)
-plt.clf()
-
-ax = plt.subplot()
-fit = np.polyfit(twre_index[a], dot_rt[a], deg=1)
-ax.plot(twre_index[a], fit[0] * twre_index[a] + fit[1], color=[0,0,0])
-ax.scatter(twre_index[a], dot_rt[a], s=50, c=[0.4, 0.4, 0.4], edgecolors = [1, 1, 1], alpha=1)
-stats.pearsonr(twre_index[a],dot_rt[a]) 
-
-os.chdir('figures')
-plt.savefig('dot_corr_brs_rt.png',dpi=600)
-plt.savefig('dot_corr_brs_rt.pdf',dpi=600)
-os.chdir('..')
-
-plt.figure(7)
-plt.clf()
-
-ax = plt.subplot()
-fit = np.polyfit(twre_index[a], dot_response[a], deg=1)
-ax.plot(twre_index[a], fit[0] * twre_index[a] + fit[1], color=[0,0,0])
-ax.scatter(twre_index[a], dot_response[a], s=50, c=[0.4, 0.4, 0.4], edgecolors = [1, 1, 1], alpha=1)
-plt.ylim([0,102])
-stats.pearsonr(twre_index[a],dot_response[a]) 
-
-os.chdir('figures')
-plt.savefig('dot_corr_brs_hitrate.png',dpi=600)
-plt.savefig('dot_corr_brs_hitrate.pdf',dpi=600)
-os.chdir('..')
-
-
+    
 #%%
-""" To visualize each subject """
-for k, s in enumerate(session1):
+for k, s in enumerate(session2):
     os.chdir(os.path.join(raw_dir,s))
     os.chdir('lists')
     
-    if s == '164_sf160707':
-        run_names = ['1', '2', '3', '5', '6']
+    if s == '172_th160825':
+        run_names = ['1', '2', '3', '4', '5']
     elif s == '170_gm160613':
         run_names = ['1', '2', '3', '5', '6']
     else:
@@ -520,7 +343,7 @@ for k, s in enumerate(session1):
     
     os.chdir(raw_dir)
     os.chdir('figures')
-    os.chdir('events')
+    os.chdir('events2')
     figure_name = s + '.png'
     plt.savefig(figure_name)
     

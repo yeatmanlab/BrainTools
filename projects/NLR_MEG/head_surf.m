@@ -12,7 +12,7 @@ sDir = '/mnt/diskArray/projects/avg_fsurfer';
 cd(sDir)
 
 d = dir('NLR*')
-subList = {'NLR_205_AC'};
+subList = {'NLR_IB357'};
 
 %%
 origEnv = getenv('SUBJECTS_DIR')

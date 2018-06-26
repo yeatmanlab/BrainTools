@@ -1,13 +1,15 @@
-
+import os
+import shutil
+import glob
+import numpy as np
+    
 def nlr_organizeMEG_mnefun(raw_dir=None, out_dir=None, subs=None, sess=None):
 # TODO: WE DO NOT YET DEAL WITH THE FACT THAT THERE MAY BE MISSING RUNS FOR
 # SOME SUBJECTS. IN THIS CASE, WE RENAME THE FILES IMPROPERLY. WE NEED TO
 # RECORD THE RUN NUMBERS BEFORE COPYING THE FILES
-    import os
-    import shutil
-    import glob
-    import numpy as np
-
+    
+    print('Test...')
+    
     # define subjects and sessions
     if raw_dir == None:
         raw_dir = '/mnt/diskArray/projects/MEG/nlr/raw'
@@ -15,6 +17,7 @@ def nlr_organizeMEG_mnefun(raw_dir=None, out_dir=None, subs=None, sess=None):
         # subs = ['202_dd', '203_am']
         subs = sorted(glob.glob(os.path.join(raw_dir, '1*_*'))) # sjjoo-20160824: Let's sort them
         subs.extend(sorted(glob.glob(os.path.join(raw_dir, '2*_*')))) # sjjoo-20160824: Let's sort them
+        subs.extend(sorted(glob.glob(os.path.join(raw_dir, '2*_*'))))
         # remove base path
         for n, s in enumerate(subs):
             subs[n] = os.path.basename(subs[n])

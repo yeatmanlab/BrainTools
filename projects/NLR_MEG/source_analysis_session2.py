@@ -25,6 +25,9 @@ from mne.stats import (spatio_temporal_cluster_1samp_test,
 
 from mne import set_config
 import matplotlib.font_manager as font_manager
+import csv
+os.chdir('/home/sjjoo/git/BrainTools/projects/NLR_MEG')
+from plotit import plotit
 
 set_config('MNE_MEMMAP_MIN_SIZE', '1M')
 set_config('MNE_CACHE_DIR', '.tmp')
@@ -35,89 +38,48 @@ this_env = copy.copy(os.environ)
 fs_dir = '/mnt/diskArray/projects/avg_fsurfer'
 this_env['SUBJECTS_DIR'] = fs_dir
 
-raw_dir = '/mnt/scratch/NLR_MEG4'
+raw_dir = '/mnt/scratch/NLR_MEG3'
 
 os.chdir(raw_dir)
 
-subs = ['NLR_102_RS','NLR_103_AC','NLR_110_HH','NLR_127_AM',
-        'NLR_130_RW','NLR_132_WP','NLR_133_ML','NLR_145_AC','NLR_151_RD',
-        'NLR_152_TC','NLR_160_EK','NLR_161_AK','NLR_163_LF','NLR_164_SF',
-        'NLR_170_GM','NLR_172_TH','NLR_174_HS','NLR_179_GM','NLR_180_ZD',
-        'NLR_187_NB','NLR_203_AM','NLR_204_AM','NLR_205_AC','NLR_206_LM',
-        'NLR_207_AH','NLR_211_LB','NLR_150_MG',
-        'NLR_GB310','NLR_KB218','NLR_JB423','NLR_GB267','NLR_JB420',
-        'NLR_HB275','NLR_197_BK','NLR_GB355','NLR_GB387',
-        'NLR_HB205','NLR_IB319','NLR_JB227','NLR_JB486','NLR_KB396'] # 'NLR_202_DD','NLR_105_BB','NLR_150_MG','NLR_201_GS',
+subs = ['NLR_102_RS','NLR_110_HH','NLR_145_AC','NLR_150_MG',
+        'NLR_152_TC','NLR_160_EK','NLR_161_AK','NLR_162_EF','NLR_163_LF',
+        'NLR_164_SF','NLR_170_GM','NLR_172_TH','NLR_174_HS','NLR_179_GM',
+        'NLR_180_ZD','NLR_201_GS',
+        'NLR_204_AM','NLR_205_AC','NLR_207_AH','NLR_210_SB','NLR_211_LB',
+        'NLR_GB310','NLR_KB218','NLR_GB267','NLR_JB420', 'NLR_HB275','NLR_GB355'] 
 
-brs = [87, 102, 78, 115,
-       91, 121, 77, 91, 93,
-       88, 75, 90, 66, 59,
-       81, 84, 81, 72, 71, 
-       121,75, 66, 90, 93, 
-       101, 56, 93,
-       76, 83, 69, 93, 68,
-       97, 73, 73, 88,
-       113, 119, 83, 68, 107] #75 101, 93,
-
-brs = np.array(brs)
-
-swe = [89, 93, 66, 123,
-        89, 111, 71, 92, 85,
-        88, 72, 93, 55, 55,
-        89, 57, 66, 79, 61,
-        129, 78, 55, 87, 82,
-        89, 55, 91,
-        59, 85, 55, 82, 55,
-        72, 62, 81, 84,
-        121, 110, 86, 68, 105]
-swe = np.array(swe)
-
-swe_raw = [62, 76, 42, 83,
-        67, 76, 21, 54, 21,
-        61, 45, 48, 17, 11,
-        70, 19, 10, 57, 12,
-        86, 51, 13, 30, 54,
-        25, 27, 35,
-        10, 66, 18, 18, 20,
-        37, 23, 17, 36,
-        79, 74, 64, 42, 78]
-swe_raw = np.array(swe_raw)
-
-twre = [87, 102, 67, 111,
-        85, 110, 67, 84, 87,
-        86, 63, 81, 60, 55,
-        71, 63, 68, 67, 64,
-        127, 73, 59, 88, 79,
-        91, 57, 92,
-        67, 77, 57, 80, 53,
-        66, 58, 85, 79,
-        116, 110, 78, 66, 101]
-twre = np.array(twre)
+session2 = ['102_rs160815','110_hh160809',
+       '145_ac160823','150_mg160825',
+       '152_tc160623','160_ek160915','161_ak160916','162_ef160829','163_lf160920',
+       '164_sf160920','170_gm160822','172_th160825','174_hs160829','179_gm160913',
+       '180_zd160826','201_gs150925',
+       '204_am151120','205_ac160202','207_ah160809','210_sb160822','211_lb160823',
+       'nlr_gb310170829','nlr_kb218170829','nlr_gb267170911','nlr_jb420170828',
+       'nlr_hb275170828','nlr_gb355170907']
 
 
-age = [125, 132, 138, 109,
-       138, 108, 98, 105, 87,
-       131, 123, 95, 112, 133,
-       152, 103, 89, 138, 93,
-       117, 122, 109, 90, 111,
-       86, 147, 89,
-       94, 148, 121, 87, 121,
-       107, 105, 88, 94,
-       101, 110, 132, 127, 135]
-age = np.divide(age, 12)
-# Session 1
-# subs are synced up with session1 folder names...
-#
-session1 = ['102_rs160618','103_ac150609','110_hh160608','127_am161004',
-            '130_rw151221','132_wp160919','133_ml151124','145_ac160621','151_rd160620',
-            '152_tc160422','160_ek160627','161_ak160627','163_lf160707','164_sf160707',
-            '170_gm160613','172_th160614','174_hs160620','179_gm160701','180_zd160621',
-            '187_nb161017','203_am150831','204_am150829','205_ac151208','206_lm151119',
-            '207_ah160608','211_lb160617','150_mg160606',
-            'nlr_gb310170614','nlr_kb218170619','nlr_jb423170620','nlr_gb267170620','nlr_jb420170621',
-            'nlr_hb275170622','197_bk170622','nlr_gb355170606','nlr_gb387170608',
-            'nlr_hb205170825','nlr_ib319170825','nlr_jb227170811','nlr_jb486170803','nlr_kb396170808'] #'202_dd150919'(# of average is zero) '105_bb150713'(# of average is less than 10)
-              #,(# of average is less than 20) '201_gs150729'(# of average is less than 10)
+twre_index1 = [87,66,84,92,
+               86,63,81,53,60,
+               55,71,63,68,67,
+               64,79,
+               59,84,91,76,57,
+               67,77,80,53,72,85]
+twre_index2 = [90,76,94,115,
+               85,75,82,64,75,
+               63,83,77,84,75,
+               68,79,
+               62,90,105,75,71,
+               69,83,76,62,73,94]
+twre_index1 = np.array(twre_index1)
+twre_index2 = np.array(twre_index2)
+
+#age1 = [125.6885, 132.9501, 122.0434, 138.4349, 97.6347, 138.1420, 108.2457, 98.0631, 105.8147, 89.9132,
+#       87.6465, 131.8660, 123.7174, 95.959, 112.416, 133.8042, 152.4639, 103.4823, 89.8475, 138.4020,
+#       93.8568, 117.0814, 123.6202, 122.9304, 109.1656, 90.6058,
+#       111.9593,86.0381,147.2063,95.8699,148.0802,122.5896,88.7162,123.0495,110.6645,105.3069,88.9143,95.2879,106.2852,
+#       122.2915,114.4389,136.1496,128.6246,137.9216,122.7528]
+#age1 = np.divide(age1, 12)
 
 n_subjects = len(subs)
 
@@ -134,221 +96,85 @@ c_table = (    (0.6510,    0.8078,    0.8902), # Blue, Green, Red, Orange, Purpl
     (1.0000,    1.0000,    0.6000),
     (0.6941,    0.3490,    0.1569))
 
-method = "dSPM"
-snr = 3.
-lambda2 = 1. / snr ** 2
+fname_data = op.join(raw_dir, 'session2_data_loose_depth8_normal.npy')
 
-m1 = np.logical_and(np.transpose(swe) > 85, np.transpose(age) <= 12)
-m2 = np.logical_and(np.transpose(swe) <= 85, np.transpose(age) <= 12)
+#%%
+""" Some checks """
+n = 38
+os.chdir(os.path.join(raw_dir,session2[n]))
+os.chdir('inverse')
+fn = 'All_40-sss_eq_'+session2[n]+'-ave.fif'
+evoked = mne.read_evokeds(fn, condition=0, 
+                baseline=(None,0), kind='average', proj=True)
+    
+info = evoked.info 
+    
+if os.path.isdir('../forward'):
+    os.chdir('../forward')
 
-m1[16] = False # NLR_174_HS: This subject has a lot of noise in the raw data--should have been discarded
-m2[16] = False
-#m1[15] = False # NLR_172_TH
-#m2[15] = False
-#
-#m1[19] = False # NLR_187_NB
-#m2[19] = False
-#m1[24] = False # NLR_207_AH
-#m2[24] = False
-#
-#m1[32] = False # NLR_HB275
-#m2[32] = False
-#
-#m1[26] = False # NLR_150_MG
-#m2[26] = False
-#m1[29] = False # NLR_JB423
-#m2[29] = False
-#m1[33] = False # NLR_197_BK
-#m2[33] = False
-#m1[34] = False # NLR_GB355
-#m2[34] = False
-m1[38] = False # NLR_JB227 n_epochs < 10
-m2[38] = False
+trans = session2[n] + '-trans.fif'
+#    Take a look at the sensors
+mne.viz.plot_trans(info, trans, subject=subs[n], dig=True,
+                   meg_sensors=True, subjects_dir=fs_dir)
+    
+os.chdir(os.path.join(raw_dir,session2[n]))
+os.chdir('epochs')
+epo = mne.read_epochs('All_40-sss_'+session2[n]+'-epo.fif',proj='delayed')
+epo.average().plot(proj='interactive')
 
-good_readers = np.where(m1)[0]
-poor_readers = np.where(m2)[0]
-
-a1 = np.transpose(age) > 9
-a2 = np.logical_not(a1)
-
-a1[16] = False # NLR_174_HS: This subject has a lot of noise in the raw data--should have been discarded
-a2[16] = False
-#a1[15] = False # NLR_172_TH
-#a2[15] = False
-#a1[19] = False # NLR_187_NB
-#a2[19] = False
-#a1[24] = False # NLR_207_AH
-#a2[24] = False
-#
-#a1[32] = False # NLR_HB275
-#a2[32] = False
-#a1[33] = False # NLR_197_BK
-#a2[33] = False
-#a1[26] = False # NLR_150_MG
-#a2[26] = False
-#a1[29] = False # NLR_JB423
-#a2[29] = False
-#a1[34] = False # NLR_GB355
-#a2[34] = False
-a1[38] = False # NLR_JB227
-a2[38] = False
-
-old_readers = np.where(a1)[0]
-young_readers = np.where(a2)[0]
-
-all_subject = []
-all_subject.extend(good_readers)
-all_subject.extend(poor_readers)
-all_subject.sort()
-
-poor_subs = []
-for n in np.arange(0,len(poor_readers)):
-    poor_subs.append(subs[poor_readers[n]])
-
-#m1 = np.transpose(age) > 9
-#
-#m2 = np.logical_not(m1)
-#
-#m2[12] = False
-#m2[16] = False
-#m2[26] = False
-#old_readers = np.where(m1)[0]
-#young_readers = np.where(m2)[0]
-#
-#all_readers = []
-#all_readers.extend(good_readers)
-#all_readers.extend(poor_readers)
-#all_readers.sort()
-
-fname_data = op.join(raw_dir, 'session1_data_ico5_headpos.npy')
 #%%
 """
-Here we do the real deal...
+Here we load the data
 """            
 # Session 1
-load_data = False
+os.chdir(raw_dir)
+X13 = np.load(fname_data)
+orig_times = np.load('session2_times.npy')
+tstep = np.load('session2_tstep.npy')
+n_epochs = np.load('session2_n_averages.npy')
+tmin = -0.1
 
-method = "dSPM" 
-snr = 3.
-lambda2 = 1. / snr ** 2
-#conditions1 = [0, 2, 4, 6, 8, 16, 18, 20, 22, 24] # Lets compare word vs. scramble
-conditions1 = ['word_c254_p20_dot', 'word_c254_p50_dot', 'word_c137_p20_dot',
-               'word_c254_p80_dot', 'word_c137_p80_dot', #'bigram_c254_p20_dot',
-#               'bigram_c254_p50_dot', 'bigram_c137_p20_dot',
-               'word_c254_p20_word', 'word_c254_p50_word', 'word_c137_p20_word',
-               'word_c254_p80_word', 'word_c137_p80_word', #'bigram_c254_p20_word',
-#               'bigram_c254_p50_word', 'bigram_c137_p20_word'
-               ]
-#    conditions2 = [16, 22] # Lets compare word vs. scramble
-X13 = np.empty((20484, 481, n_subjects, len(conditions1)))
-#word_data = np.empty((20484, 421, n_subjects, len(conditions1[8:])))
+#m1 = np.logical_and(np.transpose(twre_index) >= 85, np.transpose(age) <= 13)
+#m2 = np.logical_and(np.transpose(twre_index) < 85, np.transpose(age) <= 13)
+##m4 = np.logical_and(np.transpose(twre_index) >= 80, np.transpose(twre_index) < 90)
+#m3 = np.mean(n_epochs,axis=1) < 40
+#m1[np.where(m3)] = False
+#m2[np.where(m3)] = False
+#
+#good_readers = np.where(m1)[0]
+#poor_readers = np.where(m2)[0]
+##middle_readers = np.where(m4)[0]
+#
+#a1 = np.transpose(age) > 9
+#a2 = np.logical_not(a1)
+#
+#old_readers = np.where(a1)[0]
+#young_readers = np.where(a2)[0]
+#
+#all_subject = []
+#all_subject.extend(good_readers)
+#all_subject.extend(poor_readers)
+##all_subject.extend(middle_readers)
+#all_subject.sort()
+
 fs_vertices = [np.arange(10242)] * 2
 
-n_epochs = np.empty((n_subjects,len(conditions1)))
-       
-if load_data == False:
-    for n, s in enumerate(session1):  
-        os.chdir(os.path.join(raw_dir,session1[n]))
-        os.chdir('inverse')
-        
-        fn = 'Conditions_40-sss_eq_'+session1[n]+'-ave.fif'
-        fn_inv = session1[n] + '-inv-ico5.fif'
-        inv = mne.minimum_norm.read_inverse_operator(fn_inv, verbose=None)
-        
-        for iCond in np.arange(0,len(conditions1)):
-            evoked = mne.read_evokeds(fn, condition=conditions1[iCond], 
-                                  baseline=(None,0), kind='average', proj=True)
-            
-            n_epochs[n][iCond] = evoked.nave
-            
-            stc = mne.minimum_norm.apply_inverse(evoked,inv,lambda2, method=method, pick_ori="normal")
-            
-            stc.crop(-0.1, 0.7)
-            tmin = stc.tmin
-            tstep = stc.tstep
-            times = stc.times
-            # Average brain
-            """
-            One should check if morph map is current and correct. Otherwise, it will spit out and error.
-            Check SUBJECTS_DIR/morph-maps
-            """
-            morph_mat = mne.compute_morph_matrix(subs[n], 'fsaverage', stc.vertices,
-                                                 fs_vertices, smooth=None,
-                                                 subjects_dir=fs_dir)
-            stc_fsaverage = stc.morph_precomputed('fsaverage', fs_vertices, morph_mat)
-        #    morph_dat = mne.morph_data(subs[n], 'fsaverage', stc, n_jobs=16,
-        #                        grade=fs_vertices, subjects_dir=fs_dir)
-            X13[:,:,n,iCond] = stc_fsaverage.data
+#%% 
+""" Downsample the data """
+sample = np.arange(0,len(orig_times),2)
+times = orig_times[sample]
+tstep = 2*tstep
+X11 = X13[:,sample,:,:]
+del X13
+X11 = np.abs(X11)
 
-    os.chdir(raw_dir)
-    np.save(fname_data, X13)
-    np.save('session1_times.npy',times)
-    np.save('session1_tstep.npy',tstep)
-    np.save('session1_n_averages.npy',n_epochs)
-else:
-    os.chdir(raw_dir)
-    X13 = np.load(fname_data)
-    times = np.load('session1_times.npy')
-    tstep = np.load('session1_tstep.npy')
-    n_epochs = np.load('session1_n_averages.npy')
-    tmin = -0.1
-
-#%%
-"""
-Let's just add or modify subjects
-"""
-X13 = np.load(fname_data)
-
-add_subject = ['179_gm160701']
-
-n = session1.index(add_subject[0])
-os.chdir(os.path.join(raw_dir,session1[n]))
-os.chdir('inverse')
-
-fn = 'Conditions_40-sss_eq_'+session1[n]+'-ave.fif'
-
-###############################################################################
-""" Different sources """
-fn_inv = session1[n] + '-inv-ico5.fif'
-fn_inv = session1[n] + '-inv-oct6.fif'
-###############################################################################
-
-inv = mne.minimum_norm.read_inverse_operator(fn_inv, verbose=None)
-
-for iCond in np.arange(0,len(conditions1)):
-    evoked = mne.read_evokeds(fn, condition=conditions1[iCond], 
-                          baseline=(None,0), kind='average', proj=True)
-    
-    stc = mne.minimum_norm.apply_inverse(evoked,inv,lambda2, method=method, pick_ori=None)
-    
-    stc.crop(-0.1, 0.7)
-    tmin = stc.tmin
-    tstep = stc.tstep
-    times = stc.times
-    # Average brain
-    fs_vertices = [np.arange(10242)] * 2
-    morph_mat = mne.compute_morph_matrix(subs[n], 'fsaverage', stc.vertices,
-                                         fs_vertices, smooth=None,
-                                         subjects_dir=fs_dir)
-    stc_fsaverage = stc.morph_precomputed('fsaverage', fs_vertices, morph_mat)
-    
-    X13[:,:,n,iCond] = stc_fsaverage.data
-
-os.chdir(raw_dir)
-np.save(fname_data, X13)
-    
 #%%
 """ Read HCP labels """
 labels = mne.read_labels_from_annot('fsaverage', parc='HCPMMP1', surf_name='white', subjects_dir=fs_dir) #regexp=aparc_label_name
 #aparc_label_name = 'PHT_ROI'#'_IP'#'IFSp_ROI'#'STSvp_ROI'#'STSdp_ROI'#'PH_ROI'#'TE2p_ROI' #'SFL_ROI' #'IFSp_ROI' #'TE2p_ROI' #'inferiortemporal' #'pericalcarine'
-#        anat_label = mne.read_labels_from_annot('fsaverage', parc='aparc',surf_name='white',
-#               subjects_dir=fs_dir, regexp=aparc_label_name)
+anat_label = mne.read_labels_from_annot('fsaverage', parc='aparc',surf_name='white',
+       subjects_dir=fs_dir) #, regexp=aparc_label_name)
 #%%
-#labels = mne.read_labels_from_annot('fsaverage', 'HCPMMP1', 'lh', subjects_dir=fs_dir)
-#aud_label = [label for label in labels if label.name == 'L_A1_ROI-lh'][0]
-#brain.add_label(aud_label, borders=False)
-""" Task effects """
-
 #TE2p_mask_lh = mne.Label.get_vertices_used(TE2p_label[0])
 #TE2p_mask_rh = mne.Label.get_vertices_used(TE2p_label[1])
 
@@ -382,6 +208,9 @@ p946v_label_rh = [label for label in labels if label.name == 'R_p9-46v_ROI-rh'][
 IFSp_label_lh = [label for label in labels if label.name == 'L_IFSp_ROI-lh'][0]
 IFSp_label_rh = [label for label in labels if label.name == 'R_IFSp_ROI-rh'][0]
 
+IFSa_label_lh = [label for label in labels if label.name == 'L_IFSa_ROI-lh'][0]
+IFSa_label_rh = [label for label in labels if label.name == 'R_IFSa_ROI-rh'][0]
+
 IFJp_label_lh = [label for label in labels if label.name == 'L_IFJp_ROI-lh'][0]
 IFJp_label_rh = [label for label in labels if label.name == 'R_IFJp_ROI-rh'][0]
 
@@ -393,6 +222,12 @@ a45_label_rh = [label for label in labels if label.name == 'R_45_ROI-rh'][0]
 
 a44_label_lh = [label for label in labels if label.name == 'L_44_ROI-lh'][0]
 a44_label_rh = [label for label in labels if label.name == 'R_44_ROI-rh'][0]
+
+a43_label_lh = [label for label in labels if label.name == 'L_43_ROI-lh'][0]
+a43_label_rh = [label for label in labels if label.name == 'R_43_ROI-rh'][0]
+
+a9_46v_lh = [label for label in labels if label.name == 'L_a9-46v_ROI-lh'][0]
+a9_46v_rh = [label for label in labels if label.name == 'R_a9-46v_ROI-rh'][0]
 
 PGi_label_lh = [label for label in labels if label.name == 'L_PGi_ROI-lh'][0]
 PGi_label_rh = [label for label in labels if label.name == 'R_PGi_ROI-rh'][0]
@@ -406,11 +241,23 @@ STSvp_label_rh = [label for label in labels if label.name == 'R_STSvp_ROI-rh'][0
 STSdp_label_lh = [label for label in labels if label.name == 'L_STSdp_ROI-lh'][0]
 STSdp_label_rh = [label for label in labels if label.name == 'R_STSdp_ROI-rh'][0]
 
+STSva_label_lh = [label for label in labels if label.name == 'L_STSva_ROI-lh'][0]
+STSva_label_rh = [label for label in labels if label.name == 'R_STSva_ROI-rh'][0]
+
+STSda_label_lh = [label for label in labels if label.name == 'L_STSda_ROI-lh'][0]
+STSda_label_rh = [label for label in labels if label.name == 'R_STSda_ROI-rh'][0]
+
 TPOJ1_label_lh = [label for label in labels if label.name == 'L_TPOJ1_ROI-lh'][0]
 TPOJ1_label_rh = [label for label in labels if label.name == 'R_TPOJ1_ROI-rh'][0]
 
+TPOJ2_label_lh = [label for label in labels if label.name == 'L_TPOJ2_ROI-lh'][0]
+TPOJ2_label_rh = [label for label in labels if label.name == 'R_TPOJ2_ROI-rh'][0]
+
 V1_label_lh = [label for label in labels if label.name == 'L_V1_ROI-lh'][0]
 V1_label_rh = [label for label in labels if label.name == 'R_V1_ROI-rh'][0]
+
+V4_label_lh = [label for label in labels if label.name == 'L_V4_ROI-lh'][0]
+V4_label_rh = [label for label in labels if label.name == 'R_V4_ROI-rh'][0]
 
 LIPd_label_lh = [label for label in labels if label.name == 'L_LIPd_ROI-lh'][0]
 LIPd_label_rh = [label for label in labels if label.name == 'R_LIPd_ROI-rh'][0]
@@ -435,528 +282,585 @@ MBelt_label_rh = [label for label in labels if label.name == 'R_MBelt_ROI-rh'][0
 RI_label_lh = [label for label in labels if label.name == 'L_RI_ROI-lh'][0]
 RI_label_rh = [label for label in labels if label.name == 'R_RI_ROI-rh'][0]
 
+A4_label_lh = [label for label in labels if label.name == 'L_A4_ROI-lh'][0]
+A4_label_rh = [label for label in labels if label.name == 'R_A4_ROI-rh'][0]
+
+PFcm_label_lh = [label for label in labels if label.name == 'L_PFcm_ROI-lh'][0]
+PFcm_label_rh = [label for label in labels if label.name == 'R_PFcm_ROI-rh'][0]
+
+PFm_label_lh = [label for label in labels if label.name == 'L_PFm_ROI-lh'][0]
+PFm_label_rh = [label for label in labels if label.name == 'R_PFm_ROI-rh'][0]
+
+_4_label_lh = [label for label in labels if label.name == 'L_4_ROI-lh'][0]
+_4_label_rh = [label for label in labels if label.name == 'R_4_ROI-rh'][0]
+
+_1_label_lh = [label for label in labels if label.name == 'L_1_ROI-lh'][0]
+_1_label_rh = [label for label in labels if label.name == 'R_1_ROI-rh'][0]
+
+_2_label_lh = [label for label in labels if label.name == 'L_2_ROI-lh'][0]
+_2_label_rh = [label for label in labels if label.name == 'R_2_ROI-rh'][0]
+
+_3a_label_lh = [label for label in labels if label.name == 'L_3a_ROI-lh'][0]
+_3a_label_rh = [label for label in labels if label.name == 'R_3a_ROI-rh'][0]
+
+_3b_label_lh = [label for label in labels if label.name == 'L_3b_ROI-lh'][0]
+_3b_label_rh = [label for label in labels if label.name == 'R_3b_ROI-rh'][0]
+
+_43_label_lh = [label for label in labels if label.name == 'L_43_ROI-lh'][0]
+_43_label_rh = [label for label in labels if label.name == 'R_43_ROI-rh'][0]
+
+_6r_label_lh = [label for label in labels if label.name == 'L_6r_ROI-lh'][0]
+_6r_label_rh = [label for label in labels if label.name == 'R_6r_ROI-rh'][0]
+
+OP1_label_lh = [label for label in labels if label.name == 'L_OP1_ROI-lh'][0]
+OP1_label_rh = [label for label in labels if label.name == 'R_OP1_ROI-rh'][0]
+
+OP23_label_lh = [label for label in labels if label.name == 'L_OP2-3_ROI-lh'][0]
+OP23_label_rh = [label for label in labels if label.name == 'R_OP2-3_ROI-rh'][0]
+
+OP4_label_lh = [label for label in labels if label.name == 'L_OP4_ROI-lh'][0]
+OP4_label_rh = [label for label in labels if label.name == 'R_OP4_ROI-rh'][0]
+
+PFop_label_lh = [label for label in labels if label.name == 'L_PFop_ROI-lh'][0]
+PFop_label_rh = [label for label in labels if label.name == 'R_PFop_ROI-rh'][0]
+
+A5_label_lh = [label for label in labels if label.name == 'L_A5_ROI-lh'][0]
+A5_label_rh = [label for label in labels if label.name == 'R_A5_ROI-rh'][0]
+
+STV_label_lh = [label for label in labels if label.name == 'L_STV_ROI-lh'][0]
+STV_label_rh = [label for label in labels if label.name == 'R_STV_ROI-rh'][0]
+
+RI_label_lh = [label for label in labels if label.name == 'L_RI_ROI-lh'][0]
+RI_label_rh = [label for label in labels if label.name == 'R_RI_ROI-rh'][0]
+
+PF_label_lh = [label for label in labels if label.name == 'L_PF_ROI-lh'][0]
+PF_label_rh = [label for label in labels if label.name == 'R_PF_ROI-rh'][0]
+
+PFt_label_lh = [label for label in labels if label.name == 'L_PFt_ROI-lh'][0]
+PFt_label_rh = [label for label in labels if label.name == 'R_PFt_ROI-rh'][0]
+
+p47r_label_lh = [label for label in labels if label.name == 'L_p47r_ROI-lh'][0]
+p47r_label_rh = [label for label in labels if label.name == 'R_p47r_ROI-rh'][0]
+
+FOP5_label_lh = [label for label in labels if label.name == 'L_FOP5_ROI-lh'][0]
+FOP5_label_rh = [label for label in labels if label.name == 'R_FOP5_ROI-rh'][0]
+
+FOP4_label_lh = [label for label in labels if label.name == 'L_FOP4_ROI-lh'][0]
+FOP4_label_rh = [label for label in labels if label.name == 'R_FOP4_ROI-rh'][0]
+
+FOP3_label_lh = [label for label in labels if label.name == 'L_FOP3_ROI-lh'][0]
+FOP3_label_rh = [label for label in labels if label.name == 'R_FOP3_ROI-rh'][0]
+
+FOP2_label_lh = [label for label in labels if label.name == 'L_FOP2_ROI-lh'][0]
+FOP2_label_rh = [label for label in labels if label.name == 'R_FOP2_ROI-rh'][0]
+
+Ig_label_lh = [label for label in labels if label.name == 'L_Ig_ROI-lh'][0]
+Ig_label_rh = [label for label in labels if label.name == 'R_Ig_ROI-rh'][0]
+
+temp1_label_lh = [label for label in anat_label if label.name == 'parsopercularis-lh'][0]
+temp1_label_rh = [label for label in anat_label if label.name == 'parsopercularis-rh'][0]
+temp2_label_lh = [label for label in anat_label if label.name == 'parsorbitalis-lh'][0]
+temp2_label_rh = [label for label in anat_label if label.name == 'parsorbitalis-rh'][0]
+temp3_label_lh = [label for label in anat_label if label.name == 'parstriangularis-lh'][0]
+temp3_label_rh = [label for label in anat_label if label.name == 'parstriangularis-rh'][0]
+temp4_label_lh = [label for label in anat_label if label.name == 'precentral-lh'][0]
+temp4_label_rh = [label for label in anat_label if label.name == 'precentral-rh'][0]
+
 #%%
 #new_data = X13[:,:,all_subject,:]
 #data1 = np.subtract(np.mean(new_data[:,:,:,[5]],axis=3), np.mean(new_data[:,:,:,[0]],axis=3))
 #data1 = np.mean(new_data[:,:,:,[5]],axis=3)
 #del new_data
 
-data11 = X13[:,:,all_subject,[5]]
-data11 = X13[:,:,all_subject,5] - X13[:,:,all_subject,8]
+#lex_hC_lN = X13[:,:,:,5]
+#dot_hC_lN = X13[:,:,:,0]
+data11 = np.mean(X11[:,:,:,[5]],axis=3) - np.mean(X11[:,:,:,[8]],axis=3)
 data11 = np.transpose(data11,[2,1,0])
 
+#%%
 stat_fun = partial(mne.stats.ttest_1samp_no_p)
 
-temp3 = mne.SourceEstimate(np.transpose(stat_fun(data11)), fs_vertices, tmin, tstep,subject='fsaverage') # np.transpose(stat_fun(data11))
-#temp3 = mne.SourceEstimate(np.transpose(data11[0,:,:]), fs_vertices, tmin, tstep,subject='fsaverage')
+s_group = all_subject
 
-#threshold = -scipy.stats.distributions.t.ppf(p_thresh, n_samples - 1)
-threshold = 1.7 #1.69 2.46
-brain3_1 = temp3.plot(hemi='lh', subjects_dir=fs_dir, views = ['ven'], #views=['lat','ven','med'], #transparent = True,
-          initial_time=0.18, clim=dict(kind='value', lims=[1.5, threshold, 7]), background='white', colorbar=False) #np.max(temp3.data[:,:])])) #pos_lims=[0, 4, 4.5] #np.max(temp3.data[:,:])]))
+p_threshold = 0.05
+t_threshold = -stats.distributions.t.ppf(p_threshold / 2., len(s_group) - 1)
 
-brain3_1.save_movie('AllSubjects_WordMinusNoise.mp4',time_dilation = 4.0,framerate = 30)
+#subjects_dir = mne.utils.get_subjects_dir(subjects_dir, raise_error=True)
+#label_dir = op.join(fs_dir, 'fsaverage', 'label')
+#lh = mne.read_label(op.join(label_dir, 'lh.Medial_wall.label'))
+#rh = mne.read_label(op.join(label_dir, 'rh.Medial_wall.label'))
+#medial_vertices = np.concatenate((lh.vertices[lh.vertices < 10242], rh.vertices[rh.vertices < 10242] + 10242))
 
-#threshold = 1 #1.69 2.46
-#brain3_1 = temp3.plot(hemi='lh', subjects_dir=fs_dir, views = ['ven'], #views=['lat','ven','med'], #transparent = True,
-#          initial_time=0.18, clim=dict(kind='value', lims=[0, threshold, 5]))
+#lex_hC_lN[medial_vertices,:,:] = 0
 
-#brain3_1 = temp3.plot(hemi='both', subjects_dir=fs_dir, views = ['ven'], #views=['lat','ven','med'], #transparent = True,
-#          initial_time=0.18, clim=dict(kind='value', lims=[1.5, threshold, 5]))
+#if concatenate is True:
+#    return np.concatenate((lh.vertices[lh.vertices < 10242],
+#                           rh.vertices[rh.vertices < 10242] + 10242))
+#else: 
+#    return [lh.vertices, rh.vertices]
+#    
+temp3 = mne.SourceEstimate(np.transpose(stat_fun(data11[s_group,:,:])), fs_vertices, tmin, tstep, subject='fsaverage')
 
-#brain3_1.save_image('LH_180.pdf')
+brain3_1 = temp3.plot(hemi='lh', subjects_dir=fs_dir, views = 'lat', initial_time=0.40, #['lat','ven','med']
+           clim=dict(kind='value', lims=[1.5, t_threshold, 7])) #clim=dict(kind='value', lims=[2, t_threshold, 7]), size=(800,800))
 
-#brain3_1.add_label(PHT_label_lh, borders=True, color=c_table[0])
-#brain3_1.add_label(TE2a_label_lh, borders=True, color=c_table[1])
-#brain3_1.add_label(TE2p_label_lh, borders=True, color=c_table[1])
-#brain3_1.add_label(TF_label_lh, borders=True, color=c_table[1])
-
-#brain3_1.add_label(PH_label_lh, borders=True, color=c_table[1])
-#brain3_1.add_label(TE1p_label_lh, borders=True, color=c_table[1])
-#brain3_1.add_label(FFC_label_lh, borders=True, color=c_table[3])
-
-#brain3_1.add_label(IFSp_label_lh, borders=True, color=c_table[5])
-#brain3_1.add_label(IFJp_label_lh, borders=True, color=c_table[6])
-#brain3_1.add_label(IFJa_label_lh, borders=True, color=c_table[7])
-#brain3_1.add_label(a45_label_lh, borders=True, color=c_table[8])
-#brain3_1.add_label(a44_label_lh, borders=True, color=c_table[8])
-#brain3_1.add_label(a8C_label_lh, borders=True, color=c_table[8])
-#brain3_1.add_label(p946v_label_lh, borders=True, color=c_table[8])
+#temp3 = mne.SourceEstimate(np.mean(np.abs(X11[:,:,:,5]),axis=2), fs_vertices, tmin, tstep, subject='fsaverage')
 #
-#brain3_1.add_label(PGi_label_lh, borders=True, color=c_table[9])
-#brain3_1.add_label(PGs_label_lh, borders=True, color=c_table[9])
-#
-#brain3_1.add_label(STSvp_label_lh, borders=True, color=c_table[2])
-#brain3_1.add_label(STSdp_label_lh, borders=True, color=c_table[2])
-#brain3_1.add_label(PBelt_label_lh, borders=True, color=c_table[2])
-#brain3_1.add_label(PSL_label_lh, borders=True, color=c_table[2])
-#brain3_1.add_label(TE1p_label_lh, borders=True, color=c_table[2])
-#brain3_1.add_label(LBelt_label_lh, borders=True, color=c_table[2])
-#brain3_1.add_label(A1_label_lh, borders=True, color=c_table[2])
-#brain3_1.add_label(MBelt_label_lh, borders=True, color=c_table[2])
-#brain3_1.add_label(RI_label_lh, borders=True, color=c_table[2])
+#brain3_1 = temp3.plot(hemi='lh', subjects_dir=fs_dir, views = ['lat','ven','med'], initial_time=0.26, #['lat','ven','med']
+#           clim=dict(kind='value', lims=[2, 2.5, 5])) #clim=dict(kind='value', lims=[2, t_threshold, 7]), size=(800,800))
 
-#
-#brain3_1.add_label(V1_label_lh, borders=True, color='k')
-#brain3_1.add_label(LIPd_label_lh, borders=True, color='k')
-#brain3_1.add_label(LIPv_label_lh, borders=True, color='k')
+brain3_1.save_movie('Lex_LH_free_depth8_all_Word_Normal.mp4',time_dilation = 6.0,framerate = 24)
 
-
-#brain3_1.save_movie('Response2Word.mp4',time_dilation = 4.0,framerate = 30)
+"""
+plot(self, subject=None, surface='inflated', hemi='lh', colormap='auto', 
+     time_label='auto', smoothing_steps=10, transparent=None, alpha=1.0, 
+     time_viewer=False, subjects_dir=None, figure=None, views='lat', 
+     colorbar=True, clim='auto', cortex='classic', size=800, background='black', 
+     foreground='white', initial_time=None, time_unit='s')
+"""
 
 #%%
-#brain3_2 = temp3.plot(hemi='rh', subjects_dir=fs_dir,  views='lat',
-#          clim=dict(kind='value', lims=[2.9, 3, np.max(temp3.data[:,:])]),
-#          initial_time=0.15)
-#brain3_2.add_label(PHT_label_rh, borders=True, color=c_table[0])
-#brain3_2.add_label(TE2p_label_rh, borders=True, color=c_table[1])
-#brain3_2.add_label(PH_label_rh, borders=True, color=c_table[2])
-#brain3_2.add_label(FFC_label_rh, borders=True, color=c_table[3])
-#brain3_2.add_label(TE1p_label_rh, borders=True, color=c_table[4])
-#brain3_2.add_label(IFSp_label_rh, borders=True, color=c_table[5])
-#brain3_2.add_label(IFJp_label_rh, borders=True, color=c_table[6])
-#brain3_2.add_label(IFJa_label_rh, borders=True, color=c_table[7])
-#brain3_2.add_label(a45_label_rh, borders=True, color=c_table[8])
+""" Spatio-temporal clustering """
+p_threshold = 0.05
+t_threshold = -stats.distributions.t.ppf(p_threshold / 2., n_subjects - 1)
+s_space = mne.grade_to_tris(5)
 
+# Left hemisphere
+s_space_lh = s_space[s_space[:,0] < 10242]
+connectivity = mne.spatial_tris_connectivity(s_space_lh, remap_vertices = True)
+
+T_obs, clusters, cluster_p_values, H0 = clu = \
+    mne.stats.spatio_temporal_cluster_1samp_test(data11[:,:,0:10242], connectivity=connectivity, n_jobs=12,
+                                       threshold=t_threshold)
+good_cluster_inds = np.where(cluster_p_values < 0.05)[0]
+fsave_vertices = [np.arange(10242), np.array([], int)]
+stc_all_cluster_vis = summarize_clusters_stc(clu, tstep=tstep,
+                                             vertices=fsave_vertices,
+                                             subject='fsaverage')
+
+#%%
+brain1 = stc_all_cluster_vis.plot(
+    hemi='lh', views='lateral', subjects_dir=fs_dir,
+    time_label='Duration significant (ms)', size=(800, 800),
+    smoothing_steps=5, clim=dict(kind='value', lims=[20, 40, 300]))
+
+#brain1.add_label(A4_label_lh, borders=True, color=c_table[2])
+#brain1.add_label(A5_label_lh, borders=True, color=c_table[2])
+#brain1.add_label(STSdp_label_lh, borders=True, color=c_table[2])
+#brain1.add_label(TPOJ1_label_lh, borders=True, color=c_table[2])
+#brain1.add_label(PBelt_label_lh, borders=True, color=c_table[2])
+#brain1.add_label(LBelt_label_lh, borders=True, color=c_table[2])
+brain1.add_label(A1_label_lh, borders=True, color='k')
+temp_auditory_label_l = mne.Label(A4_label_lh.vertices, hemi='lh',name=u'sts_l',pos=A4_label_lh.pos,values= A4_label_lh.values) + \
+        mne.Label(A5_label_lh.vertices, hemi='lh',name=u'sts_l',pos=A5_label_lh.pos,values= A5_label_lh.values) + \
+        mne.Label(STSdp_label_lh.vertices, hemi='lh',name=u'sts_l',pos=STSdp_label_lh.pos,values= STSdp_label_lh.values)+ \
+        mne.Label(TPOJ1_label_lh.vertices, hemi='lh',name=u'sts_l',pos=TPOJ1_label_lh.pos,values= TPOJ1_label_lh.values)+ \
+        mne.Label(PBelt_label_lh.vertices, hemi='lh',name=u'sts_l',pos=PBelt_label_lh.pos,values= PBelt_label_lh.values)+ \
+        mne.Label(LBelt_label_lh.vertices, hemi='lh',name=u'sts_l',pos=LBelt_label_lh.pos,values= LBelt_label_lh.values)
+
+brain1.add_label(temp_auditory_label_l, borders=True, color=c_table[2])
+
+lh_label = stc_all_cluster_vis.in_label(temp_auditory_label_l)
+data = lh_label.data
+lh_label.data[data <= 40] = 0.
+
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = stc_all_cluster_vis.in_label(temp_labels)
+aud_vertices_l = temp.vertices[0]
+
+new_label = mne.Label(aud_vertices_l, hemi='lh')
+brain1.add_label(new_label, borders=True, color=c_table[2])
+
+#brain1.add_label(PFcm_label_lh, borders=True, color=c_table[0])
+#brain1.add_label(PFop_label_lh, borders=True, color=c_table[0])
+#brain1.add_label(RI_label_lh, borders=True, color=c_table[0])
+#brain1.add_label(PF_label_lh, borders=True, color=c_table[0])
+#brain1.add_label(PFt_label_lh, borders=True, color=c_table[0])
+temp_auditory2_label_l = mne.Label(PFcm_label_lh.vertices, hemi='lh',name=u'sts_l',pos=PFcm_label_lh.pos,values= PFcm_label_lh.values) + \
+        mne.Label(PFop_label_lh.vertices, hemi='lh',name=u'sts_l',pos=PFop_label_lh.pos,values= PFop_label_lh.values) + \
+        mne.Label(RI_label_lh.vertices, hemi='lh',name=u'sts_l',pos=RI_label_lh.pos,values= RI_label_lh.values)+ \
+        mne.Label(PF_label_lh.vertices, hemi='lh',name=u'sts_l',pos=PF_label_lh.pos,values= PF_label_lh.values)+ \
+        mne.Label(PFt_label_lh.vertices, hemi='lh',name=u'sts_l',pos=PFt_label_lh.pos,values= PFt_label_lh.values)
+
+brain1.add_label(temp_auditory2_label_l, borders=True, color=c_table[0])
+
+lh_label = stc_all_cluster_vis.in_label(temp_auditory2_label_l)
+data = lh_label.data
+lh_label.data[data <= 40] = 0.
+
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = stc_all_cluster_vis.in_label(temp_labels)
+aud2_vertices_l = temp.vertices[0]
+
+new_label = mne.Label(aud2_vertices_l, hemi='lh')
+brain1.add_label(new_label, borders=True, color=c_table[0])
+
+#brain1.add_label(_3a_label_lh, borders=True, color=c_table[4])
+#brain1.add_label(_3b_label_lh, borders=True, color=c_table[4])
+#brain1.add_label(_4_label_lh, borders=True, color=c_table[4])
+temp_motor_label_l = mne.Label(_3a_label_lh.vertices, hemi='lh',name=u'sts_l',pos=_3a_label_lh.pos,values= _3a_label_lh.values) + \
+        mne.Label(_3b_label_lh.vertices, hemi='lh',name=u'sts_l',pos=_3b_label_lh.pos,values= _3b_label_lh.values) + \
+        mne.Label(_4_label_lh.vertices, hemi='lh',name=u'sts_l',pos=_4_label_lh.pos,values= _4_label_lh.values)
+
+brain1.add_label(temp_motor_label_l, borders=True, color=c_table[4])
+
+lh_label = stc_all_cluster_vis.in_label(temp_motor_label_l)
+data = lh_label.data
+lh_label.data[data <= 40] = 0.
+
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = stc_all_cluster_vis.in_label(temp_labels)
+motor_vertices_l = temp.vertices[0]
+
+new_label = mne.Label(motor_vertices_l, hemi='lh')
+brain1.add_label(new_label, borders=True, color=c_table[4])
+
+#brain1.add_label(_6r_label_lh, borders=True, color=c_table[6])
+#brain1.add_label(a44_label_lh, borders=True, color=c_table[6])
+#brain1.add_label(a45_label_lh, borders=True, color=c_table[6])
+temp_broca_label_l = mne.Label(_6r_label_lh.vertices, hemi='lh',name=u'sts_l',pos=_6r_label_lh.pos,values= _6r_label_lh.values) + \
+        mne.Label(a44_label_lh.vertices, hemi='lh',name=u'sts_l',pos=a44_label_lh.pos,values= a44_label_lh.values) + \
+        mne.Label(a45_label_lh.vertices, hemi='lh',name=u'sts_l',pos=a45_label_lh.pos,values= a45_label_lh.values) + \
+        mne.Label(FOP4_label_lh.vertices, hemi='lh',name=u'sts_l',pos=FOP4_label_lh.pos,values= FOP4_label_lh.values) + \
+        mne.Label(FOP3_label_lh.vertices, hemi='lh',name=u'sts_l',pos=FOP3_label_lh.pos,values= FOP3_label_lh.values) + \
+        mne.Label(FOP5_label_lh.vertices, hemi='lh',name=u'sts_l',pos=FOP5_label_lh.pos,values= FOP5_label_lh.values)
+        
+brain1.add_label(temp_broca_label_l, borders=True, color=c_table[6])
+
+lh_label = stc_all_cluster_vis.in_label(temp_broca_label_l)
+data = lh_label.data
+lh_label.data[data <= 40] = 0.
+
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = stc_all_cluster_vis.in_label(temp_labels)
+broca_vertices_l = temp.vertices[0]
+
+new_label = mne.Label(broca_vertices_l, hemi='lh')
+brain1.add_label(new_label, borders=True, color=c_table[6])
+
+#brain1.add_label(FOP5_label_lh, borders=True, color=c_table[6])
+#brain1.add_label(FOP4_label_lh, borders=True, color=c_table[6])
+#brain1.add_label(FOP3_label_lh, borders=True, color=c_table[6])
+#brain1.add_label(FOP2_label_lh, borders=True, color=c_table[6])
+#
+#brain1.add_label(p47r_label_lh, borders=True, color=c_table[8])
+#brain1.add_label(IFSa_label_lh, borders=True, color=c_table[8])
+#brain1.add_label(a9_46v_lh, borders=True, color=c_table[8])
+temp_frontal_label_l = mne.Label(p47r_label_lh.vertices, hemi='lh',name=u'sts_l',pos=p47r_label_lh.pos,values= p47r_label_lh.values) + \
+        mne.Label(IFSa_label_lh.vertices, hemi='lh',name=u'sts_l',pos=IFSa_label_lh.pos,values= IFSa_label_lh.values) + \
+        mne.Label(a9_46v_lh.vertices, hemi='lh',name=u'sts_l',pos=a9_46v_lh.pos,values= a9_46v_lh.values)
+
+brain1.add_label(temp_frontal_label_l, borders=True, color=c_table[8])
+
+lh_label = stc_all_cluster_vis.in_label(temp_frontal_label_l)
+data = lh_label.data
+lh_label.data[data <= 40] = 0.
+
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = stc_all_cluster_vis.in_label(temp_labels)
+frontal_vertices_l = temp.vertices[0]
+
+new_label = mne.Label(frontal_vertices_l, hemi='lh')
+brain1.add_label(new_label, borders=True, color=c_table[8])
+
+#brain1.add_label(OP23_label_lh, borders=True, color='k')
+#brain1.add_label(Ig_label_lh, borders=True, color='k')
+#brain1.add_label(OP4_label_lh, borders=True, color='k')
+#brain1.add_label(OP1_label_lh, borders=True, color='k')
+temp_sylvian_label_l = mne.Label(OP23_label_lh.vertices, hemi='lh',name=u'sts_l',pos=OP23_label_lh.pos,values= OP23_label_lh.values) + \
+        mne.Label(Ig_label_lh.vertices, hemi='lh',name=u'sts_l',pos=Ig_label_lh.pos,values= Ig_label_lh.values) + \
+        mne.Label(OP4_label_lh.vertices, hemi='lh',name=u'sts_l',pos=OP4_label_lh.pos,values= OP4_label_lh.values) + \
+        mne.Label(OP1_label_lh.vertices, hemi='lh',name=u'sts_l',pos=OP1_label_lh.pos,values= OP1_label_lh.values) + \
+        mne.Label(FOP2_label_lh.vertices, hemi='lh',name=u'sts_l',pos=FOP2_label_lh.pos,values= FOP2_label_lh.values)
+        
+brain1.add_label(temp_sylvian_label_l, borders=True, color=c_table[8])
+
+lh_label = stc_all_cluster_vis.in_label(temp_sylvian_label_l)
+data = lh_label.data
+lh_label.data[data <= 40] = 0.
+
+temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
+                      subjects_dir=fs_dir, connected=False)
+temp = stc_all_cluster_vis.in_label(temp_labels)
+sylvian_vertices_l = temp.vertices[0]
+
+new_label = mne.Label(sylvian_vertices_l, hemi='lh')
+brain1.add_label(new_label, borders=True, color=c_table[8])
+
+#%% Right hemisphere
+s_space_rh = s_space[s_space[:,0] >= 10242]
+connectivity = mne.spatial_tris_connectivity(s_space_rh, remap_vertices = True)
+
+T_obs, clusters, cluster_p_values, H0 = clu = \
+    mne.stats.spatio_temporal_cluster_1samp_test(data11[:,:,10242:], connectivity=connectivity, n_jobs=18,
+                                       threshold=t_threshold)
+good_cluster_inds = np.where(cluster_p_values < 0.05)[0]
+fsave_vertices = [np.array([], int), np.arange(10242)]
+stc_all_cluster_vis2 = summarize_clusters_stc(clu, tstep=tstep,
+                                             vertices=fsave_vertices,
+                                             subject='fsaverage')
+
+brain2 = stc_all_cluster_vis2.plot(
+    hemi='rh', views='lateral', subjects_dir=fs_dir,
+    time_label='Duration significant (ms)', size=(800, 800),
+    smoothing_steps=5, clim=dict(kind='value', lims=[10, 100, 300]))
+
+#%%
+""" AUD 1 """
+M = np.mean(np.mean(X11[aud_vertices_l,:,:,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[aud_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(subs))
+
+plt.figure(1)
+plt.clf()  
+
+plt.subplot(1,2,1)
+plt.hold(True)
+plt.plot(times, M[:,5],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,5]-errM[:,5], M[:,5]+errM[:,5], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,8],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,8]-errM[:,8], M[:,8]+errM[:,8], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([0, 3])
+plt.title('Lexical task')
+
+plt.subplot(1,2,2)
+plt.hold(True)
+plt.plot(times, M[:,0],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,0]-errM[:,0], M[:,0]+errM[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,3],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,3]-errM[:,3], M[:,3]+errM[:,3], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([0, 3])
+plt.title('Dot task')
+
+#%%
+""" AUD 2 """
+
+M = np.mean(np.mean(X11[aud2_vertices_l,:,:,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[aud2_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(all_subject))
+temp1 = X11[:,:,good_readers,:]
+M1 = np.mean(np.mean(temp1[aud2_vertices_l,:,:,:],axis=0),axis=1)
+errM1 = np.std(np.mean(temp1[aud2_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(good_readers))
+del temp1
+temp2 = X11[:,:,poor_readers,:]
+M2 = np.mean(np.mean(temp2[aud2_vertices_l,:,:,:],axis=0),axis=1)
+errM2 = np.std(np.mean(temp2[aud2_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
+del temp2
+
+plotit(times, M, M1, M2, errM, errM1, errM2, yMin=-0, yMax=3)
+
+#%%
+""" Motor """
+
+M = np.mean(np.mean(X11[motor_vertices_l,:,:,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[motor_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(all_subject))
+temp1 = X11[:,:,good_readers,:]
+M1 = np.mean(np.mean(temp1[motor_vertices_l,:,:,:],axis=0),axis=1)
+errM1 = np.std(np.mean(temp1[motor_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(good_readers))
+del temp1
+temp2 = X11[:,:,poor_readers,:]
+M2 = np.mean(np.mean(temp2[motor_vertices_l,:,:,:],axis=0),axis=1)
+errM2 = np.std(np.mean(temp2[motor_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
+del temp2
+
+plotit(times, M, M1, M2, errM, errM1, errM2, yMin=-0, yMax=3)
+
+#%%
+""" Broca """
+
+M = np.mean(np.mean(X11[broca_vertices_l,:,:,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[broca_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(all_subject))
+temp1 = X11[:,:,good_readers,:]
+M1 = np.mean(np.mean(temp1[broca_vertices_l,:,:,:],axis=0),axis=1)
+errM1 = np.std(np.mean(temp1[broca_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(good_readers))
+del temp1
+temp2 = X11[:,:,poor_readers,:]
+M2 = np.mean(np.mean(temp2[broca_vertices_l,:,:,:],axis=0),axis=1)
+errM2 = np.std(np.mean(temp2[broca_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
+del temp2
+
+plotit(times, M, M1, M2, errM, errM1, errM2, yMin=-0, yMax=3, title='Broca')
+
+#%%
+""" Sylvian """
+
+M = np.mean(np.mean(X11[broca_vertices_l,:,:,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[broca_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(all_subject))
+temp1 = X11[:,:,good_readers,:]
+M1 = np.mean(np.mean(temp1[broca_vertices_l,:,:,:],axis=0),axis=1)
+errM1 = np.std(np.mean(temp1[broca_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(good_readers))
+del temp1
+temp2 = X11[:,:,poor_readers,:]
+M2 = np.mean(np.mean(temp2[broca_vertices_l,:,:,:],axis=0),axis=1)
+errM2 = np.std(np.mean(temp2[broca_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
+del temp2
+
+plotit(times, M, M1, M2, errM, errM1, errM2, yMin=-0, yMax=3, title='Sylvian')
+
+#%%
 """ Frontal """
-temp = temp3.in_label(a44_label_lh)
-broca_vertices = temp.vertices[0]
 
-temp = temp3.in_label(a45_label_lh)
-broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
+M = np.mean(np.mean(X11[frontal_vertices_l,:,:,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[frontal_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(all_subject))
+temp1 = X11[:,:,good_readers,:]
+M1 = np.mean(np.mean(temp1[frontal_vertices_l,:,:,:],axis=0),axis=1)
+errM1 = np.std(np.mean(temp1[frontal_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(good_readers))
+del temp1
+temp2 = X11[:,:,poor_readers,:]
+M2 = np.mean(np.mean(temp2[frontal_vertices_l,:,:,:],axis=0),axis=1)
+errM2 = np.std(np.mean(temp2[frontal_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
+del temp2
 
-temp = temp3.in_label(IFSp_label_lh)
-broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
+plotit(times, M, M1, M2, errM, errM1, errM2, yMin=-0, yMax=3, title='Frontal')
 
-#temp = temp3.in_label(IFJp_label_lh)
-#broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
-
-#temp = temp3.in_label(IFJa_label_lh)
-#broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
-
-""" Ventral """
-temp = temp3.in_label(TE2p_label_lh)
-ventral_vertices = temp.vertices[0]
-
-temp = temp3.in_label(PH_label_lh)
-ventral_vertices = np.unique(np.append(ventral_vertices, temp.vertices[0]))
-#
-#temp = temp3.in_label(FFC_label_lh)
-#ventral_vertices = np.unique(np.append(ventral_vertices, temp.vertices[0]))
-
-""" Temporal """
-temp = temp3.in_label(PGi_label_lh)
-w_vertices = temp.vertices[0]
-
-temp = temp3.in_label(PGs_label_lh)
-w_vertices = np.unique(np.append(w_vertices, temp.vertices[0]))
-
-#temp = temp3.in_label(TPOJ1_label_lh)
-#w_vertices = np.unique(np.append(w_vertices, temp.vertices[0]))
-
-""" V1 """
-temp = temp3.in_label(V1_label_lh)
-v1_vertices = temp.vertices[0]
 
 #%%
-del data11
+""" VTC """
+task = 5
 
-#%%
-""" V1 """
-#mask = np.logical_and(times >= 0.08, times <= 0.12)
-#
-#lh_label = temp3.in_label(V1_label_lh)
-#data = np.mean(lh_label.data[:,mask],axis=1)
-#lh_label.data[data < threshold] = 0.
-#
-#temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-#                      subjects_dir=fs_dir, connected=False)
-#temp = temp3.in_label(temp_labels)
-#v1_vertices = temp.vertices[0]
-#new_label = mne.Label(v1_vertices, hemi='lh')
-#brain3_1.add_label(new_label, borders=True, color='k')
-
-""" Ventral """
-mask = np.logical_and(times >= 0.16, times <= 0.20)
-
-lh_label = temp3.in_label(TE2p_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < threshold] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-ventral_vertices = temp.vertices[0]
-
-#lh_label = temp3.in_label(TE2a_label_lh)
-#data = np.mean(lh_label.data[:,mask],axis=1)
-#lh_label.data[data < threshold] = 0.
-#
-#temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-#                      subjects_dir=fs_dir, connected=False)
-#temp = temp3.in_label(temp_labels)
-##ventral_vertices = temp.vertices[0]
-#ventral_vertices = np.unique(np.append(ventral_vertices, temp.vertices[0]))
-#
-#lh_label = temp3.in_label(TF_label_lh)
-#data = np.mean(lh_label.data[:,mask],axis=1)
-#lh_label.data[data < threshold] = 0.
-#
-#temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-#                      subjects_dir=fs_dir, connected=False)
-#temp = temp3.in_label(temp_labels)
-#ventral_vertices = np.unique(np.append(ventral_vertices, temp.vertices[0]))
-
-#ventral_vertices = np.delete(ventral_vertices,[0,1])
-
-new_label = mne.Label(ventral_vertices, hemi='lh')
-brain3_1.add_label(new_label, borders=True, color='k')
-
-""" STS """
-mask = np.logical_and(times >= 0.22, times <= 0.26)
-
-lh_label = temp3.in_label(STSvp_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < threshold] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-w_vertices = temp.vertices[0]
-
-lh_label = temp3.in_label(STSdp_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < threshold] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-w_vertices = np.unique(np.append(w_vertices, temp.vertices[0]))
-
-lh_label = temp3.in_label(TE1p_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < threshold] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-w_vertices = np.unique(np.append(w_vertices, temp.vertices[0]))
-
-#w_vertices = np.delete(w_vertices,[12])
-
-new_label = mne.Label(w_vertices, hemi='lh')
-brain3_1.add_label(new_label, borders=True, color='k')
-
-###############################################################################
-""" Auditory """
-mask = np.logical_and(times >= 0.22, times <= 0.26)
-
-lh_label = temp3.in_label(PBelt_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < 1.72] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-pt_vertices = temp.vertices[0]
-
-lh_label = temp3.in_label(PSL_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < 1.72] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-pt_vertices = np.unique(np.append(pt_vertices, temp.vertices[0]))
-
-lh_label = temp3.in_label(LBelt_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < 1.72] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-pt_vertices = np.unique(np.append(pt_vertices, temp.vertices[0]))
-
-lh_label = temp3.in_label(A1_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < 1.72] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-pt_vertices = np.unique(np.append(pt_vertices, temp.vertices[0]))
-
-lh_label = temp3.in_label(MBelt_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < 1.72] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-pt_vertices = np.unique(np.append(pt_vertices, temp.vertices[0]))
-
-lh_label = temp3.in_label(RI_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < 1.72] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-pt_vertices = np.unique(np.append(pt_vertices, temp.vertices[0]))
-
-new_label = mne.Label(pt_vertices, hemi='lh')
-brain3_1.add_label(new_label, borders=True, color='k')
-
-###############################################################################
-""" Frontal """
-mask = np.logical_and(times >= 0.12, times <= 0.16)
-lh_label = temp3.in_label(a44_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < 1.72] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-broca_vertices = temp.vertices[0]
-
-lh_label = temp3.in_label(IFJa_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < 1.72] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
-
-lh_label = temp3.in_label(p946v_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < 1.72] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-broca_vertices = np.unique(np.append(broca_vertices, temp.vertices[0]))
-
-new_label = mne.Label(broca_vertices, hemi='lh')
-brain3_1.add_label(new_label, borders=True, color='k')
-###############################################################################
-mask = np.logical_and(times >= 0.18, times <= 0.22)
-lh_label = temp3.in_label(PGi_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < threshold] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-STGp_vertices = temp.vertices[0]
-
-lh_label = temp3.in_label(PGs_label_lh)
-data = np.mean(lh_label.data[:,mask],axis=1)
-lh_label.data[data < threshold] = 0.
-
-temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-                      subjects_dir=fs_dir, connected=False)
-temp = temp3.in_label(temp_labels)
-STGp_vertices = np.unique(np.append(STGp_vertices, temp.vertices[0]))
-
-new_label = mne.Label(STGp_vertices, hemi='lh')
-brain3_1.add_label(new_label, borders=True, color='k')
-###############################################################################
-#mask = np.logical_and(times >= 0.12, times <= 0.16)
-#lh_label = temp3.in_label(LIPv_label_lh)
-#data = np.mean(lh_label.data[:,mask],axis=1)
-#lh_label.data[data < 1.72] = 0.
-#
-#temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-#                      subjects_dir=fs_dir, connected=False)
-#temp = temp3.in_label(temp_labels)
-#LIP_vertices = temp.vertices[0]
-#
-#lh_label = temp3.in_label(LIPd_label_lh)
-#data = np.mean(lh_label.data[:,mask],axis=1)
-#lh_label.data[data < 1.72] = 0.
-#
-#temp_labels, _ = mne.stc_to_label(lh_label, src='fsaverage', smooth=False,
-#                      subjects_dir=fs_dir, connected=False)
-#temp = temp3.in_label(temp_labels)
-#LIP_vertices = np.unique(np.append(LIP_vertices, temp.vertices[0]))
-#
-#new_label = mne.Label(LIP_vertices, hemi='lh')
-#brain3_1.add_label(new_label, borders=True, color='k')
-
-#%%
-""" Dot task: All subjects """
 plt.figure(2)
 plt.clf()
 
-X11 = X13[ventral_vertices,:,:,:]
-M = np.mean(np.mean(X11[:,:,all_subject,:],axis=0),axis=1)
-M1 = np.mean(np.mean(X11[:,:,good_readers,:],axis=0),axis=1)   
-M2 = np.mean(np.mean(X11[:,:,poor_readers,:],axis=0),axis=1)
-errM = np.std(np.mean(X11[:,:,all_subject,:],axis=0),axis=1) / np.sqrt(len(all_subject))
-errM1 = np.std(np.mean(X11[:,:,good_readers,:],axis=0),axis=1) / np.sqrt(len(good_readers))
-errM2 = np.std(np.mean(X11[:,:,poor_readers,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
+M = np.mean(np.mean(X11[vtc_vertices_l,:,:,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[vtc_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(all_subject))
+temp1 = X11[:,:,good_readers,:]
+M1 = np.mean(np.mean(temp1[vtc_vertices_l,:,:,:],axis=0),axis=1)
+errM1 = np.std(np.mean(temp1[vtc_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(good_readers))
+del temp1
+temp2 = X11[:,:,poor_readers,:]
+M2 = np.mean(np.mean(temp2[vtc_vertices_l,:,:,:],axis=0),axis=1)
+errM2 = np.std(np.mean(temp2[vtc_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
+del temp2
 
-plt.subplot(3,3,1)
+plt.subplot(2,3,1)
 plt.hold(True)
 
-plt.plot(times, M[:,0],'-',color=c_table[5],label='Low noise')
-plt.fill_between(times, M[:,0]-errM[:,0], M[:,0]+errM[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,task]-errM[:,task], M[:,task]+errM[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M[:,1],'-',color=c_table[3],label='Med noise')
-plt.fill_between(times, M[:,1]-errM[:,1], M[:,1]+errM[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,task+1]-errM[:,task+1], M[:,task+1]+errM[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M[:,3],'-',color=c_table[1],label='High noise')
-plt.fill_between(times, M[:,3]-errM[:,3], M[:,3]+errM[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,task+3]-errM[:,task+3], M[:,task+3]+errM[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
 
 plt.grid(b=True)
-plt.ylim([-2, 3])
-plt.title('Dot task: VWFA')
+plt.ylim([-1, 5])
+plt.title('Lexical task: VTC')
 
-plt.subplot(3,3,2)
+plt.subplot(2,3,2)
 plt.hold(True)
 
-plt.plot(times, M1[:,0],'-',color=c_table[5],label='Low noise')
-plt.fill_between(times, M1[:,0]-errM1[:,0], M1[:,0]+errM1[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M1[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M1[:,task]-errM1[:,task], M1[:,task]+errM1[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M1[:,1],'-',color=c_table[3],label='Med noise')
-plt.fill_between(times, M1[:,1]-errM1[:,1], M1[:,1]+errM1[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M1[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M1[:,task+1]-errM1[:,task+1], M1[:,task+1]+errM1[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M1[:,3],'-',color=c_table[1],label='High noise')
-plt.fill_between(times, M1[:,3]-errM1[:,3], M1[:,3]+errM1[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+plt.plot(times, M1[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M1[:,task+3]-errM1[:,task+3], M1[:,task+3]+errM1[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
 
 plt.grid(b=True)
-plt.ylim([-2, 3])
+plt.ylim([-1, 5])
 plt.title('Good Readers')
+#plt.legend(loc='upper right')
 
-plt.subplot(3,3,3)
+plt.subplot(2,3,3)
 plt.hold(True)
 
-plt.plot(times, M2[:,0],'-',color=c_table[5],label='Low noise')
-plt.fill_between(times, M2[:,0]-errM2[:,0], M2[:,0]+errM2[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M2[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M2[:,task]-errM2[:,task], M2[:,task]+errM2[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M2[:,1],'-',color=c_table[3],label='Med noise')
-plt.fill_between(times, M2[:,1]-errM2[:,1], M1[:,1]+errM2[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M2[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M2[:,task+1]-errM2[:,task+1], M2[:,task+1]+errM2[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M2[:,3],'-',color=c_table[1],label='High noise')
-plt.fill_between(times, M2[:,3]-errM2[:,3], M2[:,3]+errM2[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+plt.plot(times, M2[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M2[:,task+3]-errM2[:,task+3], M2[:,task+3]+errM2[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
 
 plt.grid(b=True)
-plt.ylim([-2, 3])
+plt.ylim([-1, 5])
 plt.title('Poor Readers')
 
-X11 = X13[pt_vertices,:,:,:]
-M = np.mean(np.mean(X11[:,:,all_subject,:],axis=0),axis=1)
-M1 = np.mean(np.mean(X11[:,:,good_readers,:],axis=0),axis=1)   
-M2 = np.mean(np.mean(X11[:,:,poor_readers,:],axis=0),axis=1)
-errM = np.std(np.mean(X11[:,:,all_subject,:],axis=0),axis=1) / np.sqrt(len(all_subject))
-errM1 = np.std(np.mean(X11[:,:,good_readers,:],axis=0),axis=1) / np.sqrt(len(good_readers))
-errM2 = np.std(np.mean(X11[:,:,poor_readers,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
+task = 0
 
-plt.subplot(3,3,4)
+plt.subplot(2,3,4)
 plt.hold(True)
 
-plt.plot(times, M[:,0],'-',color=c_table[5],label='Low noise')
-plt.fill_between(times, M[:,0]-errM[:,0], M[:,0]+errM[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,task]-errM[:,task], M[:,task]+errM[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M[:,1],'-',color=c_table[3],label='Med noise')
-plt.fill_between(times, M[:,1]-errM[:,1], M[:,1]+errM[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,task+1]-errM[:,task+1], M[:,task+1]+errM[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M[:,3],'-',color=c_table[1],label='High noise')
-plt.fill_between(times, M[:,3]-errM[:,3], M[:,3]+errM[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+plt.plot(times, M[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,task+3]-errM[:,task+3], M[:,task+3]+errM[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
 
 plt.grid(b=True)
-plt.ylim([-1, 3])
-plt.title('Dot task: Frontal')
+plt.ylim([-1, 5])
+plt.title('Dot task: VTC')
 
-plt.subplot(3,3,5)
+plt.subplot(2,3,5)
 plt.hold(True)
 
-plt.plot(times, M1[:,0],'-',color=c_table[5],label='Low noise')
-plt.fill_between(times, M1[:,0]-errM1[:,0], M1[:,0]+errM1[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M1[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M1[:,task]-errM1[:,task], M1[:,task]+errM1[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M1[:,1],'-',color=c_table[3],label='Med noise')
-plt.fill_between(times, M1[:,1]-errM1[:,1], M1[:,1]+errM1[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M1[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M1[:,task+1]-errM1[:,task+1], M1[:,task+1]+errM1[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M1[:,3],'-',color=c_table[1],label='High noise')
-plt.fill_between(times, M1[:,3]-errM1[:,3], M1[:,3]+errM1[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+plt.plot(times, M1[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M1[:,task+3]-errM1[:,task+3], M1[:,task+3]+errM1[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
 
 plt.grid(b=True)
-plt.ylim([-1, 3])
+plt.ylim([-1, 5])
 plt.title('Good Readers')
+#plt.legend(loc='upper right')
 
-plt.subplot(3,3,6)
+plt.subplot(2,3,6)
 plt.hold(True)
 
-plt.plot(times, M2[:,0],'-',color=c_table[5],label='Low noise')
-plt.fill_between(times, M2[:,0]-errM2[:,0], M2[:,0]+errM2[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M2[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M2[:,task]-errM2[:,task], M2[:,task]+errM2[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M2[:,1],'-',color=c_table[3],label='Med noise')
-plt.fill_between(times, M2[:,1]-errM2[:,1], M2[:,1]+errM2[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M2[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M2[:,task+1]-errM2[:,task+1], M2[:,task+1]+errM2[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
 
-plt.plot(times, M2[:,3],'-',color=c_table[1],label='High noise')
-plt.fill_between(times, M2[:,3]-errM2[:,3], M2[:,3]+errM2[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+plt.plot(times, M2[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M2[:,task+3]-errM2[:,task+3], M2[:,task+3]+errM2[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
 
 plt.grid(b=True)
-plt.ylim([-1, 3])
+plt.ylim([-1, 5])
 plt.title('Poor Readers')
 
-X11 = X13[w_vertices,:,:,:]
-M = np.mean(np.mean(X11[:,:,all_subject,:],axis=0),axis=1)
-M1 = np.mean(np.mean(X11[:,:,good_readers,:],axis=0),axis=1)   
-M2 = np.mean(np.mean(X11[:,:,poor_readers,:],axis=0),axis=1)
-errM = np.std(np.mean(X11[:,:,all_subject,:],axis=0),axis=1) / np.sqrt(len(all_subject))
-errM1 = np.std(np.mean(X11[:,:,good_readers,:],axis=0),axis=1) / np.sqrt(len(good_readers))
-errM2 = np.std(np.mean(X11[:,:,poor_readers,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
-
-plt.subplot(3,3,7)
-plt.hold(True)
-
-plt.plot(times, M[:,0],'-',color=c_table[5],label='Low noise')
-plt.fill_between(times, M[:,0]-errM[:,0], M[:,0]+errM[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, M[:,1],'-',color=c_table[3],label='Med noise')
-plt.fill_between(times, M[:,1]-errM[:,1], M[:,1]+errM[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, M[:,3],'-',color=c_table[1],label='High noise')
-plt.fill_between(times, M[:,3]-errM[:,3], M[:,3]+errM[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
-
-plt.grid(b=True)
-plt.ylim([-1, 3])
-plt.title('Dot task: STG')
-
-plt.subplot(3,3,8)
-plt.hold(True)
-
-plt.plot(times, M1[:,0],'-',color=c_table[5],label='Low noise')
-plt.fill_between(times, M1[:,0]-errM1[:,0], M1[:,0]+errM1[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, M1[:,1],'-',color=c_table[3],label='Med noise')
-plt.fill_between(times, M1[:,1]-errM1[:,1], M1[:,1]+errM1[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, M1[:,3],'-',color=c_table[1],label='High noise')
-plt.fill_between(times, M1[:,3]-errM1[:,3], M1[:,3]+errM1[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
-
-plt.grid(b=True)
-plt.ylim([-1, 3])
-plt.title('Good Readers')
-
-plt.subplot(3,3,9)
-plt.hold(True)
-
-plt.plot(times, M2[:,0],'-',color=c_table[5],label='Low noise')
-plt.fill_between(times, M2[:,0]-errM2[:,0], M2[:,0]+errM2[:,0], facecolor=c_table[5], alpha=0.2, edgecolor='none')
-
-plt.plot(times, M2[:,1],'-',color=c_table[3],label='Med noise')
-plt.fill_between(times, M2[:,1]-errM2[:,1], M2[:,1]+errM2[:,1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
-
-plt.plot(times, M2[:,3],'-',color=c_table[1],label='High noise')
-plt.fill_between(times, M2[:,3]-errM2[:,3], M2[:,3]+errM2[:,3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
-
-plt.grid(b=True)
-plt.ylim([-1, 3])
-plt.title('Poor Readers')
+#%%
+temp1 = X11[vtc_vertices_l,:,:,:]
+s_group = good_readers
+for iSub in np.arange(0,len(s_group)):
+    plt.figure(100+iSub)
+    plt.clf()
+    plt.subplot(1,2,1)
+    plt.hold(True)
+    plt.plot(times, np.mean(temp1[:,:,s_group[iSub],0],axis=0), '-', color=c_table[5])
+    plt.plot(times, np.mean(temp1[:,:,s_group[iSub],1],axis=0), '-', color=c_table[3])
+    plt.plot(times, np.mean(temp1[:,:,s_group[iSub],3],axis=0), '-', color=c_table[1])
+##    plt.plot([0.1, 0.1],[0, 8],'-',color='k')
+    plt.title(subs[s_group[iSub]])
+    plt.subplot(1,2,2)
+    plt.hold(True)
+    plt.plot(times, np.mean(temp1[:,:,s_group[iSub],5],axis=0), '-', color=c_table[5])
+    plt.plot(times, np.mean(temp1[:,:,s_group[iSub],6],axis=0), '-', color=c_table[3])
+    plt.plot(times, np.mean(temp1[:,:,s_group[iSub],8],axis=0), '-', color=c_table[1])
+#    plt.plot([0.1, 0.1],[0, 8],'-',color='k')
+    plt.title(subs[s_group[iSub]])
 
 #%%
 """
@@ -991,6 +895,229 @@ stats.pearsonr(sts_response[all_subject],twre[all_subject])
 stats.ttest_ind(sts_response[good_readers],sts_response[poor_readers])
 #sns.regplot(
 
+#%%
+""" V1 responses """
+task = 5
+
+plt.figure(5)
+plt.clf()
+
+M = np.mean(np.mean(X11[v1_vertices_l,:,:,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[v1_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(all_subject))
+temp1 = X11[:,:,good_readers,:]
+M1 = np.mean(np.mean(temp1[v1_vertices_l,:,:,:],axis=0),axis=1)
+errM1 = np.std(np.mean(temp1[v1_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(good_readers))
+del temp1
+temp2 = X11[:,:,poor_readers,:]
+M2 = np.mean(np.mean(temp2[v1_vertices_l,:,:,:],axis=0),axis=1)
+errM2 = np.std(np.mean(temp2[v1_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
+del temp2
+
+plt.subplot(2,3,1)
+plt.hold(True)
+
+plt.plot(times, M[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,task]-errM[:,task], M[:,task]+errM[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,task+1]-errM[:,task+1], M[:,task+1]+errM[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,task+3]-errM[:,task+3], M[:,task+3]+errM[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([0, 7])
+plt.title('Lexical task: V1')
+
+plt.subplot(2,3,2)
+plt.hold(True)
+
+plt.plot(times, M1[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M1[:,task]-errM1[:,task], M1[:,task]+errM1[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M1[:,task+1]-errM1[:,task+1], M1[:,task+1]+errM1[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M1[:,task+3]-errM1[:,task+3], M1[:,task+3]+errM1[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([0, 7])
+plt.title('Good Readers')
+#plt.legend(loc='upper right')
+
+plt.subplot(2,3,3)
+plt.hold(True)
+
+plt.plot(times, M2[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M2[:,task]-errM2[:,task], M2[:,task]+errM2[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M2[:,task+1]-errM2[:,task+1], M2[:,task+1]+errM2[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M2[:,task+3]-errM2[:,task+3], M2[:,task+3]+errM2[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([0, 7])
+plt.title('Poor Readers')
+
+task = 0
+
+plt.subplot(2,3,4)
+plt.hold(True)
+
+plt.plot(times, M[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,task]-errM[:,task], M[:,task]+errM[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,task+1]-errM[:,task+1], M[:,task+1]+errM[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,task+3]-errM[:,task+3], M[:,task+3]+errM[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([0, 7])
+plt.title('Dot task: V1')
+
+plt.subplot(2,3,5)
+plt.hold(True)
+
+plt.plot(times, M1[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M1[:,task]-errM1[:,task], M1[:,task]+errM1[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M1[:,task+1]-errM1[:,task+1], M1[:,task+1]+errM1[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M1[:,task+3]-errM1[:,task+3], M1[:,task+3]+errM1[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([0, 7])
+plt.title('Good Readers')
+#plt.legend(loc='upper right')
+
+plt.subplot(2,3,6)
+plt.hold(True)
+
+plt.plot(times, M2[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M2[:,task]-errM2[:,task], M2[:,task]+errM2[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M2[:,task+1]-errM2[:,task+1], M2[:,task+1]+errM2[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M2[:,task+3]-errM2[:,task+3], M2[:,task+3]+errM2[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([0, 7])
+plt.title('Poor Readers')
+
+#%%
+plt.figure(6)
+plt.clf()
+
+task = 5
+
+plt.subplot(2,3,1)
+plt.hold(True)
+
+plt.plot(times, M[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,task]-errM[:,task], M[:,task]+errM[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+2],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,task+2]-errM[:,task+2], M[:,task+2]+errM[:,task+2], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+4],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,task+4]-errM[:,task+4], M[:,task+4]+errM[:,task+4], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Lexical task: VTC')
+
+plt.subplot(2,3,2)
+plt.hold(True)
+
+plt.plot(times, M1[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M1[:,task]-errM1[:,task], M1[:,task]+errM1[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+2],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M1[:,task+2]-errM1[:,task+2], M1[:,task+2]+errM1[:,task+2], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+4],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M1[:,task+4]-errM1[:,task+4], M1[:,task+4]+errM1[:,task+4], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Good Readers')
+#plt.legend(loc='upper right')
+
+plt.subplot(2,3,3)
+plt.hold(True)
+
+plt.plot(times, M2[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M2[:,task]-errM2[:,task], M2[:,task]+errM2[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+2],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M2[:,task+2]-errM2[:,task+2], M2[:,task+2]+errM2[:,task+2], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+4],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M2[:,task+4]-errM2[:,task+4], M2[:,task+4]+errM2[:,task+4], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Poor Readers')
+
+task = 0
+
+plt.subplot(2,3,4)
+plt.hold(True)
+
+plt.plot(times, M[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,task]-errM[:,task], M[:,task]+errM[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+2],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,task+2]-errM[:,task+2], M[:,task+2]+errM[:,task+2], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+4],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,task+4]-errM[:,task+4], M[:,task+4]+errM[:,task+4], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Dot task: VTC')
+
+plt.subplot(2,3,5)
+plt.hold(True)
+
+plt.plot(times, M1[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M1[:,task]-errM1[:,task], M1[:,task]+errM1[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+2],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M1[:,task+2]-errM1[:,task+2], M1[:,task+2]+errM1[:,task+2], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+4],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M1[:,task+4]-errM1[:,task+4], M1[:,task+4]+errM1[:,task+4], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Good Readers')
+#plt.legend(loc='upper right')
+
+plt.subplot(2,3,6)
+plt.hold(True)
+
+plt.plot(times, M2[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M2[:,task]-errM2[:,task], M2[:,task]+errM2[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+2],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M2[:,task+2]-errM2[:,task+2], M2[:,task+2]+errM2[:,task+2], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+4],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M2[:,task+4]-errM2[:,task+4], M2[:,task+4]+errM2[:,task+4], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Poor Readers')
 #%%
 """ For FLUX """
 
@@ -1044,12 +1171,129 @@ for iSub in np.arange(0,len(poor_readers)):
     plt.title(subs[poor_readers[iSub]])
 
 #%%
+""" Broca """
+task = 5
+
+plt.figure(3)
+plt.clf()
+
+M = np.mean(np.mean(X11[broca_vertices_l,:,:,:],axis=0),axis=1)
+errM = np.std(np.mean(X11[broca_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(all_subject))
+temp1 = X11[:,:,good_readers,:]
+M1 = np.mean(np.mean(temp1[broca_vertices_l,:,:,:],axis=0),axis=1)
+errM1 = np.std(np.mean(temp1[broca_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(good_readers))
+del temp1
+temp2 = X11[:,:,poor_readers,:]
+M2 = np.mean(np.mean(temp2[broca_vertices_l,:,:,:],axis=0),axis=1)
+errM2 = np.std(np.mean(temp2[broca_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
+del temp2
+
+plt.subplot(2,3,1)
+plt.hold(True)
+
+plt.plot(times, M[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,task]-errM[:,task], M[:,task]+errM[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,task+1]-errM[:,task+1], M[:,task+1]+errM[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,task+3]-errM[:,task+3], M[:,task+3]+errM[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Lexical task: STS')
+
+plt.subplot(2,3,2)
+plt.hold(True)
+
+plt.plot(times, M1[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M1[:,task]-errM1[:,task], M1[:,task]+errM1[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M1[:,task+1]-errM1[:,task+1], M1[:,task+1]+errM1[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M1[:,task+3]-errM1[:,task+3], M1[:,task+3]+errM1[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Good Readers')
+#plt.legend(loc='upper right')
+
+plt.subplot(2,3,3)
+plt.hold(True)
+
+plt.plot(times, M2[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M2[:,task]-errM2[:,task], M2[:,task]+errM2[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M2[:,task+1]-errM2[:,task+1], M2[:,task+1]+errM2[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M2[:,task+3]-errM2[:,task+3], M2[:,task+3]+errM2[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Poor Readers')
+
+task = 0
+
+plt.subplot(2,3,4)
+plt.hold(True)
+
+plt.plot(times, M[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M[:,task]-errM[:,task], M[:,task]+errM[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M[:,task+1]-errM[:,task+1], M[:,task+1]+errM[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M[:,task+3]-errM[:,task+3], M[:,task+3]+errM[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Dot task: STS')
+
+plt.subplot(2,3,5)
+plt.hold(True)
+
+plt.plot(times, M1[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M1[:,task]-errM1[:,task], M1[:,task]+errM1[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M1[:,task+1]-errM1[:,task+1], M1[:,task+1]+errM1[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M1[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M1[:,task+3]-errM1[:,task+3], M1[:,task+3]+errM1[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Good Readers')
+#plt.legend(loc='upper right')
+
+plt.subplot(2,3,6)
+plt.hold(True)
+
+plt.plot(times, M2[:,task],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M2[:,task]-errM2[:,task], M2[:,task]+errM2[:,task], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+1],'-',color=c_table[3],label='Med noise')
+plt.fill_between(times, M2[:,task+1]-errM2[:,task+1], M2[:,task+1]+errM2[:,task+1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.plot(times, M2[:,task+3],'-',color=c_table[1],label='High noise')
+plt.fill_between(times, M2[:,task+3]-errM2[:,task+3], M2[:,task+3]+errM2[:,task+3], facecolor=c_table[1], alpha=0.2, edgecolor='none')
+
+plt.grid(b=True)
+plt.ylim([-1, 5])
+plt.title('Poor Readers')
+
 #%%
 """ Lexical task: All subjects """
 plt.figure(4)
 plt.clf()
 
-X11 = X13[ventral_vertices,:,:,:]
+X11 = np.abs(X13[ventral_vertices,:,:,:])
 M = np.mean(np.mean(X11[:,:,all_subject,:],axis=0),axis=1)
 M1 = np.mean(np.mean(X11[:,:,good_readers,:],axis=0),axis=1)   
 M2 = np.mean(np.mean(X11[:,:,poor_readers,:],axis=0),axis=1)
@@ -1070,7 +1314,7 @@ plt.plot(times, M[:,8],'-',color=c_table[1],label='High noise')
 plt.fill_between(times, M[:,8]-errM[:,8], M[:,8]+errM[:,8], facecolor=c_table[1], alpha=0.2, edgecolor='none')
 
 plt.grid(b=True)
-plt.ylim([-2, 3])
+plt.ylim([-1, 5])
 plt.title('Lexical task: VWFA')
 
 plt.subplot(3,3,2)
@@ -1086,7 +1330,7 @@ plt.plot(times, M1[:,8],'-',color=c_table[1],label='High noise')
 plt.fill_between(times, M1[:,8]-errM1[:,8], M1[:,8]+errM1[:,8], facecolor=c_table[1], alpha=0.2, edgecolor='none')
 
 plt.grid(b=True)
-plt.ylim([-2, 3])
+plt.ylim([-1, 5])
 plt.title('Good Readers')
 
 plt.subplot(3,3,3)
@@ -1102,7 +1346,7 @@ plt.plot(times, M2[:,8],'-',color=c_table[1],label='High noise')
 plt.fill_between(times, M2[:,8]-errM2[:,8], M2[:,8]+errM2[:,8], facecolor=c_table[1], alpha=0.2, edgecolor='none')
 
 plt.grid(b=True)
-plt.ylim([-2, 3])
+plt.ylim([-1, 5])
 plt.title('Poor Readers')
 
 X11 = X13[pt_vertices,:,:,:]

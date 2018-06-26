@@ -1,27 +1,21 @@
 # -*- coding: utf-8 -*-
 
-"""Docstring
-
-Notes: Ss 105_bb presented with issues during computation of EOG projectors despite
-having valid EOG data.
-Ss 102_rs No matching events found for word_c254_p50_dot (event id 102)
-"""
-
-# Authors: Kambiz Tavabi <ktavabi@gmail.com>
+# Authors: Sung Jun Joo; Jason Yeatman; Kambiz Tavabi <ktavabi@gmail.com>
 #
 #
 # License: BSD (3-clause)
 
-          
 import numpy as np
 import mnefun
 import os
-import glob
+#import glob
 os.chdir('/home/sjjoo/git/BrainTools/projects/NLR_MEG')
 from score import score
 from nlr_organizeMEG_mnefun import nlr_organizeMEG_mnefun
 import mne
 import time
+#import pycuda.driver
+#import pycuda.autoinit
 
 t0 = time.time()
 
@@ -29,25 +23,23 @@ mne.set_config('MNE_USE_CUDA', 'true')
 
 # At Possum projects folder mounted in the local disk
 raw_dir = '/mnt/diskArray/projects/MEG/nlr/raw'
-#out_dir = '/mnt/diskArray/scratch/NLR_MEG'
-#out_dir = '/mnt/scratch/NLR_MEG'
 
 # At local hard drive
-out_dir = '/mnt/scratch/NLR_MEG3'
-#out_dir = '/mnt/scratch/adult'
+out_dir = '/mnt/scratch/NLR_MEG4'
 
 if not os.path.isdir(out_dir):
     os.mkdir(out_dir)
-    
-os.chdir(out_dir)
 
-# 162_ef missing the first session 
-# 208_lh missing
-# 210_sb missing first session 
-# 151_rd missing the second session
-subs = ['102_rs','103_ac','110_hh','145_ac','150_mg','151_rd','152_tc','160_ek',
-    '161_ak','162_ef','163_lf','164_sf','170_gm','172_th','174_hs','179_gm','180_zd','207_ah','210_sb','211_lb',
-    '201_gs','202_dd','203_am','204_am','206_lm','105_bb','127_am']
+subs = ['NLR_102_RS','NLR_103_AC','NLR_105_BB','NLR_110_HH','NLR_127_AM',
+        'NLR_130_RW','NLR_132_WP','NLR_133_ML','NLR_145_AC','NLR_150_MG',
+        'NLR_151_RD','NLR_152_TC','NLR_160_EK','NLR_161_AK','NLR_163_LF',
+        'NLR_164_SF','NLR_170_GM','NLR_172_TH','NLR_174_HS','NLR_179_GM',
+        'NLR_180_ZD','NLR_187_NB','NLR_201_GS','NLR_203_AM',
+        'NLR_204_AM','NLR_205_AC','NLR_206_LM','NLR_207_AH','NLR_211_LB',
+        'NLR_GB310','NLR_KB218','NLR_JB423','NLR_GB267','NLR_JB420',
+        'NLR_HB275','NLR_197_BK','NLR_GB355','NLR_GB387','NLR_HB205',
+        'NLR_IB217','NLR_IB319','NLR_JB227','NLR_JB486','NLR_KB396',
+        'NLR_IB357']
 
 # tmin, tmax: sets the epoch
 # bmin, bmax: sets the prestim duration for baseline correction. baseline is set
@@ -61,31 +53,26 @@ subs = ['102_rs','103_ac','110_hh','145_ac','150_mg','151_rd','152_tc','160_ek',
 # correction by setting bmin and bmax. I found that mnefun does baseline 
 # correction by default.
 # sjjoo_20160809: Commented
-params = mnefun.Params(tmin=-0.1, tmax=0.9, t_adjust=-1e-3, n_jobs=18, # t_adjust was -39e-3
-                       decim=2, n_jobs_mkl=1, proj_sfreq=250,
-                       n_jobs_fir='cuda', n_jobs_resample='cuda',
-                       filter_length='5s', epochs_type='fif', lp_cut=40.,
-#                       hp_cut=0.15,hp_trans=0.1,
-                       bmin=-0.1, auto_bad=15., plot_raw=False, 
-                       bem_type = '5120-5120-5120')
+#params = mnefun.Params(tmin=-0.1, tmax=0.9, n_jobs=18, # t_adjust was -39e-3
+#                       decim=2, n_jobs_mkl=1, proj_sfreq=250,
+#                       n_jobs_fir='cuda', n_jobs_resample='cuda',
+#                       filter_length='5s', epochs_type='fif', lp_cut=40.,
+##                       hp_cut=0.15,hp_trans=0.1,
+#                       bmin=-0.1, auto_bad=20., plot_raw=False, 
+#                       bem_type = '5120-5120-5120')
           
 # This sets the position of the head relative to the sensors. These values a
 # A typical head position. So now in sensor space everyone is aligned. However
 # We should also note that for source analysis it is better to leave this as
-# the mne-fun default
+# the mne-fun default ==> Let's put None!!!
           
-params.trans_to = (0., 0., .03)
+""" Organize subjects """
+#out,ind = nlr_organizeMEG_mnefun(raw_dir=raw_dir,out_dir=out_dir,subs=subs)
+""" The directory structure is really messy -- let's not use this function. """
 
-params.sss_type = 'python'
-params.sss_regularize = 'svd' # 'in' by default
-params.tsss_dur = 16. # 60 for adults with not much head movements. This was set to 6.
-
-params.auto_bad_meg_thresh = 10 # THIS SHOULD NOT BE SO HIGH!
-
-# Regular subjects
-out,ind = nlr_organizeMEG_mnefun(raw_dir=raw_dir,out_dir=out_dir,subs=subs)
-
-print(out)
+os.chdir(out_dir)
+#
+#print(out)
 
 #params.subjects.sort() # Sort the subject list
 #print("Done sorting subjects.\n")
@@ -102,39 +89,53 @@ print(out)
 163_lf160920          : : Too many bad channels --> Use grad=5000e-13, mag=5.0e-12
 """
 
-# REMOVE BAD SUBJECTS
-badsubs = ['127_am123_md','102_rs150716','110_hh150824','152_tc160510','152_tc160527',
-           '201_gs150818','201_gs150824','201_gs150908',
-           '203_am150922','203_am151009','202_dd150827','202_dd151013',
-           '204_am151020','206_lm160202'# These are not included
-#           '102_rs160618','102_rs160815','103_ac150609','110_hh160608','110_hh160809',
-#           '145_ac160621','145_ac160823'
-#            ,'150_mg160606','150_mg160825',
-#           '151_rd160620','152_tc160422','152_tc160623','160_ek160627','160_ek160915',
-#           '161_ak160627','161_ak160916',
-#           '162_ef160829','163_lf160707','163_lf160920','164_sf160707','164_sf160920',
-#           '170_gm160613',
-#           '170_gm160822',
-#           '172_th160614','172_th160825','174_hs160620','174_hs160829',
-#           '179_gm160701','179_gm160913','180_zd160621','180_zd160826',
-#           '207_ah160608','207_ah160809','210_sb160822','211_lb160617',
-#           '211_lb160823','201_gs150729','201_gs150925',
-#           '202_dd150919','202_dd151103','203_am150831',
-#           '203_am151029','204_am150829','204_am151120',# These are already processed successfully
-#           '206_lm151119','206_lm160113'
-        ]
-for n, s in enumerate(badsubs):
-    subnum = out.index(s)
-    print('Removing subject ' + str(subnum) + ' ' + out[subnum])
-    out.remove(s)
-    ind[subnum] = []
-    ind.remove([])
+#for n, s in enumerate(badsubs):
+#    subnum = out.index(s)
+#    print('Removing subject ' + str(subnum) + ' ' + out[subnum])
+#    out.remove(s)
+#    ind[subnum] = []
+#    ind.remove([])
+
+out = ['102_rs160618','103_ac150609','105_bb150713','110_hh160608','127_am151022',
+       '130_rw151221','132_wp160919','133_ml151124','145_ac160621','150_mg160606',
+       '151_rd160620','152_tc160422','160_ek160627','161_ak160627','163_lf160707',
+       '164_sf160707','170_gm160613','172_th160614','174_hs160620','179_gm160701',
+       '180_zd160621','187_nb161017','201_gs150818','203_am150831',
+       '204_am150829','205_ac151123','206_lm151119','207_ah160608','211_lb160617',
+       'nlr_gb310170614','nlr_kb218170619','nlr_jb423170620','nlr_gb267170620','nlr_jb420170621',
+       'nlr_hb275170622','197_bk170622','nlr_gb355170606','nlr_gb387170608','nlr_hb205170825',
+       'nlr_ib217170831','nlr_ib319170825','nlr_jb227170811','nlr_jb486170803','nlr_kb396170808',
+       'nlr_ib357170912'] 
+#%%
+out = ['203_am150831',
+       '204_am150829','205_ac151123','206_lm151119','207_ah160608','211_lb160617',
+       'nlr_gb310170614','nlr_kb218170619','nlr_jb423170620','nlr_gb267170620','nlr_jb420170621',
+       'nlr_hb275170622','197_bk170622','nlr_gb355170606','nlr_gb387170608','nlr_hb205170825',
+       'nlr_ib217170831','nlr_ib319170825','nlr_jb227170811','nlr_jb486170803','nlr_kb396170808',
+       'nlr_ib357170912']
 
 for n, s in enumerate(out):
     print(s)    
     
 for n, s in enumerate(out):
+    params = mnefun.Params(tmin=-0.1, tmax=0.9, n_jobs=18, # t_adjust was -39e-3
+                       decim=2, n_jobs_mkl=1, proj_sfreq=250,
+                       n_jobs_fir='cuda', n_jobs_resample='cuda',
+                       filter_length='5s', epochs_type='fif', lp_cut=40.,
+#                       hp_cut=0.15,hp_trans=0.1,
+                       bmin=-0.1, auto_bad=20., plot_raw=False) 
+#                       bem_type = '5120-5120-5120')
     params.subjects = [s]
+    params.sss_type = 'python'
+    params.sss_regularize = 'in' # 'in' by default
+    params.tsss_dur = 8. # 60 for adults with not much head movements. This was set to 6.
+    params.st_correlation = 0.9
+    
+    params.auto_bad_meg_thresh = 10 # THIS SHOULD NOT BE SO HIGH!
+
+    params.trans_to = None #'median'
+
+    params.t_adjust = -39e-3 # time delay from the trigger. It's due to set trigger function. I don't know why...
     
     #print("Running " + str(len(params.subjects)) + ' Subjects') 
 #    print("\n\n".join(params.subjects))
@@ -144,24 +145,22 @@ for n, s in enumerate(out):
     
     params.subject_indices = np.arange(0,len(params.subjects))
     
-    #params.subject_indices = np.concatenate((np.arange(0,3), np.arange(4,10), np.arange(11,16), np.arange(17,20),
-    #                                         np.arange(21, 24),[25], np.arange(27,len(params.subjects)))
-    #                                         , axis=0)
-    #params.subject_indices = np.arange(27,len(params.subjects))
     params.structurals =[None] * len(params.subjects)
     
     if s == '164_sf160707':
         params.run_names = ['%s_1', '%s_2', '%s_3', '%s_5','%s_6'] # 164_sf160707
     elif s == '170_gm160613':
         params.run_names = ['%s_1', '%s_2', '%s_3', '%s_5','%s_6'] # 170_gm160613
-    elif s == '172_th160825':
-        params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4', '%s_5'] # 172_th160825
     elif s == '201_gs150729':
-        params.run_names = ['%s_1', '%s_3', '%s_4', '%s_5', '%s_6'] # 201_gs150729
+        params.run_names = ['%s_1', '%s_3', '%s_4', '%s_5', '%s_6', '%s_8'] # 201_gs150729
     elif s == '204_am151120':
         params.run_names = ['%s_1', '%s_3', '%s_4', '%s_5', '%s_6'] # 204_am151120
+    elif s == '105_bb161011':
+        params.run_names = ['%s_1', '%s_2', '%s_4','%s_5','%s_6']
+    elif s == 'nlr_ib357170912':
+        params.run_names = ['%s_1', '%s_2', '%s_4','%s_5','%s_6']
     else:
-        params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4','%s_5','%s_6']
+        params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4', '%s_5', '%s_6']
     
         
     #params.subject_run_indices = np.array([
@@ -181,36 +180,21 @@ for n, s in enumerate(out):
     params.on_missing = 'warning'
     #params.acq_ssh = 'kambiz@minea.ilabs.uw.edu'  # minea - 172.28.161.8
     #params.acq_dir = '/sinuhe/data03/jason_words'
-    #params.sws_ssh = 'kam@kasga.ilabs.uw.edu'  # kasga - 172.28.161.8
-    #params.sws_dir = '/data03/kam/nlr'
-    params.acq_ssh = 'jason@minea.ilabs.uw.edu'  # minea - 172.28.161.8
-    params.acq_dir = '/sinuhe/data03/jason_words'
+
+#    params.acq_ssh = 'jason@minea.ilabs.uw.edu'  # minea - 172.28.161.8
+#    params.acq_dir = '/sinuhe/data03/jason_words'
     params.sws_ssh = 'jason@kasga.ilabs.uw.edu'  # kasga - 172.28.161.8
     params.sws_dir = '/data05/jason/NLR'
     
     #params.mf_args = '-hpie 30 -hpig .8 -hpicons' # sjjoo-20160826: We are doing SSS using python
     
-    # epoch rejection criterion
-    # 207_ah: grad = 5000e-13, mag = 5.0e-12
-    if s == '163_lf160707' or s == '163_lf160920':
-        params.reject = dict(grad=7000e-13, mag=9.0e-12)
-#    elif s == '150_mg160606':
-#        params.reject = dict(grad=5000e-13, mag=5.0e-12)
-#    elif s == '170_gm160822':
-#        params.reject = dict(grad=5000e-13, mag=6.0e-12)
-    elif s == '162_ef160829':
-        params.reject = dict(grad=7000e-13, mag=7.0e-12)
-#    elif s == '207_ah160608':
-#        params.reject = dict(grad=5000e-13, mag=5.0e-12)
-#    elif s == '172_th160825':  
-#        params.reject = dict(grad=6000e-13, mag=6.0e-12)
-    elif s == '174_hs160620':
-        params.reject = dict(grad=5000e-13, mag=9.0e-12)
-    elif s == '174_hs160829':
-        params.reject = dict(grad=10000e-13, mag=12.0e-12)
+    # epoch  
+    if s == '174_hs160620':
+        params.reject = dict(grad=3000e-13, mag=4.0e-12)
     else:
-        params.reject = dict(grad=5000e-13, mag=5.0e-12)
-        
+        params.reject = dict(grad=3000e-13, mag=4.0e-12) 
+#    params.reject = dict(grad=4000e-13, mag=4.0e-12)    
+
     params.ssp_eog_reject = dict(grad=params.reject['grad'], mag=params.reject['mag'], eog=np.inf)
     params.ssp_ecg_reject = dict(grad=params.reject['grad'], mag=params.reject['mag'], ecg=np.inf)
         
@@ -227,17 +211,17 @@ for n, s in enumerate(out):
     params.inv_runs = [range(0, len(params.run_names))]
     params.runs_empty = []
     
-    params.proj_nums = [[3, 3, 0],  # ECG: grad/mag/eeg
-                        [3, 3, 0],  # EOG # sjjoo-20160826: was 3
+    params.proj_nums = [[0, 0, 0],  # ECG: grad/mag/eeg
+                        [1, 1, 0],  # EOG # sjjoo-20160826: was 3
                         [0, 0, 0]]  # Continuous (from ERM)
     
     # The scoring function needs to produce an event file with these values
     params.in_names = ['word_c254_p20_dot', 'word_c254_p50_dot', 'word_c137_p20_dot',
-                     'word_c254_p80_dot', 'word_c137_p80_dot',
-                     'word_c254_p20_dot', 'word_c254_p50_dot', 'word_c137_p20_dot',
-                     'word_c254_p20_word', 'word_c254_p50_word', 'word_c137_p20_word',
-                     'word_c254_p80_word', 'word_c137_p80_word',
-                     'word_c254_p20_word', 'word_c254_p50_word', 'word_c137_p20_word']
+                       'word_c254_p80_dot', 'word_c137_p80_dot',
+                       'bigram_c254_p20_dot', 'bigram_c254_p50_dot', 'bigram_c137_p20_dot',
+                       'word_c254_p20_word', 'word_c254_p50_word', 'word_c137_p20_word',
+                       'word_c254_p80_word', 'word_c137_p80_word',
+                       'bigram_c254_p20_word', 'bigram_c254_p50_word', 'bigram_c137_p20_word']
     
     params.in_numbers = [101, 102, 103, 104, 105, 106, 107, 108,
                          201, 202, 203, 204, 205, 206, 207, 208]
@@ -252,16 +236,16 @@ for n, s in enumerate(out):
         ['ALL'],
         ['word_c254_p20_dot', 'word_c254_p50_dot', 'word_c137_p20_dot',
          'word_c254_p80_dot', 'word_c137_p80_dot',
-         'word_c254_p20_dot', 'word_c254_p50_dot', 'word_c137_p20_dot',
+         'bigram_c254_p20_dot', 'bigram_c254_p50_dot', 'bigram_c137_p20_dot',
          'word_c254_p20_word', 'word_c254_p50_word', 'word_c137_p20_word',
          'word_c254_p80_word', 'word_c137_p80_word',
-         'word_c254_p20_word', 'word_c254_p50_word', 'word_c137_p20_word']
+         'bigram_c254_p20_word', 'bigram_c254_p50_word', 'bigram_c137_p20_word']
     ]
     
     params.out_numbers = [
         [1] * len(params.in_numbers),
-        [101, 102, 103, 104, 105, 101, 102, 103,
-         201, 202, 203, 204, 205, 201, 202, 203]
+        [101, 102, 103, 104, 105, 106, 107, 108,
+         201, 202, 203, 204, 205, 206, 207, 208]
         ]
     
     params.must_match = [
@@ -272,12 +256,12 @@ for n, s in enumerate(out):
     mnefun.do_processing(
         params,
         fetch_raw=False,     # Fetch raw recording files from acquisition machine
-        do_score=True,      # Do scoring to slice data into trials
+        do_score=False,      # Do scoring to slice data into trials
     
         # Before running SSS, make SUBJ/raw_fif/SUBJ_prebad.txt file with
         # space-separated list of bad MEG channel numbers
         push_raw=False,      # Push raw files and SSS script to SSS workstation
-        do_sss=True,        # Run SSS remotely (on sws) or locally with mne-python
+        do_sss=False,        # Run SSS remotely (on sws) or locally with mne-python
         fetch_sss=False,     # Fetch SSSed files from SSS workstation
         do_ch_fix=False,     # Fix channel ordering
     
@@ -293,7 +277,7 @@ for n, s in enumerate(out):
         # Make SUBJ/trans/SUBJ-trans.fif using mne_analyze; needed for fwd calc.
         gen_fwd=False,       # Generate forward solutions (and src space if needed)
         gen_inv=False,       # Generate inverses
-        gen_report=True,    # Write mne report html of results to disk
+        gen_report=False,    # Write mne report html of results to disk
         print_status=False,  # Print completeness status update
     
 #        params,
@@ -314,4 +298,4 @@ for n, s in enumerate(out):
 #        gen_report=True # true
     )
 
-(time.time() - t0)
+print('%i sec' % (time.time() - t0,))
