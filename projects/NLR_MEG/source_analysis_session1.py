@@ -264,6 +264,7 @@ m2 = np.logical_and(np.transpose(twre_index) <= reading_thresh, np.transpose(age
 
 orig_twre = twre_index
 orig_age = age
+orig_swe = swe_raw
 
 m3 = np.mean(n_epochs,axis=1) < 40
 
@@ -271,6 +272,7 @@ m1[np.where(m3)] = False
 m2[np.where(m3)] = False
 twre_index = twre_index[np.where(~m3)[0]]
 age = age[np.where(~m3)[0]]
+swe_raw = swe_raw[np.where(~m3)[0]]
 
 good_readers = np.where(m1)[0]
 poor_readers = np.where(m2)[0]
@@ -742,14 +744,18 @@ tX11 = X11[:,:,all_subject,:]
 M = np.mean(np.mean(tX11[stg_vertices_l,:,:,:],axis=0),axis=1)
 errM = np.std(np.mean(tX11[stg_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(all_subject))
 
-temp1 = X11[:,:,old_readers,:]
+temp1 = X11[:,:,good_readers,:]
 M1 = np.mean(np.mean(temp1[stg_vertices_l,:,:,:],axis=0),axis=1)
 errM1 = np.std(np.mean(temp1[stg_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(good_readers))
+diffM1 = np.mean(np.mean(temp1[stg_vertices_l,:,:,5],axis=0),axis=1) - np.mean(np.mean(temp1[stg_vertices_l,:,:,8],axis=0),axis=1)
+diffM2 = np.mean(np.mean(temp1[stg_vertices_l,:,:,0],axis=0),axis=1) - np.mean(np.mean(temp1[stg_vertices_l,:,:,3],axis=0),axis=1)
 del temp1
 
-temp1 = X11[:,:,young_readers,:]
+temp1 = X11[:,:,poor_readers,:]
 M2 = np.mean(np.mean(temp1[stg_vertices_l,:,:,:],axis=0),axis=1)
 errM2 = np.std(np.mean(temp1[stg_vertices_l,:,:,:],axis=0),axis=1) / np.sqrt(len(poor_readers))
+diffM3 = np.mean(np.mean(temp1[stg_vertices_l,:,:,5],axis=0),axis=1) - np.mean(np.mean(temp1[stg_vertices_l,:,:,8],axis=0),axis=1)
+diffM4 = np.mean(np.mean(temp1[stg_vertices_l,:,:,0],axis=0),axis=1) - np.mean(np.mean(temp1[stg_vertices_l,:,:,3],axis=0),axis=1)
 del temp1
 
 # For calculating p-values
@@ -759,6 +765,30 @@ X = np.mean(X11[stg_vertices_l,:,:,:],axis=0)
 t0 = time.time()
 plotit2(times, M, errM, 0, 3, yMin=0, yMax=2.3, subject = 'all')
 plotsig2(times,nReps,X, 0, 3, all_subject, boot_pVal)
+
+task1 = 5
+task2 = 0
+plt.figure()
+plt.clf() 
+plt.hold(True)
+plt.plot(times, M1[:,task1],'-',color=c_table[5],label='Low noise')
+plt.fill_between(times, M1[:,task1]-errM1[:,task1], M1[:,task1]+errM1[:,task1], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+plt.plot(times, M1[:,task2],'--',color=c_table[5],label='Low noise')
+plt.fill_between(times, M1[:,task2]-errM1[:,task2], M1[:,task2]+errM1[:,task2], facecolor=c_table[5], alpha=0.2, edgecolor='none')
+
+plt.figure()
+plt.clf() 
+plt.hold(True)
+plt.plot(times, M2[:,task1],'-',color=c_table[3],label='Low noise')
+plt.fill_between(times, M2[:,task1]-errM2[:,task1], M2[:,task1]+errM2[:,task1], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+plt.plot(times, M2[:,task2],'--',color=c_table[3],label='Low noise')
+plt.fill_between(times, M2[:,task2]-errM2[:,task2], M2[:,task2]+errM2[:,task2], facecolor=c_table[3], alpha=0.2, edgecolor='none')
+
+plt.figure()
+plt.clf() 
+plt.hold(True)
+plt.plot(times, diffM3,'-',color=c_table[5],label='Low noise')
+plt.plot(times, diffM4,'--',color=c_table[5],label='Low noise')
 
 #C = np.mean(X11[stg_vertices_l,:,:,0],axis=0) - np.mean(X11[stg_vertices_l,:,:,3],axis=0)
 #corr = plotcorr3(times, C[:,all_subject], twre_index)
@@ -1932,6 +1962,7 @@ Correlation
 aaa = np.array(subs)
 temp_meg1 = np.concatenate((dot_lowNoise1_good,dot_lowNoise1_poor))
 temp_read = np.concatenate((orig_twre[good_readers],orig_twre[poor_readers]))
+temp_raw = np.concatenate((orig_swe[good_readers],orig_swe[poor_readers]))
 
 temp_age = np.concatenate((orig_age[good_readers],orig_age[poor_readers]))
 
@@ -1944,16 +1975,16 @@ plt.figure(20)
 plt.clf()
 ax = plt.subplot()
 
-fit = np.polyfit(temp_age, temp_meg1, deg=1)
-ax.plot(temp_age, fit[0] * temp_age + fit[1], color=[0,0,0])
-ax.plot(temp_age, temp_meg1, 'o', markerfacecolor=[.5, .5, .5], markeredgecolor=[1,1,1], markersize=10)
+fit = np.polyfit(temp_meg1, temp_read, deg=1)
+ax.plot(temp_meg1, fit[0] * temp_meg1 + fit[1], color=[0,0,0])
+ax.plot(temp_meg1, temp_read, 'o', markerfacecolor=[.5, .5, .5], markeredgecolor=[1,1,1], markersize=10)
 
 #for i, txt in enumerate(temp_age):
 #    ax.annotate(temp_age[i], (temp_meg1[i], temp_read[i]))
 #plt.ylim([-1,6])
 #plt.xlim([50,130])
-np.corrcoef(temp_age,temp_meg1)
-r, p = stats.pearsonr(temp_age,temp_meg1)
+np.corrcoef(temp_read,temp_meg1)
+r, p = stats.pearsonr(temp_read,temp_meg1)
 plt.text(1,60,r)
 plt.text(1,55,p)
 os.chdir('figures')
@@ -1966,16 +1997,16 @@ plt.figure(21)
 plt.clf()
 ax = plt.subplot()
 
-fit = np.polyfit(temp_age, temp_meg2, deg=1)
-ax.plot(temp_age, fit[0] * temp_age + fit[1], color=[0,0,0])
-ax.plot(temp_age, temp_meg2, 'o', markerfacecolor=[.5, .5, .5], markeredgecolor=[1,1,1], markersize=10)
+fit = np.polyfit(temp_meg2, temp_read, deg=1)
+ax.plot(temp_meg2, fit[0] * temp_meg2 + fit[1], color=[0,0,0])
+ax.plot(temp_meg2, temp_read, 'o', markerfacecolor=[.5, .5, .5], markeredgecolor=[1,1,1], markersize=10)
 
 #for i, txt in enumerate(temp_age):
 #    ax.annotate(temp_age[i], (temp_meg2[i], temp_read[i]))
 #plt.ylim([-1,6])
 #plt.xlim([50,130])
-np.corrcoef(temp_age,temp_meg2)
-r, p = stats.pearsonr(temp_age,temp_meg2)
+np.corrcoef(temp_read,temp_meg2)
+r, p = stats.pearsonr(temp_read,temp_meg2)
 plt.text(2,60,r)
 plt.text(2,55,p)
 os.chdir('figures')

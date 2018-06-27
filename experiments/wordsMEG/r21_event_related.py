@@ -11,6 +11,7 @@ from PIL import Image
 import os
 from os import path as op
 import glob
+import time
 
 # background color
 testing = False
@@ -110,17 +111,19 @@ with ExperimentController('ShowImages', full_screen=True, version='dev') as ec:
     #           dict(imorder_shuf=imorder_shuf,
     #                imtype_shuf=imtype_shuf))
     fr = 1/ec.estimate_screen_fs()  # Estimate frame rate
+    realRR = ec.estimate_screen_fs()
+    realRR = round(realRR)
     adj = fr/2  # Adjustment factor for accurate flip
     # Wait to fill the screen
     ec.set_visible(False)
     # Set the background color to gray
     ec.set_background_color(bgcolor)
 
-    n_frames = int(total_time * fr)
-    img_frames = int(imduration*fr)
-    jitter = np.arange(0,fr/5) # 0~200 ms jitter
+    n_frames = int(total_time * realRR)
+    img_frames = int(imduration*realRR)
+    jitter = np.arange(0,realRR/5) # 0~200 ms jitter
     
-    temp_flicker = np.arange(0,n_frames,int(fr/2)) # Get temp_flicker frames: every .5 s
+    temp_flicker = np.arange(0,n_frames,int(realRR/2)) # Get temp_flicker frames: every .5 s
     delay = []
     for i in np.arange(0,len(temp_flicker)):
         rng.shuffle(jitter)
@@ -128,7 +131,7 @@ with ExperimentController('ShowImages', full_screen=True, version='dev') as ec:
     frame_flicker = temp_flicker + delay # 
     frame_img = [0]
     for i in np.arange(0,len(ISI)):
-        frame_img.append(frame_img[i] + img_frames + int(ISI[i]*fr))
+        frame_img.append(frame_img[i] + img_frames + int(ISI[i]*realRR))
     frame_img = frame_img[:-1]
     
     # load up the image stack. The images in img_buffer are in the sequential 
@@ -184,16 +187,13 @@ with ExperimentController('ShowImages', full_screen=True, version='dev') as ec:
     trial = 0
     frame = 0
     flicker = 0
-    while frame < n_frames:
+    imageframe = []
+    t0 = time.time()
+    while frame < n_frames-1:
         # Mark the log file of the trial type
-        ec.write_data_line('imnumber', imnumber[trial])
-        ec.write_data_line('imtype', imtype[trial])
-        
-        if frame == frame_flicker:
-            fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
-            ec.write_data_line('dotcolorFix', fix_color[flicker])
-            flicker += 1
-        elif frame == frame_img[trial]:
+        if frame == frame_img[trial]:
+            ec.write_data_line('imnumber', imnumber[trial])
+            ec.write_data_line('imtype', imtype[trial])
             fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
             if testing:
                 if count == 0:
@@ -205,21 +205,36 @@ with ExperimentController('ShowImages', full_screen=True, version='dev') as ec:
                 img[trial].draw()
             trig = imtype[trial] if not testing else test_trig
             ec.stamp_triggers(trig, check='int4')
-            imageframe = frame
-        elif (frame - imageframe) > img_frames: # ISI
+            imageframe.append(frame)
+            if trial < len(imnumber)-2:
+                trial += 1
+        elif (frame - imageframe[trial]) > img_frames: # ISI
             fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
             blank.draw()
-        
+        else:
+            fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
+            img[trial].draw()
+            
+        if frame == frame_flicker[flicker]:
+            fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
+            ec.write_data_line('dotcolorFix', fix_color[flicker])
+            if flicker < len(frame_flicker)-2:
+                flicker += 1
+            img[trial].draw()
         fix.draw()
         
         last_flip = ec.flip(last_flip-adj)
-
+        frame += 1
         ec.get_presses()
         frametimes.append(last_flip)
         ec.check_force_quit()
 
     # Now the experiment is over and we show 5 seconds of blank
+    print "\n\n Elasped time: %0.2d mins %0.2d secs" % divmod(time.time()-t0, 60)
+    print "\n\n Targeted time: %0.2d mins %0.2d secs" % divmod(total_time, 60)
     blank.draw(), fix.draw()
     ec.flip()
     ec.wait_secs(5.0)
     pressed = ec.get_presses()  # relative_to=0.0
+    
+    
