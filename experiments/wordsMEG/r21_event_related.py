@@ -11,7 +11,6 @@ from PIL import Image
 import os
 from os import path as op
 import glob
-import time
 
 # background color
 testing = False
@@ -28,7 +27,7 @@ if not os.path.isdir(basedir):
     basedir = os.path.join('/mnt/diskArray/projects/MEG/wordStim')
 
 """ Words, False fonts (Korean), Faces, Objects """
-imagedirs = ['word_c254_p20', 'word_c254_p50', 'word_c254_p80', 'bigram_c254_p20']
+imagedirs = ['word_c254_p0', 'word_c254_p50', 'word_c254_p80', 'bigram_c254_p20']
 
 nimages = [30, 30, 30, 30]  # number of images in each category
 if len(nimages) == 1: # Does nothing....
@@ -87,8 +86,8 @@ for i in range(1, len(imagedirs)+1):
 # Build the path structure to each image in each image directory. Each image
 # category is an entry into the list. The categories are in sequential order 
 # matching imorder, but the images within each category are random
-imagelist = []
-imnumber = []
+templist = []
+tempnumber = []
 c = -1
 for imname in imagedirs:
     c = c+1
@@ -100,11 +99,19 @@ for imname in imagedirs:
     for i in n:
         tmp2.append(tmp[i])
     # Add the random image list to an entry in imagelist
-    imagelist.extend(tmp2)
+    templist.extend(tmp2)
     # record the image number
-    imnumber.extend(n)
-    assert len(imagelist[-1]) > 0
+    tempnumber.extend(n)
+    assert len(templist[-1]) > 0
+temp_list = np.arange(0,len(templist))
+rng.shuffle(temp_list)
 
+imagelist = []
+imnumber = []
+for i in temp_list:
+    imagelist.append(templist[i])
+    imnumber.append(tempnumber[i])
+    
 # Start instance of the experiment controller
 with ExperimentController('ShowImages', full_screen=True, version='dev') as ec:
     #write_hdf5(op.splitext(ec.data_fname)[0] + '_trials.hdf5',
@@ -119,9 +126,9 @@ with ExperimentController('ShowImages', full_screen=True, version='dev') as ec:
     # Set the background color to gray
     ec.set_background_color(bgcolor)
 
-    n_frames = int(total_time * realRR)
-    img_frames = int(imduration*realRR)
-    jitter = np.arange(0,realRR/5) # 0~200 ms jitter
+    n_frames = round(total_time * realRR)
+    img_frames = round(imduration*realRR)
+    jitter = np.arange(0,realRR*0.2) # 0~200 ms jitter
     
     temp_flicker = np.arange(0,n_frames,int(realRR/2)) # Get temp_flicker frames: every .5 s
     delay = []
@@ -190,40 +197,34 @@ with ExperimentController('ShowImages', full_screen=True, version='dev') as ec:
     imageframe = []
     t0 = time.time()
     while frame < n_frames-1:
-        # Mark the log file of the trial type
-        if frame == frame_img[trial]:
-            ec.write_data_line('imnumber', imnumber[trial])
-            ec.write_data_line('imtype', imtype[trial])
-            fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
-            if testing:
-                if count == 0:
-                    bright.draw()
-                else:
-                    blank.draw()
-                count = (count + 1) % 2
-            else:
-                img[trial].draw()
-            trig = imtype[trial] if not testing else test_trig
-            ec.stamp_triggers(trig, check='int4')
-            imageframe.append(frame)
-            if trial < len(imnumber)-2:
-                trial += 1
-        elif (frame - imageframe[trial]) > img_frames: # ISI
-            fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
-            blank.draw()
-        else:
-            fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
-            img[trial].draw()
-            
         if frame == frame_flicker[flicker]:
             fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
             ec.write_data_line('dotcolorFix', fix_color[flicker])
             if flicker < len(frame_flicker)-2:
                 flicker += 1
+                
+        if frame >= frame_img[trial] and frame < frame_img[trial] + img_frames:
+            if frame == frame_img[trial]:
+                ec.write_data_line('imnumber', imnumber[trial])
+                ec.write_data_line('imtype', imtype[trial])
+                trig = imtype[trial]
+                ec.stamp_triggers(trig, check='int4', wait_for_last = False)
+                
+            fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
+            
             img[trial].draw()
+            
+            imageframe.append(frame)
+            if frame == frame_img[trial] + img_frames - 1:
+                if trial < len(imnumber)-2:
+                    trial += 1
+        else:
+            fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
+            blank.draw()
+        
         fix.draw()
         
-        last_flip = ec.flip(last_flip-adj)
+        last_flip = ec.flip()
         frame += 1
         ec.get_presses()
         frametimes.append(last_flip)
