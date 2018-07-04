@@ -1,0 +1,12 @@
+2018-07-03 07:33:22,929 - INFO    - Expyfun: Using version 2.0.0.dev0+4c31ad2 (requested dev)
+2018-07-03 07:33:22,931 - INFO    - Expyfun: Setting up Pyglet audio
+2018-07-03 07:33:23,006 - INFO    - Expyfun: Setting up screen
+2018-07-03 07:33:23,224 - EXP     - Expyfun: Set screen visibility True
+2018-07-03 07:33:23,313 - INFO    - Expyfun: Initializing dummy triggering mode
+2018-07-03 07:33:23,318 - INFO    - Expyfun: Initialization complete
+2018-07-03 07:33:23,319 - EXP     - Expyfun: Participant: test
+2018-07-03 07:33:23,321 - EXP     - Expyfun: Session: 1
+2018-07-03 07:33:24,200 - EXP     - Expyfun: Set screen visibility False
+2018-07-03 07:33:28,404 - EXP     - Expyfun: Set screen visibility True
+2018-07-03 07:34:17,636 - INFO    - Expyfun: Exiting
+2018-07-03 07:34:17,655 - EXP     - Expyfun: Audio stopped and reset.
