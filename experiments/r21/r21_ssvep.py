@@ -18,7 +18,7 @@ test_trig = [15]
 if testing:
     bgcolor = [0., 0., 0., 1.]
 else:
-    bgcolor = [127/255., 127/255., 127/255., 1]
+    bgcolor = [0.5, 0.5, 0.5, 1]
 
 # Paths to images
 #basedir = '/home/jyeatman/projects/MEG/images/'
@@ -102,7 +102,7 @@ oddlist = tmp
 templist = []
 k = 0
 temptype = []
-for i in np.arange(0,len(baselist)): # Every 6 images is odd image
+for i in np.arange(0,len(baselist)): #len(baselist)
     if np.mod(i,5) == 4:
         templist.append(oddlist[k])
         k += 1
@@ -120,24 +120,26 @@ imagelist = np.concatenate((paddlist[:init_time*base_rate],templist,paddlist[len
 imtype = np.concatenate((paddtype,temptype,paddtype))
 
 # Start instance of the experiment controller
-with ExperimentController('ShowImages', full_screen=True, version ='dev') as ec:
+with ExperimentController('ShowImages', full_screen=True, version='dev') as ec:
     #write_hdf5(op.splitext(ec.data_fname)[0] + '_trials.hdf5',
     #           dict(imorder_shuf=imorder_shuf,
     #                imtype_shuf=imtype_shuf))
-    fr = 1/ec.estimate_screen_fs()  # Estimate frame rate
-    realRR = ec.estimate_screen_fs()
+    
+    realRR = ec.estimate_screen_fs(n_rep=20)
     realRR = round(realRR)
+    fr = 1./realRR
     adj = fr/2  # Adjustment factor for accurate flip
     # Wait to fill the screen
     ec.set_visible(False)
     # Set the background color to gray
     ec.set_background_color(bgcolor)
 
-    n_frames = round(total_time * realRR)
+    n_frames = int(round(total_time * realRR))
     img_frames = int(round(realRR/base_rate))
     
     frame_img = np.arange(0,n_frames,img_frames)
-    start_frame = (len(paddlist)/2-1)*img_frames
+    blank_img = frame_img + int(img_frames/2)
+    start_frame = (len(paddlist)/2)*img_frames
     end_frame = start_frame + len(templist)*img_frames
 #    x = np.linspace(0,np.pi,img_frames)
 #    multi_factor = np.sin(x)
@@ -181,10 +183,7 @@ with ExperimentController('ShowImages', full_screen=True, version ='dev') as ec:
 
     # Display instruction (7 seconds).
     # They will be different depending on the run number
-    if int(ec.session) % 2:
-        t = visual.Text(ec,text='Button press when the dot turns red - Ignore images',pos=[0,.1],font_size=40,color='k')
-    else:
-        t = visual.Text(ec,text='Button press for fake word',pos=[0,.1],font_size=40,color='k') 
+    t = visual.Text(ec,text='Button press when the dot turns red - Ignore images',pos=[0,.1],font_size=40,color='k')
     t.draw()
     ec.flip()
     ec.wait_secs(5.0)
@@ -202,50 +201,58 @@ with ExperimentController('ShowImages', full_screen=True, version ='dev') as ec:
     # The iterable 'trial' randomizes the order of everything since it is
     # drawn from imorder_shuf
     trial = 0
+    b_trial = 0
     frame = 0
     flicker = 0
     imageframe = []
     trig = 0
+    time2Flip = 0
     t0 = time.time()
     while frame < n_frames:
         if frame == frame_flicker[flicker]:
             fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
             ec.write_data_line('dotcolorFix', fix_color[flicker])
+            time2Flip = 1
             if flicker < len(frame_flicker)-2:
                 flicker += 1
                 
-        if frame >= frame_img[trial] and frame < frame_img[trial] + int(img_frames/2):
-            if frame == frame_img[trial]:
-                ec.write_data_line('imtype', imtype[trial])
-                if frame == start_frame:
-                    ec.write_data_line('Start')
-                    trig = 1
-                    ec.stamp_triggers(trig, check='int4')
-                elif frame == end_frame:
-                    ec.write_data_line('End')
-                    trig = 11
-                    ec.stamp_triggers(trig, check='int4')
-            fix.set_colors(colors=(fix_color[flicker],fix_color[flicker]))
+        if frame == frame_img[trial]:
+            ec.write_data_line('imtype', imtype[trial])
+            time2Flip = 1
+            if frame == start_frame:
+                ec.write_data_line('Start')
+                trig = 1
+            elif frame == end_frame:
+                ec.write_data_line('End')
             
             img[trial].draw()
             
-            imageframe.append(frame)
-            if frame == frame_img[trial] + int(img_frames/2) - 1:
-                if trial < len(imtype)-2:
-                    trial += 1
-        else:
+            if trial < len(imtype)-1:
+                trial += 1
+        elif frame == blank_img[b_trial]:
             blank.draw()
+            time2Flip = 1
+            trig = 0
+            if b_trial < len(imtype)-1:
+                b_trial += 1
+        else:
+            time2Flip = 0
+            trig = 0
             
         fix.draw()
-        
-        last_flip = ec.flip()
-        
+        if trig:
+            ec.stamp_triggers(1, check='int4', wait_for_last=False)
+        if time2Flip:
+            last_flip = ec.flip()
+            frametimes.append(last_flip)
         ec.get_presses()
-        frametimes.append(last_flip)
-        ec.check_force_quit()
-        while time.time()-t0 < (frame+1)*fr:
+#        ec.wait_for_presses(max_wait = 0.1)
+        
+#        ec.check_force_quit()
+        while time.time()-t0 < (frame+1)*fr - fr/60:
             ec.check_force_quit()
         frame += 1
+        
     # Now the experiment is over and we show 5 seconds of blank
     print "\n\n Elasped time: %0.4f secs" % (time.time()-t0)
     print "\n\n Targeted time: %0.4f secs" % total_time
