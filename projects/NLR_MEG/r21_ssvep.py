@@ -33,7 +33,7 @@ if not os.path.isdir(out_dir):
 os.chdir(out_dir)
 #
 #%%
-out = ['joo_sung_session']
+out = ['pmd']
 
 for n, s in enumerate(out):
     print(s)    
@@ -49,12 +49,12 @@ for n, s in enumerate(out):
     params.subjects = [s]
     params.sss_type = 'python'
     params.sss_regularize = 'in' # 'in' by default
-    params.tsss_dur = 8. # 60 for adults with not much head movements. This was set to 6.
-    params.st_correlation = 0.9
+    params.tsss_dur = 16. # 60 for adults with not much head movements. This was set to 6.
+    params.st_correlation = 0.98
     
     params.auto_bad_meg_thresh = 10 # THIS SHOULD NOT BE SO HIGH!
 
-    params.trans_to = None #'median'
+    params.trans_to = 'median'
 
     params.t_adjust = -44e-3 # time delay from the trigger. It's due to set trigger function. I don't know why...
     
@@ -69,7 +69,7 @@ for n, s in enumerate(out):
     params.structurals =[None] * len(params.subjects)
     
 
-    params.run_names = ['%s_1', '%s_3']
+    params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4']
     
     
     params.dates = [(2014, 0, 00)] * len(params.subjects)
@@ -149,11 +149,11 @@ for n, s in enumerate(out):
         # Before running SSP, examine SSS'ed files and make
         # SUBJ/bads/bad_ch_SUBJ_post-sss.txt; usually, this should only contain EEG
         # channels.
-        gen_ssp=True,       # Generate SSP vectors
-        apply_ssp=True,     # Apply SSP vectors and filtering
-        plot_psd=True,      # Plot raw data power spectra
-        write_epochs=True,  # Write epochs to disk
-        gen_covs=True,      # Generate covariances
+        gen_ssp=False,       # Generate SSP vectors
+        apply_ssp=False,     # Apply SSP vectors and filtering
+        plot_psd=False,      # Plot raw data power spectra
+        write_epochs=False,  # Write epochs to disk
+        gen_covs=False,      # Generate covariances
     
         # Make SUBJ/trans/SUBJ-trans.fif using mne_analyze; needed for fwd calc.
         gen_fwd=False,       # Generate forward solutions (and src space if needed)
