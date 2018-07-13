@@ -33,7 +33,7 @@ if not os.path.isdir(out_dir):
 os.chdir(out_dir)
 #
 #%%
-out = ['pmd']
+out = ['ek_short']
 
 for n, s in enumerate(out):
     print(s)    

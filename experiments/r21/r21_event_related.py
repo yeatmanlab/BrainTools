@@ -224,7 +224,7 @@ with ExperimentController('ShowImages', full_screen=True,version='dev') as ec:
         
         fix.draw()
         if trigger:
-            ec.stamp_triggers(1, check='int4',wait_for_last=False)
+            ec.stamp_triggers(trig, check='int4',wait_for_last=False)
 #            stampframe.append(frame)
         last_flip = ec.flip()
         frame += 1
