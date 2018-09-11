@@ -1,4 +1,6 @@
 function response = AnalyzeBehaviorWordTask(tabPath)
+%%
+tabPath = '/mnt/diskArray/projects/MEG/nlr/bdata/202_DD_2015-08-27 14_50_00.573000.tab';
 
 if exist('tabPath','var') && ~isempty(tabPath)
     if exist(tabPath,'dir')

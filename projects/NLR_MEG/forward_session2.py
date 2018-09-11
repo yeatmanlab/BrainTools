@@ -36,16 +36,14 @@ raw_dir = '/mnt/scratch/NLR_MEG4'
 
 os.chdir(raw_dir)
 
-subs = ['NLR_102_RS','NLR_103_AC','NLR_105_BB','NLR_110_HH','NLR_127_AM',
-        'NLR_130_RW','NLR_132_WP','NLR_133_ML','NLR_145_AC','NLR_150_MG',
-        'NLR_151_RD','NLR_152_TC','NLR_160_EK','NLR_161_AK','NLR_163_LF',
+subs = ['NLR_102_RS','NLR_105_BB','NLR_110_HH','NLR_127_AM',
+        'NLR_132_WP','NLR_145_AC','NLR_150_MG',
+        'NLR_152_TC','NLR_160_EK','NLR_161_AK','NLR_162_EF','NLR_163_LF',
         'NLR_164_SF','NLR_170_GM','NLR_172_TH','NLR_174_HS','NLR_179_GM',
-        'NLR_180_ZD','NLR_187_NB','NLR_201_GS','NLR_203_AM',
-        'NLR_204_AM','NLR_205_AC','NLR_206_LM','NLR_207_AH','NLR_211_LB',
-        'NLR_GB310','NLR_KB218','NLR_JB423','NLR_GB267','NLR_JB420',
-        'NLR_HB275','NLR_197_BK','NLR_GB355','NLR_GB387','NLR_HB205',
-        'NLR_IB217','NLR_IB319','NLR_JB227','NLR_JB486','NLR_KB396',
-        'NLR_IB357']
+        'NLR_180_ZD','NLR_201_GS','NLR_203_AM',
+        'NLR_204_AM','NLR_205_AC','NLR_207_AH','NLR_210_SB','NLR_211_LB',
+        'NLR_GB310','NLR_KB218','NLR_GB267','NLR_JB420',
+        'NLR_HB275','NLR_GB355'] 
 
 #for n, s in enumerate(subs):
 #    run_subprocess(['mne', 'watershed_bem', '--subject', subs[n],'--overwrite'], env=this_env)
@@ -70,23 +68,21 @@ Run head_surf.m
 #                                                    # otherwise, it gives errors
 
 """ Co-register...
-mne.gui.coregistration(tabbed=False,subject=subs[45],subjects_dir=fs_dir)
+mne.gui.coregistration(tabbed=False,subject=subs[0],subjects_dir=fs_dir)
 # Recommended way is to use mne coreg from terminal
 """
 
-# Session 1
+# Session 2
 # subs are synced up with session1 folder names...
 #
-session1 = ['102_rs160618','103_ac150609','105_bb150713','110_hh160608','127_am151022',
-       '130_rw151221','132_wp160919','133_ml151124','145_ac160621','150_mg160606',
-       '151_rd160620','152_tc160422','160_ek160627','161_ak160627','163_lf160707',
-       '164_sf160707','170_gm160613','172_th160614','174_hs160620','179_gm160701',
-       '180_zd160621','187_nb161017','201_gs150818','203_am150831',
-       '204_am150829','205_ac151123','206_lm151119','207_ah160608','211_lb160617',
-       'nlr_gb310170614','nlr_kb218170619','nlr_jb423170620','nlr_gb267170620','nlr_jb420170621',
-       'nlr_hb275170622','197_bk170622','nlr_gb355170606','nlr_gb387170608','nlr_hb205170825',
-       'nlr_ib217170831','nlr_ib319170825','nlr_jb227170811','nlr_jb486170803','nlr_kb396170808',
-       'nlr_ib357170912']
+session2 = ['102_rs160815','105_bb161011','110_hh160809','127_am161004',
+       '132_wp161122','145_ac160823','150_mg160825',
+       '152_tc160623','160_ek160915','161_ak160916','162_ef160829','163_lf160920',
+       '164_sf160920','170_gm160822','172_th160825','174_hs160829','179_gm160913',
+       '180_zd160826','201_gs150925','203_am151029',
+       '204_am151120','205_ac160202','207_ah160809','210_sb160822','211_lb160823',
+       'nlr_gb310170829','nlr_kb218170829','nlr_gb267170911','nlr_jb420170828',
+       'nlr_hb275170828','nlr_gb355170907']
 
 #subs = ['NLR_205_AC','NLR_206_LM',
 #        'NLR_207_AH','NLR_210_SB','NLR_211_LB'
@@ -137,8 +133,8 @@ Forward model...
 #mne.viz.plot_head_positions(pos, mode='traces')
 
 #%%
-for n, s in enumerate(session1):
-    os.chdir(os.path.join(raw_dir,session1[n]))
+for n, s in enumerate(session2):
+    os.chdir(os.path.join(raw_dir,session2[n]))
     
     if s[0:3] == 'nlr':
         subject = s[0:9].upper()
@@ -146,7 +142,7 @@ for n, s in enumerate(session1):
         subject = 'NLR_' + s[0:6].upper()
     
     os.chdir('inverse')
-    fn = 'All_40-sss_eq_'+session1[n]+'-ave.fif'
+    fn = 'All_40-sss_eq_'+session2[n]+'-ave.fif'
     evoked = mne.read_evokeds(fn, condition=0, 
                               baseline=(None,0), kind='average', proj=True)
     
@@ -155,10 +151,10 @@ for n, s in enumerate(session1):
     if os.path.isdir('../forward'):
         os.chdir('../forward')
     else:
-        temp_src = '/mnt/scratch/NLR_MEG2/' + session1[n] + '/forward'
-        temp_dest = '/mnt/scratch/NLR_MEG3/' + session1[n] + '/forward'
+        temp_src = '/mnt/scratch/NLR_MEG2/' + session2[n] + '/forward'
+        temp_dest = '/mnt/scratch/NLR_MEG3/' + session2[n] + '/forward'
         shutil.copytree(temp_src, temp_dest)
-    trans = session1[n] + '-trans.fif'
+    trans = session2[n] + '-trans.fif'
     
     # Take a look at the sensors
 #    mne.viz.plot_trans(info, trans, subject=subs[n], dig=True,
@@ -172,7 +168,7 @@ for n, s in enumerate(session1):
 
     os.chdir(os.path.join(fs_dir,subject,'bem'))
     src = mne.read_source_spaces(fn2)
-    os.chdir(os.path.join(raw_dir,session1[n]))
+    os.chdir(os.path.join(raw_dir,session2[n]))
     os.chdir('forward')
         
     #import numpy as np  # noqa
@@ -194,14 +190,14 @@ for n, s in enumerate(session1):
                                conductivity=conductivity, 
                                subjects_dir=fs_dir)
     bem = mne.make_bem_solution(model)
-    fn = session1[n] + '-bem-sol.fif'
+    fn = session2[n] + '-bem-sol.fif'
     mne.write_bem_solution(fn,bem)
     
     # Now create forward model
     fwd = mne.make_forward_solution(info, trans=trans, src=src, bem=bem,
                                     meg=True, eeg=False, mindist=3.0, n_jobs=18)
     fwd = mne.convert_forward_solution(fwd, surf_ori=True, force_fixed=True, copy=True)
-    fn = session1[n] + '-sss-fwd.fif'
+    fn = session2[n] + '-sss-fwd.fif'
     mne.write_forward_solution(fn,fwd,overwrite=True)
     
     #Inverse here

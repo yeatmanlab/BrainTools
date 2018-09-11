@@ -1,3 +1,4 @@
+
 """
 ==========================
 Display images for MEG
@@ -8,12 +9,14 @@ from expyfun import visual, ExperimentController
 from expyfun.io import write_hdf5
 import time
 from PIL import Image
+
+
 import os
 from os import path as op
 import glob
 
-# background color
-testing = False
+# background color2
+testing = True
 test_trig = [15]
 if testing:
     bgcolor = [0., 0., 0., 1.]
@@ -146,59 +149,75 @@ with ExperimentController('ShowImages', full_screen=True) as ec:
         t = visual.Text(ec,text='Button press for fake word',pos=[0,.1],font_size=40,color='k') 
     t.draw()
     ec.flip()
-    ec.wait_secs(6.0)
+    ec.wait_secs(1.0)
 
     # Show images
-    count = 0
+    frame = 0
+    trigger = 0
     # The iterable 'trial' randomizes the order of everything since it is
     # drawn from imorder_shuf
-    for trial in imorder_shuf:
-        assert len(dcolor) == len(ISI)
+    t0 = time.time()
+    while frame < 2400:
+#        assert len(dcolor) == len(ISI)
         # Insert a blank after waiting the desired image duration
         # Change the fixation dot color
-        fix.set_colors(colors=(dcolor2[trial], dcolor2[trial]))
-        blank.draw(), fix.draw()
-        ec.write_data_line('dotcolorFix', dcolor2[trial])
+#        fix.set_colors(colors=(dcolor2[trial], dcolor2[trial]))
+#        blank.draw(), fix.draw()
+#        ec.write_data_line('dotcolorFix', dcolor2[trial])
 
-        last_flip = ec.flip(last_flip+imduration/2-adj)
+#        last_flip = ec.flip(last_flip+imduration/2-adj)
         # Draw a fixation dot of a random color
-        fix.set_colors(colors=(dcolor[trial], dcolor[trial]))
+#        fix.set_colors(colors=(dcolor[trial], dcolor[trial]))
         # Stamp a trigger when the image goes on
-        trig = imtype[trial] if not testing else test_trig
-        ec.call_on_next_flip(ec.stamp_triggers, trig, check='int4')
-
+#        trig = imtype[trial] if not testing else test_trig
+#        ec.call_on_next_flip(ec.stamp_triggers, trig, check='int4')
+        
+#        bright.draw()
+#        ec.stamp_triggers(1, check='int4')
+#        t1 = ec.flip()
         # Draw the image
-        if testing:
-            if count == 0:
-                bright.draw()
-            else:
-                blank.draw()
-            count = (count + 1) % 2
+
+        if np.mod(frame,40) == 0:
+            bright.draw()
+            trigger = 1
+#            ec.stamp_triggers(1,check='int4')
         else:
-            img[trial].draw()
-        fix.draw()
+            trigger = 0
+            blank.draw()
+#            ec.stamp_triggers(2,check='int4')
+#            count = (count + 1) % 2
+#            blank.draw()
+#        else:
+#            img[trial].draw()
+#        fix.draw()
 
         # Mark the log file of the trial type
-        ec.write_data_line('imnumber', imnumber[trial])
-        ec.write_data_line('imtype', imtype[trial])
-        ec.write_data_line('dotcolorIm', dcolor[trial])
+#        ec.write_data_line('imnumber', imnumber[trial])
+#        ec.write_data_line('imtype', imtype[trial])
+#        ec.write_data_line('dotcolorIm', dcolor[trial])
 
         # The image is flipped ISI milliseconds after the blank
-        last_flip = ec.flip(last_flip+ISI[trial]-adj)
-
+        if trigger:
+            ec.stamp_triggers(1,check='int4',wait_for_last=False)
+        last_flip = ec.flip()
+        
+#        last_flip - t1
+#        ec.flip()
        # Change the fixation dot color mid trial
-        fix.set_colors(colors=(dcolor3[trial], dcolor3[trial]))
-        img[trial].draw(), fix.draw()
-        ec.write_data_line('dotcolorFix', dcolor3[trial])
-        last_flip = ec.flip(last_flip+imduration/2-adj)
+#        fix.set_colors(colors=(dcolor3[trial], dcolor3[trial]))
+#        img[trial].draw(), fix.draw()
+#        ec.write_data_line('dotcolorFix', dcolor2[trial])
+#        last_flip = ec.flip(last_flip+imduration/2-adj)
         
         ec.get_presses()
         ec.listen_presses()
         frametimes.append(last_flip)
         ec.check_force_quit()
-
+        
+        frame += 1
+print "\n\n Elasped time: %0.4f secs" % (time.time()-t0)
     # Now the experiment is over and we show 5 seconds of blank
-    blank.draw(), fix.draw()
-    ec.flip()
-    ec.wait_secs(5.0)
-    pressed = ec.get_presses()  # relative_to=0.0
+#    blank.draw(), fix.draw()
+#    ec.flip()
+#    ec.wait_secs(5.0)
+#    pressed = ec.get_presses()  # relative_to=0.0
