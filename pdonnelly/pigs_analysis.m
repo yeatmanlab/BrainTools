@@ -35,6 +35,9 @@ compare(lme1,lme2)
 lme3 = fitlme(data2(data2.type==false,:), 'acc ~ 1 + pigs_casecontrol*int_session + (int_session|record_id)', 'FitMethod', 'ML')
 compare(lme1,lme3)
 
+% all
+lme_all = fitlme(data2, 'acc ~ 1 + pigs_casecontrol*int_session + (int_session|record_id) + (1|acc_Indicator)', 'FitMethod', 'ML')
+
 %% Just the intervention group
 lme4 = fitlme(data2(data2.type==true & data2.pigs_casecontrol==1,:), 'acc ~ 1 + int_session + (int_session|record_id) + (1|acc_Indicator)', 'FitMethod', 'ML')
 lme5 = fitlme(data2(data2.type==true & data2.pigs_casecontrol==0,:), 'acc ~ 1 + int_session + (int_session|record_id) + (1|acc_Indicator)', 'FitMethod', 'ML')
