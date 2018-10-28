@@ -1,54 +1,109 @@
-%Script for Pigs Analysis, Summer 2018
-%Patrick M Donnelly
-%University of Washington
-%September 11, 2018
+%% Script for Pigs Analysis, Summer 2018
+% Patrick M. Donnelly
+% University of Washington
+% October 27th, 2018
 
 %% Read in Data
-% Run pigs_analysis script in Python notebook
-
+% run pigs_analysis script in Python notebook
+% read in data from Desktop
 data = readtable('C://Users/Patrick/Desktop/pigs_wordlist_data.csv');
-categorical(data.int_session);
-categorical(data.pigs_casecontrol);
-data.worddiff = data.pigs_word2_acc - data.pigs_word1_acc;
-data.pseudodiff = data.pigs_pseudo2_acc - data.pigs_pseudo1_acc;
+% rename variables for ease in analysis
+data.Properties.VariableNames = {'Var1', 'id', 'session', 'group', ...
+    'study_name', 'word1_acc', 'word2_acc', 'pseudo1_acc', ...
+    'pseudo2_acc', 'first_acc', 'second_rate', 'wj_brs', 'twre_index', ...
+    'practice'};
+% make time and group variables categorical
+categorical(data.session);
+categorical(data.group);
+%data_stacked.wj_brs = zscore(data_stacked.wj_brs);
+% calculate difference scores and create new variables
+data.worddiff = data.word2_acc - data.word1_acc;
+data.pseudodiff = data.pseudo2_acc - data.pseudo1_acc;
+%extend practice variable to both visits for LME analysis
+for sub = 1:length(data.id)
+   if isnan(data.practice(sub))
+       data.practice(sub) = data.practice(sub+1);
+   end
+end
+% create new stacked dataset for wordlist data analysis
+data_stacked = stack(data,{'word1_acc','word2_acc',...
+    'pseudo1_acc','pseudo2_acc'},'NewDataVariableName','acc');
+data_stacked.type = data_stacked.acc_Indicator == 'word1_acc' | ...
+    data_stacked.acc_Indicator=='word2_acc';
 
+%% LME analysis {preregistered}
 
-data2 = stack(data,{'pigs_word1_acc','pigs_word2_acc','pigs_pseudo1_acc','pigs_pseudo2_acc'},'NewDataVariableName','acc')
-data2.type = data2.acc_Indicator=='pigs_word1_acc' | data2.acc_Indicator=='pigs_word2_acc';
-%% LME Model
-word_simple_model = 'word_acc ~ 1 + int_session + pigs_casecontrol + (1|record_id)'
-word_model = 'word_acc ~ 1 + pigs_casecontrol*int_session + (1|record_id)'
-word_lme = fitlme(data, word_model, 'FitMethod', 'ML') 
+%% Real word analysis
+% models
+model1 = 'acc ~ 1 + practice + group*session + (1|id)';
+model2 = 'acc ~ 1 + session*practice*group + (1|id) + (1|acc_Indicator)';
+model3 = 'acc ~ 1 + practice*group*session + (1-session|id)+ (1|acc_Indicator)';
+model4 = 'acc ~ 1 + practice + group*session + (1-session|id)'
 
-pseudo_model = 'pseudo_acc ~ 1 + pigs_casecontrol*int_session + (1|record_id)'
-pseudo_lme = fitlme(data, pseudo_model, 'FitMethod', 'ML') 
-
-%% 
-
-% Real words
-lme1 = fitlme(data2(data2.type==true,:), 'acc ~ 1 + wj_brs + pigs_practice_numstories + pigs_casecontrol*int_session + (1|record_id)', 'FitMethod', 'ML')
-lme2 = fitlme(data2(data2.type==true,:), 'acc ~ 1 + pigs_practice_numstories * pigs_casecontrol*int_session + (1|record_id) + (1|acc_Indicator)', 'FitMethod', 'ML')
+% focus in on dataset
+real_data = data_stacked(data_stacked.type==true,:);
+% run model fits
+lme1 = fitlme(real_data, model1, 'FitMethod', 'ML');
+lme2 = fitlme(real_data, model2, 'FitMethod', 'ML');
 compare(lme1,lme2)
-lme3 = fitlme(data2(data2.type==true,:), 'acc ~ 1 + pigs_casecontrol*int_session + (int_session|record_id) + (1|acc_Indicator)', 'FitMethod', 'ML')
+lme3 = fitlme(real_data, model3, 'FitMethod', 'ML');
 compare(lme2,lme3)
+lme4 = fitlme(real_data, model4, 'FitMethod', 'ML');
+compare(lme3,lme4)
 
-% Pseudo
-lme1 = fitlme(data2(data2.type==false,:), 'acc ~ 1 + pigs_practice_numstories*pigs_casecontrol*int_session + (1|record_id)', 'FitMethod', 'ML')
+% Pseudo word analysis
+% models
+model1 = 'acc ~ 1 + practice + group*session + (session|id)'
+model2 = 'acc ~ 1 + practice*group*session + (1-session|id)'
+model3 = 'acc ~ 1 + group*session + (session|id)'
 
-data2.int_session = categorical(data2.int_session);
-data2.pigs_casecontrol = categorical(data2.pigs_casecontrol);
-data2.wj_brs = zscore(data2.wj_brs);
-data2.pigs_practice_numstories = zscore(data2.pigs_practice_numstories);
-lme2 = fitlme(data2(data2.type==false,:), 'acc ~ 1 + pigs_practice_numstories*pigs_casecontrol*int_session + (1|record_id) + (1|acc_Indicator)', 'FitMethod', 'ML'...
-)
+
+% focus in on dataset
+pseudo_data = data_stacked(data_stacked.type==false,:);
+% run model fits
+lme1 = fitlme(pseudo_data, model1, 'FitMethod', 'ML');
+lme2 = fitlme(pseudo_data, model2, 'FitMethod', 'ML');
 compare(lme1,lme2)
-lme3 = fitlme(data2(data2.type==false,:), 'acc ~ 1 + pigs_casecontrol*int_session + (int_session|record_id)', 'FitMethod', 'ML')
+lme3 = fitlme(pseudo_data, model3, 'FitMethod', 'ML');
 compare(lme1,lme3)
 
-% all
-lme_all = fitlme(data2, 'acc ~ 1 + pigs_casecontrol*int_session + (int_session|record_id) + (1|acc_Indicator)', 'FitMethod', 'ML')
 
-%% Just the intervention group
-lme4 = fitlme(data2(data2.type==true & data2.pigs_casecontrol==1,:), 'acc ~ 1 + int_session + (int_session|record_id) + (1|acc_Indicator)', 'FitMethod', 'ML')
-lme5 = fitlme(data2(data2.type==true & data2.pigs_casecontrol==0,:), 'acc ~ 1 + int_session + (int_session|record_id) + (1|acc_Indicator)', 'FitMethod', 'ML')
+%% By Group
+int_data = data_stacked(data_stacked.type==true & data_stacked.group==1,:);
+cntrl_data = data_stacked(data_stacked.type==true & data_stacked.group==0,:);
+
+% models
+model1 = 'acc ~ 1 + session + (session|id) + (1|acc_Indicator)'
+model2 = 'acc ~ 1 + session + (session|id) + (1|acc_Indicator)'
+
+% model fits
+lme1 = fitlme(int_data, model1, 'FitMethod', 'ML')
+lme2 = fitlme(cntrl_data, model2, 'FitMethod', 'ML')
+
+%% Passage data
+
+% acc models
+model1 = 'first_acc ~ 1 + practice*group*session + (1-session|id)'
+model2 = 'first_acc ~ 1 + practice*group*session + (session|id)'
+
+% run model fits
+lme_acc_1 = fitlme(data, model1, 'FitMethod', 'ML')
+lme_acc_2 = fitlme(data, model2, 'FitMethod', 'ML')
+compare(lme_acc_1, lme_acc_2)
+
+% rate models
+model1 = 'second_rate ~ 1 + practice*group*session + (1-session|id)'
+lme_rate = fitlme(data, model1, 'FitMethod', 'ML')
+
+
+
+
+
+
+
+
+
+
+
+
 
