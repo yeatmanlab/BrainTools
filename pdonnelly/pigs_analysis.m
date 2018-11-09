@@ -6,12 +6,13 @@
 %% Read in Data
 % run pigs_analysis script in Python notebook
 % read in data from Desktop
-data = readtable('C://Users/Patrick/Desktop/pigs_wordlist_data.csv');
+%data = readtable('C://Users/Patrick/Desktop/pigs_wordlist_data.csv');
+data = readtable('~/Desktop/pigs_wordlist_data.csv');
 % rename variables for ease in analysis
 data.Properties.VariableNames = {'Var1', 'id', 'session', 'group', ...
     'study_name', 'word1_acc', 'word2_acc', 'pseudo1_acc', ...
     'pseudo2_acc', 'first_acc', 'second_rate', 'wj_brs', 'twre_index', ...
-    'practice'};
+    'ctopp_rapid','practice'};
 % make time and group variables categorical
 categorical(data.session);
 categorical(data.group);
@@ -38,7 +39,8 @@ data_stacked.type = data_stacked.acc_Indicator == 'word1_acc' | ...
 model1 = 'acc ~ 1 + practice + group*session + (1|id)';
 model2 = 'acc ~ 1 + session*practice*group + (1|id) + (1|acc_Indicator)';
 model3 = 'acc ~ 1 + practice*group*session + (1-session|id)+ (1|acc_Indicator)';
-model4 = 'acc ~ 1 + practice + group*session + (1-session|id)'
+model4 = 'acc ~ 1 + practice + group*session + (1-session|id)';
+model5 = 'acc ~ 1 + wj_brs + twre_index + ctopp_rapid + practice*group*session + (1-session|id)+ (1|acc_Indicator)';
 
 % focus in on dataset
 real_data = data_stacked(data_stacked.type==true,:);
@@ -50,12 +52,14 @@ lme3 = fitlme(real_data, model3, 'FitMethod', 'ML');
 compare(lme2,lme3)
 lme4 = fitlme(real_data, model4, 'FitMethod', 'ML');
 compare(lme3,lme4)
+lme5 = fitlme(real_data, model5, 'FitMethod', 'ML');
 
 % Pseudo word analysis
 % models
 model1 = 'acc ~ 1 + practice + group*session + (session|id)'
 model2 = 'acc ~ 1 + practice*group*session + (1-session|id)'
 model3 = 'acc ~ 1 + group*session + (session|id)'
+model4 = 'acc ~ 1 + wj_brs + twre_index + ctopp_rapid + practice + group*session + (session|id)';
 
 
 % focus in on dataset
@@ -66,14 +70,15 @@ lme2 = fitlme(pseudo_data, model2, 'FitMethod', 'ML');
 compare(lme1,lme2)
 lme3 = fitlme(pseudo_data, model3, 'FitMethod', 'ML');
 compare(lme1,lme3)
+lme4 = fitlme(pseudo_data, model4, 'FitMethod', 'ML');
 
 
 %% By Group
-int_data = data_stacked(data_stacked.type==true & data_stacked.group==1,:);
+int_data = data_stacked(data_stacked.type==false & data_stacked.group==1,:);
 cntrl_data = data_stacked(data_stacked.type==true & data_stacked.group==0,:);
 
 % models
-model1 = 'acc ~ 1 + session + (session|id) + (1|acc_Indicator)'
+model1 = 'acc ~ 1 + practice*session + (session|id) + (1|acc_Indicator)'
 model2 = 'acc ~ 1 + session + (session|id) + (1|acc_Indicator)'
 
 % model fits
