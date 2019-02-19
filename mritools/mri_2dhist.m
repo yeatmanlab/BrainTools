@@ -1,4 +1,20 @@
 function mri_2dhist(im1,im2,drange,cax)
+%
+% mri_2dhist(im1,im2,drange,cax)
+%
+% Make a 2d histogram from 3d images;
+%
+% im1 and im2 are 3d blocks of data. For example, if it's a nifti image,
+% the data is stored in .data
+%
+% drange - clip range
+%
+% cax - defines the color range
+%
+% example:
+%
+% im1 = rand(10,10,10); im2 = rand(10,10,10)
+% mri_2dhist(im1,im2,drange,cax)
 
    
 figure;hold;
