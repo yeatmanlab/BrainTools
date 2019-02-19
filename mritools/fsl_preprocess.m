@@ -87,15 +87,6 @@ bvals_cat = horzcat(bvals{:});
 bvals_cat(bvals_cat<20) = 0;
 bvecs_cat = horzcat(bvecs{:});
 
-% Discard volumes with reversed phase encode (if desired)
-if discardRPE==1
-    rpe_ind = all(pe_dir ~= -1,2);
-    keepvols = rpe_ind(vol_ind);
-    dfull = dfull(:,:,:,keepvols);
-    bvecs_cat = bvecs_cat(:,keepvols');
-    bvals_cat = bvals_cat(keepvols');  
-end
-
 % Write out a concatenated DWI
 im.data = dfull;
 im.dim(4) = size(im.data,4);
@@ -139,7 +130,7 @@ end
 dlmwrite('index.txt',indx,'\t');
 
 %% run eddy currect correction
-if ~exist('eddy','dir')
+if ~exist(fullfile(pwd,'eddy'),'dir')
     mkdir('eddy');
 end
 outname = 'eddy/eddy_corrected_data';
@@ -159,10 +150,34 @@ copyfile('bvals_cat.bval','eddy/bvals');
 movefile([outname '.nii.gz'],'eddy/data.nii.gz')
 copyfile('topup_b0_brain_mask.nii.gz', 'eddy/nodif_brain_mask.nii.gz')
 
-%% Run dtifit
+%% Discard volumes with reversed phase encode (if desired)
 eddyNii   = fullfile(pwd,'eddy/data.nii.gz');
 eddyBvecs = fullfile(pwd,'eddy/bvecs');
 eddyBvals = fullfile(pwd,'eddy/bvals');
+
+if discardRPE==1
+    if ~exist(fullfile(outdir,'eddy','withRPE'),'dir'),mkdir(fullfile(outdir,'eddy','withRPE'));end
+    % Get indices for reverse PE
+    rpe_ind = all(pe_dir ~= -1,2);
+    keepvols = rpe_ind(vol_ind);
+    % Load up post-eddy data, bvals and bvecs and remove reverse PE volumes
+    dfull = niftiRead(eddyNii);
+    niftiWrite(dfull, fullfile(outdir, 'eddy', 'withRPE', 'data.nii.gz'))
+    dfull.data = dfull.data(:,:,:,keepvols);
+    bvecs_cat = dlmread(eddyBvecs);
+    bvals_cat = dlmread(eddyBvals);
+    dlmwrite(fullfile(outdir, 'eddy', 'withRPE', 'bvecs') , bvecs_cat,'\t');
+    dlmwrite(fullfile(outdir, 'eddy', 'withRPE', 'bvals') , bvals_cat,'\t');
+    bvecs_cat = bvecs_cat(:,keepvols');
+    bvals_cat = bvals_cat(keepvols');
+
+    % Overwrite data
+    niftiWrite(dfull);
+    dlmwrite(eddyBvecs, bvecs_cat,'\t');
+    dlmwrite(eddyBvals, bvals_cat,'\t');
+end
+
+%% Run dtifit
 mask      = fullfile(pwd,'eddy/nodif_brain_mask.nii.gz');
 dtidir    = fullfile(pwd,'dtifit');
 dtiOut    = fullfile(dtidir,'dti');
