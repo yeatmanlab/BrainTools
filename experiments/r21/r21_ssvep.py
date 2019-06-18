@@ -126,7 +126,11 @@ with ExperimentController('ShowImages', full_screen=True, version='dev') as ec:
     #                imtype_shuf=imtype_shuf))
     
     realRR = ec.estimate_screen_fs(n_rep=20)
+    ec.write_data_line('realRR:', realRR) # we should keep a record of that measurement
+    print('realRR:', realRR)   # and it should be visible to the operator
     realRR = round(realRR)
+    assert realRR == 60 # the assertion will throw an error if realRR is ever something other than 60
+
     fr = 1./realRR
     adj = fr/2  # Adjustment factor for accurate flip
     # Wait to fill the screen
