@@ -2,7 +2,7 @@
 
 %% Preprocess data
 
-data_dir = strcat('/Users/emilykubota/Desktop/motionCheck');
+data_dir = strcat('/home/ekubota/Desktop/motionCheck');
 nf_preprocessfmri(data_dir)
 cd(data_dir)
 % Get functional filenames

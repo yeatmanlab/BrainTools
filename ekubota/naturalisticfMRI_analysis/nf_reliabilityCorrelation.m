@@ -1,6 +1,6 @@
-function R = nf_reliabilityCorrelation(subject,date)
+function R = nf_reliabilityCorrelation(subject)
 
-functionalPath = strcat('/mnt/scratch/PREK_Analysis/',subject,'/',date,'/fmri/GLMdenoise');
+functionalPath = strcat('/mnt/scratch/PREK_Analysis/',subject,'/ses-pre/func/GLMdenoise');
 
 cd(functionalPath)
 
