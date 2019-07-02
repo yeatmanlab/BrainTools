@@ -1,15 +1,15 @@
-function timecourse_t1 = nf_timecourseInFsRoi(subList)
+function roi_timecourse = nf_timecourseInFsRoi(subList)
 
 
 for ii = 1:length(subList)
     
     functionalPath = strcat('/mnt/scratch/PREK_Analysis/', subList{ii},'/ses-pre/func');
     anatPath = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/ses-pre/t1');    
-    denoisedPath = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/ses-pre/func/GLMdenoise')
-    roiPath = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/fsROIs')
+    denoisedPath = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/ses-pre/func/GLMdenoise');
+    roiPath = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/fsROIs');
     
     % Get betas from results.mat
-    cd(functionalPath)
+    cd(functionalPath);
     
     % use meean functional as reference 
     im1 = readFileNifti(fullfile(denoisedPath,'denoisedGLMrun01.nii'));
@@ -18,13 +18,13 @@ for ii = 1:length(subList)
     inplane_dimensions = im1.pixdim(1:3);
     
     % get raw data to make nii too 
-    cd(denoisedPath)
-    im2 = readFileNifti(fullfile(denoisedPath,'denoisedGLMrun01.nii'))  
-    timecourse = im2.data;
+    cd(denoisedPath);
+    im2 = readFileNifti(fullfile(denoisedPath,'denoisedGLMrun01.nii'));
+    functional = im2.data;
     
     cd(roiPath)
-    im5 = readFileNifti('1007_ctx-lh-fusiform.nii.gz');
-    lh_fus = im5.data;
+    im5 = readFileNifti('lh_ph1.nii.gz');
+    roi = im5.data;
     
     cd(anatPath)
     
@@ -40,10 +40,14 @@ for ii = 1:length(subList)
     % Load in alignment
     load tr.mat   
     
-    tmp = NaN(181,217,181,98);
-    timecourse_t1 = NaN(length(subList),98);
-    for tt = 1:size(timecourse,4)
-        tmp(:,:,:,tt) = extractslices(lh_fus, t1_dimensions, timecourse(:,:,:,tt), inplane_dimensions, tr,1);
+    roi_func = extractslices(roi, t1_dimensions, mean(functional,4), inplane_dimensions, tr,0,'nearest');
+    % Loop over timepoints
+    for tt = 1:size(functional,4)
+        % Pull out 1 volume
+        vol_f = squeeze(functional(:,:,:,tt));
+        % Take the mean within the ROI for this timepoint
+        tmp_f(tt) = nanmean(vol_f(roi_func==1));
     end
-    timecourse_t1(ii,:) = nanmean(nanmean(nanmean(tmp)));
+    % PUt the subjects mean timecourse into this variable
+    roi_timecourse(ii,:) = tmp_f;
 end
