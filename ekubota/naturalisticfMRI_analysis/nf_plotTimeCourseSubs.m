@@ -4,9 +4,11 @@ full_sublist = {'PREK_1112','PREK_1676','PREK_1691','PREK_1715','PREK_1762',...
     'PREK_1673','PREK_1921','PREK_1936','PREK_1869','PREK_1443','PREK_1812',...
     'PREK_1714','PREK_1391','PREK_1293','PREK_1790','PREK_1878','PREK_1210',...
     'PREK_1706','PREK_1768','PREK_1401','PREK_1490','PREK_1818','PREK_1751',...
-    'PREK_1103','PREK_1184'}
+    'PREK_1103','PREK_1184'};
 
-roi_timecourse = nf_timecourseInFsRoi(subList)
+[~,subList,~] = nf_excludeMotion(full_sublist);
+
+roi_timecourse = nf_timecourseInFsRoi(subList);
 
 T = readtable('ses_pre.xlsx');
 
@@ -45,5 +47,8 @@ end
 figure;hold on
 stdshade(normedTimecourseLow,.4,'r');
 stdshade(normedTimecourseHigh,.4,'b');
+x=[0,3]
+y = area([-1.5,1.5])
+area(x,y)
 ylabel('zscore')
 xlabel('time')

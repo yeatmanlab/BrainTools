@@ -23,7 +23,7 @@ for ii = 1:length(subList)
     functional = im2.data;
     
     cd(roiPath)
-    im5 = readFileNifti('lh_ph1.nii.gz');
+    im5 = readFileNifti('lh_itg3.nii.gz');
     roi = im5.data;
     
     cd(anatPath)

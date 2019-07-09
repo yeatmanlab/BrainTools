@@ -8,8 +8,7 @@ full_sublist = {'PREK_1112','PREK_1676','PREK_1691','PREK_1715','PREK_1762',...
     'PREK_1966','PREK_1750','PREK_1940'}; %,'PREK_1262''PREK_1113'};
 
 sublist = {'PREK_1762','PREK_1964','PREK_1887','PREK_1673','PREK_1869','PREK_1676'};
-sublist = {'PREK_1798','PREK_1302','PREK_1460','PREK_1110','PREK_1756',...
-    'PREK_1966','PREK_1750','PREK_1940'};%,'PREK_1113','PREK_1262'};
+sublist = {'PREK_1113','PREK_1262'};
 
 session = 'ses-pre';    
 nf_organizeData(sublist,session)

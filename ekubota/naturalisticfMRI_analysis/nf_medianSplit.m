@@ -1,16 +1,16 @@
 %function nf_medianSplit
 
 fsavgout = '/mnt/scratch/projects/freesurfer/fsaverage_maps/nf';
-T = readtable('ses_pre.xlsx');
+T = readtable('/home/ekubota/git/BrainTools/ekubota/naturalisticfMRI_analysis/ses_pre.xlsx');
 
 for ii = 1:height(T) 
     T.readingScore(ii) = sum([T.letknow_numlet(ii) T.letknow_numsound(ii)]);
 end 
 
-medianRS = median(T.readingScore);
+medianRS = nanmedian(T.readingScore);
 
-low = T(T.readingScore<= medianRS,1);
-high = T(T.readingScore>medianRS,1);
+low = T(T.readingScore< medianRS,1);
+high = T(T.readingScore>=medianRS,1);
 [~,~,exclude] = nf_excludeMotion(full_sublist);
 
 [~,tmp] = strtok(exclude,'_');
@@ -45,9 +45,9 @@ for h = 1:length(hemis)
             [con_high(:,ii) M{ii}] = load_mgh(fullfile(fsavgout,mapnames_high{m}));
         end  
         
-        [~,~,~,stats] = ttest2(con_low,con_high);
+        [~,~,~,stats] = ttest2(con_low',con_high');
         T = stats.tstat';
-        save_mgh(T,fullfile(fsavgout,sprintf('Tstat_MS_%s_%s',hemis{h},contrasts{c})),M{1});
+        save_mgh(T,fullfile(fsavgout,sprintf('Tstat_MedianSplit_%s_%s',hemis{h},contrasts{c})),M{1});
     end 
 end
  
