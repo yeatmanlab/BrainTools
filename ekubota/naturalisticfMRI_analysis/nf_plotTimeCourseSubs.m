@@ -47,8 +47,5 @@ end
 figure;hold on
 stdshade(normedTimecourseLow,.4,'r');
 stdshade(normedTimecourseHigh,.4,'b');
-x=[0,3]
-y = area([-1.5,1.5])
-area(x,y)
 ylabel('zscore')
 xlabel('time')

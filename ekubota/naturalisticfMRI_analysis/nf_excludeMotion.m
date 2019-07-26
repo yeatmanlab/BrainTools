@@ -1,11 +1,11 @@
-function [C,include,exclude] = nf_excludeMotion(sublist)
+function [C,include,exclude] = nf_excludeMotion(sublist,session)
 
 root_dir = '/mnt/scratch/PREK_Analysis';
 
 for ii = 1:length(sublist)
-    denoisedDir = strcat(root_dir,'/',sublist{ii},'/ses-pre/func/GLMdenoise');
+    denoisedDir = strcat(root_dir,'/',sublist{ii},'/',session,'/func/GLMdenoise');
     if exist(denoisedDir,'dir') == 7
-        fig_dir = strcat(root_dir, '/', sublist{ii}, '/ses-pre/func/figures');
+        fig_dir = strcat(root_dir, '/', sublist{ii}, '/',session,'/func/figures');
         cd(fig_dir);
         load('record.mat')
         motion1 = max(sqrt(sum(diff(mparams{1}(:,1:3)).^2,2)));

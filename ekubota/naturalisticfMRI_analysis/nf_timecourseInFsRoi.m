@@ -11,7 +11,7 @@ for ii = 1:length(subList)
     % Get betas from results.mat
     cd(functionalPath);
     
-    % use meean functional as reference 
+    % use mean functional as reference 
     im1 = readFileNifti(fullfile(denoisedPath,'denoisedGLMrun01.nii'));
     ref = mean(im1.data,4);
     inplane = mean(im1.data,4);
@@ -51,3 +51,7 @@ for ii = 1:length(subList)
     % PUt the subjects mean timecourse into this variable
     roi_timecourse(ii,:) = tmp_f;
 end
+
+return
+
+corrmat = corr(roi_timecourse'); corrmat(corrmat == 1) = nan; nanmean(corrmat(:))

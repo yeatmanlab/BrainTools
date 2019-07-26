@@ -1,7 +1,7 @@
-function nf_alignFunctionaltoVolume(sublist)
+function nf_alignFunctionaltoVolume(sublist,session)
 
 for ii = 1:length(sublist)
-    refPath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/ses-pre/func');
+    refPath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/',session,'/func');
     targetPath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/ses-pre/t1');
     
     % Load in inplane

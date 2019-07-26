@@ -19,10 +19,15 @@ for ii = 1:nParfiles
     parNames = [parNames parfiles(ii).name];
 end 
 
-design = {};
+tmp = {};
 tr = 2;
 for ii = 1:nParfiles
-    design = [design nf_makeDesignMatrix_jdy(sessDir, parNames{ii}, tr)];
+    tmp = [tmp nf_makeDesignMatrix_jdy(sessDir, parNames{ii}, tr)];
+end 
+
+design = {};
+for ii = 1:size(tmp,2)
+    design{ii} = tmp{ii}(:,2:end)
 end 
  
 cd(sessDir)
@@ -53,7 +58,7 @@ xlabel('Time from condition onset (s)');
 ylabel('Response (arbitrary units)');
 
 %% run it 
-[results, denoiseddata] = GLMdenoisedata(design, data, stimdur, tr, [],[],[],[]);
+[results, denoiseddata] = GLMdenoisedata(design, data, stimdur, tr,'assume',[],struct('wantparametric',1),[]); 
 
 save results.mat results 
 save denoiseddata.mat denoiseddata

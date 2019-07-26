@@ -15,9 +15,9 @@ for ii = 1:length(subList)
     r2 = results.R2; 
     
     % make a contrast map
-    textvnontext = betas(:,:,:,3) - betas(:,:,:,2);
-    text = betas(:,:,:,3);
-    all = mean(betas(:,:,:,2:3),4)-betas(:,:,:,1);
+    textvnontext = betas(:,:,:,2) - betas(:,:,:,1);
+    text = betas(:,:,:,2);
+    all = mean(betas(:,:,:,1:2),4);
 
     % use meean functional as reference 
     im1 = readFileNifti(fullfile(betaPath,'run01.nii'));
