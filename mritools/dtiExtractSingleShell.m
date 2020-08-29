@@ -3,8 +3,8 @@ function dtiExtractSingleShell(dMRI, bvecs, bvals, brange, outname)
 % 
 % dtiExtractSingleShell(dMRI, bvecs, bvals, brange, outname)
 im = readFileNifti(dMRI)
-b = dlmread(bvals)
-bv = dlmread(bvecs)
+b = dlmread(bvals);
+bv = dlmread(bvecs);
 if size(bv,2) > size(bv,1)
     bv = bv';
 end
@@ -20,7 +20,7 @@ im.data = im.data(:,:,:,v); im.dim(4)=sum(v); im.fname = [outname '.nii.gz'];
 b = b(v); bv = bv(v,:);
 % Write out new nifti and corresponding bvals and bvecs
 writeFileNifti(im);
-dlmwrite([outname '.bval'],b');
-dlmwrite([outname '.bvec'],bv');
+dlmwrite([outname '.bvals'],b');
+dlmwrite([outname '.bvecs'],bv');
 
 

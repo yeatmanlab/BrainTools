@@ -1,4 +1,5 @@
-function BIDS_copyraw(basedir, dirstring, include, exclude, outbasedir)
+function BIDS_copyraw(basedir, dirstring, include, exclude, outbasedir, ...
+    dwidirname, rawdirname, dmristring, t1string, bval, dcm2nii, fsdir, fssubprefix, t1basedir)
 %
 %
 % example:
@@ -17,36 +18,52 @@ function BIDS_copyraw(basedir, dirstring, include, exclude, outbasedir)
 
 %% Find data
 
+if ~exist('dwidirname','var') || isempty(dwidirname)
+    dwidirname = 'dwi';
+end
+if ~exist('rawdirname','var') || isempty(rawdirname)
+    rawdirname = 'raw';
+end
+if ~exist('dmristring','var') || isempty(dmristring)
+    dmristring = '*DWI*';
+end
+if ~exist('dcm2nii','var') || isempty(dcm2nii)
+    dcm2nii = 0;
+end
 % List directory
 d = dir(fullfile(basedir,[dirstring '*']));
 
 % Only include designated subjects
-keep = zeros(length(d),1);
-for ii = 1:length(d)
-    if any(strcmp(d(ii).name,include))
-        keep(ii) = 1;
+if exist(include,'var') && ~isempty(include)
+    keep = zeros(length(d),1);
+    for ii = 1:length(d)
+        if any(strcmp(d(ii).name,include))
+            keep(ii) = 1;
+        end
     end
+    d = d(logical(keep));
 end
-d = d(logical(keep));
 
 % Remove subjects designated in exclude
-keep = ones(length(d),1);
-for ii = 1:length(d)
-    if any(strcmp(d(ii).name,exclude))
-        keep(ii) = 0;
+if exist(exclude,'var') && ~isempty(exclude)
+    keep = ones(length(d),1);
+    for ii = 1:length(d)
+        if any(strcmp(d(ii).name,exclude))
+            keep(ii) = 0;
+        end
     end
+    d = d(logical(keep));
 end
-d = d(logical(keep));
 
 ss = 0;
 % Record all subject session directories
 for ii = 1:length(d)
-    subdirs{ii} = d(ii).name;
-    dss = dir(fullfile(basedir, subdirs{ii}));
+    subdirs{ii} = d(ii).name; % Subject directory
+    dss = dir(fullfile(basedir, subdirs{ii})); % Session directories
     
     for jj  = 3:length(dss)
         % Check if there is a raw data directory
-        if exist(fullfile(basedir, subdirs{ii}, dss(jj).name, 'raw'), 'dir')
+        if exist(fullfile(basedir, subdirs{ii}, dss(jj).name, rawdirname), 'dir')
             ss = ss+1;
             sessdirs_subject{ss} = subdirs{ii};
             sessdirs_session{ss} = dss(jj).name;
@@ -55,41 +72,111 @@ for ii = 1:length(d)
 end
 
 % Table with all the subject-session directory combinations
-sessdirs = table(sessdirs_subject(:),sessdirs_session(:), 'variableNames',{'subject', 'session'})
+sessdirs = table(sessdirs_subject(:),sessdirs_session(:), 'variableNames',{'subject', 'session'});
 
 %% Copy data and save to BIDS
 dmrifilelist = table; t1filelist = table;
 for ii = 1:size(sessdirs,1)
-    subdir = fullfile(outbasedir, sessdirs.subject{ii});
+    % Check if the subdir already contains 'sub-'
+    if strfind(sessdirs.subject{ii},'sub-') == 1
+        subdir = fullfile(outbasedir, sessdirs.subject{ii});
+    else
+        subdir = fullfile(outbasedir, ['sub-' sessdirs.subject{ii}]);
+    end
     sessdir = fullfile(subdir,sessdirs.session{ii});
-    dwidir = fullfile(sessdir, 'raw');
+    dwidir = fullfile(sessdir, dwidirname);
     anatdir = fullfile(sessdir, 'anat');
-    rawdir = fullfile(basedir,sessdirs.subject{ii},sessdirs.session{ii},'raw')
+    rawdir = fullfile(basedir,sessdirs.subject{ii},sessdirs.session{ii},rawdirname);
     
     % Raw diffusion files - .PAR and .REC
-    diffusionpath = dir(fullfile(rawdir, '*DWI*'));
+    diffusionpath = dir(fullfile(rawdir, dmristring));
     dmrifiles = {diffusionpath(:).name};
-    if ~isempty(dmrifiles),mkdir(dwidir);end
+    % Only continue if this subject has dwi data
+    if ~isempty(dmrifiles) && ~exist(dwidir, 'dir')
+        mkdir(dwidir);
+    else
+        continue; % Skip sub if no dwi
+    end
     for jj = 1:length(dmrifiles)
-        copyfile(fullfile(rawdir,dmrifiles{jj}),fullfile(dwidir,dmrifiles{jj}));
-        dmrifilelist = [dmrifilelist; table(sessdirs.subject(ii), sessdirs.session(ii), {dwidir},dmrifiles(jj),...
-            'variableNames',{'subject', 'session', 'dwidir', 'filename'})];
+        % Try to parse bvalue if it wasn't supplied
+        if ~exist('bval','var') || isempty(bval)
+            b(1) = strfind(dmrifiles{jj},'_b'); b(2) = strfind(dmrifiles{jj},'_SSGR');
+            bval = dmrifiles{jj}(b(1)+2 : b(2)-1);
+        elseif isnumeric(bval)
+            bval = num2str(bval);
+        end
+        % Check if the session name already contains 'ses'
+        if strfind(sessdirs.session{ii},'ses') == 1
+            sesname = sessdirs.session{ii};
+        else
+            sesname = sprintf('ses-%s',sessdirs.session{ii});
+        end
+        [~,~,ext] = fileparts(dmrifiles{jj});
+        dmrioutfile = fullfile(dwidir,sprintf('sub-%s_%s_acq-b%s_dwi%s',sessdirs.subject{ii}, sesname, bval, ext));
+        copyfile(fullfile(rawdir,dmrifiles{jj}),dmrioutfile);
+        if dcm2nii == 1 && strcmp(ext,'.REC')
+            cmd = sprintf('dcm2nii -o %s -f Y -d N -e N -p N %s',fileparts(dmrioutfile),dmrioutfile);
+            system(cmd);
+        end
+        dmrifilelist = [dmrifilelist; table(sessdirs.subject(ii), sessdirs.session(ii), {dwidir},dmrifiles(jj),{dmrioutfile},...
+            'variableNames',{'subject', 'session', 'dwidir', 'filein', 'fileout'})];
     end
     
     % Raw T1 anatomy files - .PAR and .REC
-    t1path = dir(fullfile(rawdir, '*MEMP_VBM_SENSE*'));
-    t1files = {t1path(:).name};
-    if ~isempty(t1path),mkdir(anatdir);end
-    for jj = 1:length(t1files)
-        copyfile(fullfile(rawdir,t1files{jj}),fullfile(anatdir,t1files{jj}));
-        t1filelist = [t1filelist; table(sessdirs.subject(ii), sessdirs.session(ii), {anatdir},t1files(jj),...
-            'variableNames',{'subject', 'session', 'anatdir', 'filename'})];
+    % Only if defined in t1string
+    if exist('t1string','var') && ~isempty(t1string)
+        t1path = dir(fullfile(rawdir, t1string));
+        t1files = {t1path(:).name};
+        if ~isempty(t1path),mkdir(anatdir);end
+        for jj = 1:length(t1files)
+            copyfile(fullfile(rawdir,t1files{jj}),fullfile(anatdir,t1files{jj}));
+            if dcm2nii == 1 && strcmp(ext,'.REC')
+                cmd = sprintf('dcm2nii -o %s -f Y -d N -e N -p N %s',anatdir,fullfile(anatdir,t1files{jj}));
+                system(cmd);
+            end
+            t1filelist = [t1filelist; table(sessdirs.subject(ii), sessdirs.session(ii), {anatdir},t1files(jj),...
+                'variableNames',{'subject', 'session', 'anatdir', 'filename'})];
+        end
+    else
+        t1filelist = [];
     end
-    
-    
+   
 end
 
-save BIDS_copyraw_log dmrifilelist t1filelist sessdirs
+save(fullfile(outbasedir,'BIDS_copyraw_log'), 'dmrifilelist', 't1filelist', 'sessdirs')
+
+% Freesurfer
+if exist('fsdir','var') && ~isempty(fsdir)
+    if ~exist('fssubprefix', 'var')
+        fssubprefix=[];
+    end
+    subdirs = unique(dmrifilelist.subject);
+    for ii = 1:length(subdirs)
+        if strfind(subdirs{ii},'sub-') == 1
+            subdir = subdirs{ii};
+        else
+            subdir = ['sub-' subdirs{ii}];
+        end
+        fsoutdir = fullfile(outbasedir,'derivatives',subdir,'freesurfer');
+        if ~exist(fileparts(fileparts(fsoutdir)),'dir'), mkdir(fileparts(fileparts(fsoutdir))); end
+        if ~exist(fileparts(fsoutdir),'dir'), mkdir(fileparts(fsoutdir)); end
+        if ~exist(fsoutdir,'dir'), mkdir(fsoutdir); end  
+
+        fsindir = fullfile(fsdir,[fssubprefix subdirs{ii}]);
+        if exist(fsindir,'dir')
+            fprintf('\n%s Copying FREESURFER\n',fsindir)
+            copyfile(fsindir,fsoutdir);
+        else
+            fprintf('\n%s DOES NOT EXIST\n',fsindir)
+        end
+        % Copy t1 associated with fs run
+        if exist('t1basedir','var') && ~isempty(t1basedir)
+            t1filepath = fullfile(t1basedir,[fssubprefix subdirs{ii}],t1string);
+            copyfile(t1filepath,fullfile(fsoutdir,t1string));
+            
+        end
+    end
+end
 
 return
 
