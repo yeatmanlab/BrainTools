@@ -1,30 +1,34 @@
+function nf_writeOutContrastAsNifti(subList)
 
-subList = {'PREK_1112','PREK_1676','PREK_1691','PREK_1715','PREK_1762',...
-    'PREK_1901','PREK_1916','PREK_1951','PREK_1964'};
-visitDates = {'20190525','20190525','20190525','20190525','20190525',...
-    '20190524','20190524','20190525','20190525'};
 
 for ii = 1:length(subList)
     
-    betaPath = strcat('/mnt/scratch/PREK_Analysis/', subList{ii},'/',visitDates{ii},'/fmri');
-    anatPath = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/nf_anatomy');    
+    betaPath = strcat('/mnt/scratch/PREK_Analysis/', subList{ii},'/ses-pre/func');
+    anatPath = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/ses-pre/t1');    
+    denoisedPath = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/ses-pre/func/GLMdenoise')
     
     % Get betas from results.mat
     cd(betaPath)
     load results.mat
     betas = results.modelmd{2};
     npredictors = size(betas,4);
+    r2 = results.R2; 
     
     % make a contrast map
-    textvnontext = betas(:,:,:,2) - betas(:,:,:,3);
+    textvnontext = betas(:,:,:,2) - betas(:,:,:,1);
     text = betas(:,:,:,2);
-    all = mean(betas(:,:,:,2:3),4)-betas(:,:,:,1);
+    all = mean(betas(:,:,:,1:2),4);
 
     % use meean functional as reference 
     im1 = readFileNifti(fullfile(betaPath,'run01.nii'));
     ref = mean(im1.data,4);
     inplane = mean(im1.data,4);
     inplane_dimensions = im1.pixdim(1:3);
+    
+    % get raw data to make nii too 
+    cd(denoisedPath)
+    im1 = readFileNifti(fullfile(denoisedPath,'denoisedGLMrun01.nii'))
+    
     
     cd(anatPath)
     
@@ -43,7 +47,7 @@ for ii = 1:length(subList)
    
     textvnontext_t1= extractslices(t1, t1_dimensions, textvnontext, inplane_dimensions, tr,1);
     all_t1= extractslices(t1, t1_dimensions, all, inplane_dimensions, tr,1);
-    
+    r2_t1 = extractslices(t1,t1_dimensions,r2,inplane_dimensions,tr,1);
  
     % write out contrast map as nifti
     im = readFileNifti(fullfile(anatPath,'t1_acpc.nii.gz'));
@@ -57,6 +61,11 @@ for ii = 1:length(subList)
     im.data = textvnontext_t1;
     im.descrip = 'contrastMap';
     im.fname = fullfile(anatPath,'TextvNontext.nii.gz');
+    writeFileNifti(im)
+    
+    im.data = r2_t1;
+    im.descrip = 'varianceExplained';
+    im.fname = fullfile(anatPath,'ModelFit.nii.gz');
     writeFileNifti(im)
 end 
     

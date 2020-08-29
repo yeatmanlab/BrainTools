@@ -22,7 +22,7 @@ for ii = 1:(length(onsets) - 1) % Onsets-1 because of last blank offset being co
 end
 
 % CHECK THIS!
-X(end: end+extraSecs,1) = 1;
+% X(end: end+extraSecs,1) = 1;
 
 % Visualize design matrix
 imagesc(X);xlabel('conditions');ylabel('seconds')

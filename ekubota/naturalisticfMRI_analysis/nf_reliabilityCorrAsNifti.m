@@ -1,13 +1,10 @@
-sublist = {'PREK_1112','PREK_1676','PREK_1691','PREK_1715','PREK_1762',...
-    'PREK_1901','PREK_1916','PREK_1951','PREK_1964'};
-dates = {'20190525','20190525','20190525','20190525','20190525',...
-    '20190524','20190524','20190525','20190525'};
+function nf_reliabilityCorrAsNifti(sublist)
 
 for ii = 1:length(sublist)
-    inplanePath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/',dates{ii},'/fmri');
-    anatPath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/nf_anatomy');    
+    inplanePath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/ses-pre/func');
+    anatPath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/ses-pre/t1');    
     
-    reliability = nf_reliabilityCorrelation(sublist{ii},dates{ii});
+    reliability = nf_reliabilityCorrelation(sublist{ii});
     
     cd(inplanePath)
 

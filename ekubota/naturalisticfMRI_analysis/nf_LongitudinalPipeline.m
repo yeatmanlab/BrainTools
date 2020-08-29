@@ -5,19 +5,20 @@ full_sublist = {'PREK_1112','PREK_1676','PREK_1691','PREK_1715','PREK_1762',...
     'PREK_1714','PREK_1391','PREK_1293','PREK_1790','PREK_1878','PREK_1210',...
     'PREK_1706','PREK_1768','PREK_1401','PREK_1490','PREK_1818','PREK_1751',...
     'PREK_1103','PREK_1184', 'PREK_1798','PREK_1302','PREK_1460','PREK_1110','PREK_1756',...
-    'PREK_1966','PREK_1750','PREK_1940','PREK_1262','PREK_1113','PREK_1241'};
+    'PREK_1966','PREK_1750','PREK_1940','PREK_1262','PREK_1113'};
 
-sublist = {'PREK_1966','PREK_1302','PREK_1262','PREK_1812','PREK_1878','PREK_1756',...
-    'PREK_1113','PREK_1750','PREK_1940','PREK_1110','PREK_1382','PREK_1401'};
+sublist = {'PREK_1762','PREK_1964','PREK_1887','PREK_1673','PREK_1869','PREK_1676'};
+sublist = {'PREK_1112','PREK_1691','PREK_1916','PREK_1951','PREK_1901'};
+sublist = {'PREK_1715','PREK_1921','PREK_1208','PREK_1271','PREK_1372',...
+    'PREK_1939','PREK_1868','PREK_1505'};
 
-session = 'ses-post';    
-nf_organizeData(sublist,session)
+nf_organizeLongitudinalData(sublist)
 % nf_organizeAnatomy(sublist)
 root_dir = '/mnt/scratch/PREK_Analysis/';
 
 %% Preprocess data
 for si = 1:length(sublist)
-    data_dir = strcat(root_dir,sublist{si},'/',session,'/func');
+    data_dir = strcat(root_dir,sublist{si},'/longitudinal');
     if exist(data_dir,'dir') == 7
         nf_preprocessfmri(data_dir)
         cd(data_dir)
@@ -53,15 +54,15 @@ for si = 1:length(sublist)
 end
 
 %% next steps after freesurfer is run.
-nf_copyParfiles(sublist,session)
-nf_glmDenoiseSubs(sublist,session);
-nf_organizeAnatomy(sublist);
-nf_saveMeshsubs(sublist);
+nf_copyParfilesLongitudinal(sublist)
+nf_glmDenoiseSubsLongitudinal(sublist);
+%nf_organizeAnatomy(sublist);
+%nf_saveMeshsubs(sublist);
 nf_alignFunctionaltoVolume(sublist,session);
-nf_writeOutfsROIs(sublist)
-nf_divideFSRois(sublist)
-nf_writeOutContrastAsNifti(full_sublist);
-nf_reliabilityCorrAsNifti(full_sublist);
+% nf_writeOutfsROIs(sublist)
+% nf_divideFSRois(sublist)
+% nf_writeOutContrastAsNifti(sublist);
+% nf_reliabilityCorrAsNifti(sublist);
 [C,include,exclude] = nf_excludeMotion(sublist,session);
 % nf_MapFmriToFS(include);
 % nf_fsStats;

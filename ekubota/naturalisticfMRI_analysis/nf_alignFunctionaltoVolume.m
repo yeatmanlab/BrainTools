@@ -1,12 +1,8 @@
-sublist = {'PREK_1112','PREK_1676','PREK_1691','PREK_1715','PREK_1762',...
-    'PREK_1901','PREK_1916','PREK_1951','PREK_1964'};
-dates = {'20190525','20190525','20190525','20190525','20190525',...
-    '20190524','20190524','20190525','20190525'};
+function nf_alignFunctionaltoVolume(sublist,session)
 
-for ii = 9:length(sublist)
-    refPath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/',dates{ii},'/fmri');
-    targetPath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/nf_anatomy');
-    alignmentPath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/',dates{ii},'/fmri');
+for ii = 1:length(sublist)
+    refPath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/',session,'/func');
+    targetPath = strcat('/mnt/scratch/PREK_Analysis/',sublist{ii},'/ses-pre/t1');
     
     % Load in inplane
     cd(refPath)

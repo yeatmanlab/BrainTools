@@ -8,7 +8,7 @@ function nf_initialize_vista(sub_num, data_dir)
 root_dir = '/mnt/scratch/PREK_Analysis/';
 
 %% Step 4: Build t1_class file to build a 3d surface (mesh)
-anat_dir = strcat(root_dir,sub_num, '/nf_anatomy');
+anat_dir = strcat(root_dir,sub_num, '/ses-pre/t1');
 ribbonfile = strcat(anat_dir,'/ribbon.mgz');
 outfile = strcat(anat_dir,'/t1_class.nii.gz');
 alignTo = strcat(anat_dir,'/t1_acpc.nii.gz');

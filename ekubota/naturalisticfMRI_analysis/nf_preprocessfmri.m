@@ -54,7 +54,7 @@ epidesiredinplanesize = [80 80];
 % special case is [] which means to omit slice time correction.
 %   If even number of slices, then [2:2:end 1:2:end]
 %   If odd number of slices, then [1:2:end 2:2:end]
-episliceorder = 1:36; % for our experiment ascending -EK
+episliceorder = 1:33; % for our experiment ascending -EK
 
 
 
