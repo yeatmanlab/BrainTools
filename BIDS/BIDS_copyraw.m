@@ -1,5 +1,5 @@
 function BIDS_copyraw(basedir, dirstring, include, exclude, outbasedir, ...
-    dwidirname, rawdirname, dmristring, t1string, bval, dcm2nii, fsdir, fssubprefix, t1basedir)
+    dwidirname, rawdirname, dmristring, t1string, bvalall, dcm2nii, fsdir, fssubprefix, t1basedir, parreconly)
 %
 %
 % example:
@@ -30,6 +30,9 @@ end
 if ~exist('dcm2nii','var') || isempty(dcm2nii)
     dcm2nii = 0;
 end
+if ~exist('parreconly','var') || isempty(parreconly)
+    parreconly=0;
+end
 % List directory
 d = dir(fullfile(basedir,[dirstring '*']));
 
@@ -45,7 +48,7 @@ if exist(include,'var') && ~isempty(include)
 end
 
 % Remove subjects designated in exclude
-if exist(exclude,'var') && ~isempty(exclude)
+if exist('exclude','var') && ~isempty(exclude)
     keep = ones(length(d),1);
     for ii = 1:length(d)
         if any(strcmp(d(ii).name,exclude))
@@ -99,11 +102,13 @@ for ii = 1:size(sessdirs,1)
     end
     for jj = 1:length(dmrifiles)
         % Try to parse bvalue if it wasn't supplied
-        if ~exist('bval','var') || isempty(bval)
+        if ~exist('bvalall','var') || isempty(bvalall)
             b(1) = strfind(dmrifiles{jj},'_b'); b(2) = strfind(dmrifiles{jj},'_SSGR');
             bval = dmrifiles{jj}(b(1)+2 : b(2)-1);
-        elseif isnumeric(bval)
-            bval = num2str(bval);
+        elseif isnumeric(bvalall)
+            bval = num2str(bvalall);
+        else
+            bval = bvalall;
         end
         % Check if the session name already contains 'ses'
         if strfind(sessdirs.session{ii},'ses') == 1
@@ -112,6 +117,9 @@ for ii = 1:size(sessdirs,1)
             sesname = sprintf('ses-%s',sessdirs.session{ii});
         end
         [~,~,ext] = fileparts(dmrifiles{jj});
+        if parreconly ==1 && ~strcmp(ext,'.REC') && ~strcmp(ext,'.PAR')
+            continue
+        end
         dmrioutfile = fullfile(dwidir,sprintf('sub-%s_%s_acq-b%s_dwi%s',sessdirs.subject{ii}, sesname, bval, ext));
         copyfile(fullfile(rawdir,dmrifiles{jj}),dmrioutfile);
         if dcm2nii == 1 && strcmp(ext,'.REC')
@@ -130,6 +138,10 @@ for ii = 1:size(sessdirs,1)
         if ~isempty(t1path),mkdir(anatdir);end
         for jj = 1:length(t1files)
             copyfile(fullfile(rawdir,t1files{jj}),fullfile(anatdir,t1files{jj}));
+            [~,~,ext] = fileparts(t1files{jj});
+            if parreconly ==1 && ~strcmp(ext,'.REC') && ~strcmp(ext,'.PAR')
+                continue
+            end
             if dcm2nii == 1 && strcmp(ext,'.REC')
                 cmd = sprintf('dcm2nii -o %s -f Y -d N -e N -p N %s',anatdir,fullfile(anatdir,t1files{jj}));
                 system(cmd);
