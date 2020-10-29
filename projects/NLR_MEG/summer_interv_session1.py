@@ -25,7 +25,7 @@ mne.set_config('MNE_USE_CUDA', 'true')
 raw_dir = '/mnt/diskArray/projects/MEG/nlr/raw'
 
 # At local hard drive
-out_dir = '/mnt/scratch/NLR_MEG4'
+out_dir = '/mnt/scratch/NLR_MEG_Sensor'
 
 if not os.path.isdir(out_dir):
     os.mkdir(out_dir)
@@ -107,12 +107,17 @@ out = ['102_rs160618','103_ac150609','105_bb150713','110_hh160608','127_am151022
        'nlr_ib217170831','nlr_ib319170825','nlr_jb227170811','nlr_jb486170803','nlr_kb396170808',
        'nlr_ib357170912'] 
 #%%
-out = ['203_am150831',
+out = ['102_rs160618','103_ac150609','105_bb150713','110_hh160608','127_am151022',
+       '130_rw151221','132_wp160919','133_ml151124','145_ac160621','150_mg160606',
+       '151_rd160620','152_tc160422','160_ek160627','161_ak160627','163_lf160707',
+       '164_sf160707','170_gm160613','172_th160614','174_hs160620','179_gm160701',
+       '180_zd160621','187_nb161017','201_gs150818','203_am150831',
        '204_am150829','205_ac151123','206_lm151119','207_ah160608','211_lb160617',
        'nlr_gb310170614','nlr_kb218170619','nlr_jb423170620','nlr_gb267170620','nlr_jb420170621',
        'nlr_hb275170622','197_bk170622','nlr_gb355170606','nlr_gb387170608','nlr_hb205170825',
        'nlr_ib217170831','nlr_ib319170825','nlr_jb227170811','nlr_jb486170803','nlr_kb396170808',
-       'nlr_ib357170912']
+       'nlr_ib357170912'] 
+out = ['211_lb160617']
 
 for n, s in enumerate(out):
     print(s)    
@@ -133,7 +138,7 @@ for n, s in enumerate(out):
     
     params.auto_bad_meg_thresh = 10 # THIS SHOULD NOT BE SO HIGH!
 
-    params.trans_to = None #'median'
+    params.trans_to = 'median' #(0., 0., .03) #'median' # None
 
     params.t_adjust = -39e-3 # time delay from the trigger. It's due to set trigger function. I don't know why...
     
@@ -159,6 +164,8 @@ for n, s in enumerate(out):
         params.run_names = ['%s_1', '%s_2', '%s_4','%s_5','%s_6']
     elif s == 'nlr_ib357170912':
         params.run_names = ['%s_1', '%s_2', '%s_4','%s_5','%s_6']
+    elif s == 'nlr_gb355170606':
+        params.run_names = ['%s_1', '%s_2', '%s_3','%s_5','%s_6']
     else:
         params.run_names = ['%s_1', '%s_2', '%s_3', '%s_4', '%s_5', '%s_6']
     
@@ -175,7 +182,7 @@ for n, s in enumerate(out):
     
     params.dates = [(2014, 0, 00)] * len(params.subjects)
     #params.subject_indices = [0]
-    params.score = score  # scoring function to use
+#    params.score = score  # scoring function to use
     params.plot_drop_logs = False
     params.on_missing = 'warning'
     #params.acq_ssh = 'kambiz@minea.ilabs.uw.edu'  # minea - 172.28.161.8
@@ -183,8 +190,8 @@ for n, s in enumerate(out):
 
 #    params.acq_ssh = 'jason@minea.ilabs.uw.edu'  # minea - 172.28.161.8
 #    params.acq_dir = '/sinuhe/data03/jason_words'
-    params.sws_ssh = 'jason@kasga.ilabs.uw.edu'  # kasga - 172.28.161.8
-    params.sws_dir = '/data05/jason/NLR'
+#    params.sws_ssh = 'jason@kasga.ilabs.uw.edu'  # kasga - 172.28.161.8
+#    params.sws_dir = '/data05/jason/NLR'
     
     #params.mf_args = '-hpie 30 -hpig .8 -hpicons' # sjjoo-20160826: We are doing SSS using python
     
@@ -270,9 +277,9 @@ for n, s in enumerate(out):
         # channels.
         gen_ssp=True,       # Generate SSP vectors
         apply_ssp=True,     # Apply SSP vectors and filtering
-        plot_psd=False,      # Plot raw data power spectra
+#        plot_psd=False,      # Plot raw data power spectra
         write_epochs=True,  # Write epochs to disk
-        gen_covs=True,      # Generate covariances
+        gen_covs=False,      # Generate covariances
     
         # Make SUBJ/trans/SUBJ-trans.fif using mne_analyze; needed for fwd calc.
         gen_fwd=False,       # Generate forward solutions (and src space if needed)

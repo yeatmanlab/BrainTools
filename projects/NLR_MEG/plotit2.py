@@ -25,7 +25,7 @@ def plotit2(times, M, errM, task1, task2, yMin=-1, yMax=5, subject = 'all'):
     plt.figure()
     plt.clf()    
     
-    plt.hold(True)
+#    plt.hold(True)
     
     plt.plot(times, M[:,task1],'-',color=c_table[5],label='Low noise')
     plt.fill_between(times, M[:,task1]-errM[:,task1], M[:,task1]+errM[:,task1], facecolor=c_table[5], alpha=0.2, edgecolor='none')

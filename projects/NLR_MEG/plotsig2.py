@@ -23,7 +23,7 @@ c_table = (    (0.6510,    0.8078,    0.8902), # Blue, Green, Red, Orange, Purpl
 
 def plotsig2(times,nReps,X,task1, task2, subject, p_value):
     
-    t_window = 4 # 12 ms
+    t_window = 4 # 20 ms; orginally 12 ms
     temp_range = [100*(0.5-(1-p_value)/2), 100*(0.5 + (1-p_value)/2)]
     """ Lexical task: all subjects """
     result = np.zeros((X.shape[0],1))

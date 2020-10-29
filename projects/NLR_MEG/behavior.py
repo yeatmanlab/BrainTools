@@ -21,7 +21,7 @@ import statsmodels.formula.api as smf
 from scipy.stats import norm
 from scipy import stats as stats
 
-raw_dir = '/mnt/scratch/NLR_MEG4'
+raw_dir = '/mnt/scratch/NLR_MEG'
 
 session1 = ['102_rs160618','103_ac150609','105_bb150713','110_hh160608','127_am151022',
        '130_rw151221','132_wp160919','133_ml151124','145_ac160621','150_mg160606',
@@ -243,7 +243,6 @@ figureDir = '%s/figures' % raw_dir
 
 plt.figure(1)
 plt.clf()
-plt.hold(True)
 plt.bar(0.75, np.nanmean(overall_pseudo_rt1[good_readers]), width=0.2, \
         yerr = np.nanstd(overall_pseudo_rt1[good_readers])/np.sqrt(np.sum(~np.isnan(overall_pseudo_rt1[good_readers]))), \
         color=c_table[5], ecolor = [0,0,0], align='center')
@@ -306,7 +305,7 @@ os.chdir('..')
 
 plt.figure(2)
 plt.clf()
-plt.hold(True)
+
 plt.bar(1, np.nanmean(d_prime[good_readers]), width=0.4, \
         yerr = np.nanstd(d_prime[good_readers])/np.sqrt(np.sum(~np.isnan(d_prime[good_readers]))), \
         color=[0.4, 0.4, 0.4], ecolor = [0,0,0], align='center')
@@ -388,7 +387,6 @@ dot_rt = np.array(dot_rt)
 plt.figure(4)
 plt.clf()
 
-plt.hold(True)
 plt.bar(1, np.nanmean(dot_response[good_readers]), width=0.4, \
         yerr = np.nanstd(dot_response[good_readers])/np.sqrt(np.sum(~np.isnan(dot_response[good_readers]))), \
         color=[0.4, 0.4, 0.4], ecolor = [0,0,0], align='center')
@@ -422,7 +420,6 @@ stats.ttest_ind(a,b)
 
 plt.figure(5)
 plt.clf()
-plt.hold(True)
 plt.bar(1, np.nanmean(dot_rt[good_readers]), width=0.4, \
         yerr = np.nanstd(dot_rt[good_readers])/np.sqrt(np.sum(~np.isnan(dot_rt[good_readers]))), \
         color=[0.4, 0.4, 0.4], ecolor = [0,0,0], align='center')
