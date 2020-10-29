@@ -1,12 +1,37 @@
+% Make images of single words and pseudowords at different contrast and
+% noise levels. This is the code that has been used for MEG experiments on
+% reading.
+%
+% Dependencies:
+% vistadisp - https://github.com/vistalab/vistadisp
+
 % read in words
 [~,~,w]=xlsread('Word_Pseduoword_List.xlsx');
 
+% Upper or lower case?
+% wfun = @upper;
+wfun = @lower;
+
+% Remove boarder?
+removeboarder = 1;
+
 %% loop over words and render
 for ii = 2:101
-   wordIm(:,:,ii-1) = uint8(renderText(w{ii,1},'courier',20,5));
+   wordIm(:,:,ii-1) = uint8(renderText(wfun(w{ii,1}),'courier',20,5));
 end
+
+if removeboarder ==1
+    m = mean(wordIm,3);
+    my = mean(m,2);
+    mx = mean(m,1);
+    ry = [min(find(my>0)) max(find(my>0))];
+    rx = [min(find(mx>0)) max(find(mx>0))];
+    wordIm = wordIm(ry(1):ry(2),rx(1):rx(2),:);
+end
+
 wordIm(wordIm == 0) = 127;
 wordIm(wordIm == 1) = 254;
+
 
 cvals = [131  133  137 141 150  254]
 pvals = [0 .1 .2 .3 .4 .5 .6 .7 .8 .9]
@@ -25,7 +50,7 @@ end
 
 %% loop over pseudowords and render
 for ii = 2:151
-   nonwordIm(:,:,ii-1) = uint8(renderText(w{ii,2},'courier',20,5));
+   nonwordIm(:,:,ii-1) = uint8(renderText(wfun(w{ii,2}),'courier',20,5));
 end
 nonwordIm(nonwordIm == 0) = 127;
 nonwordIm(nonwordIm == 1) = 254;
@@ -43,7 +68,7 @@ for ii = 1:length(cvals)
 end
 %% loop over letter strings and render
 for ii = 2:151
-   rlIm(:,:,ii-1) = uint8(renderText(w{ii,3},'courier',20,5));
+   rlIm(:,:,ii-1) = uint8(renderText(wfun(w{ii,3}),'courier',20,5));
 end
 rlIm(rlIm == 0) = 127;
 rlIm(rlIm == 1) = 254;
@@ -61,7 +86,7 @@ for ii = 1:length(cvals)
 end
 %% loop over bigrams and render
 for ii = 2:151
-   biIm(:,:,ii-1) = uint8(renderText(w{ii,4},'courier',20,5));
+   biIm(:,:,ii-1) = uint8(renderText(wfun(w{ii,4}),'courier',20,5));
 end
 biIm(biIm == 0) = 127;
 biIm(biIm == 1) = 254;
