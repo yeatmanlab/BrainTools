@@ -32,7 +32,7 @@ from sklearn import linear_model
 import statsmodels.api as sm
 
 #import csv
-os.chdir('/home/sjjoo/git/BrainTools/projects/NLR_MEG')
+os.chdir(os.path.join("D:\\", "git","BrainTools","projects","NLR_MEG"))
 from plotit3 import plotit3
 from plotsig3 import plotsig3
 from plotit2 import plotit2
@@ -45,10 +45,10 @@ set_config('MNE_CACHE_DIR', '.tmp')
 mne.set_config('MNE_USE_CUDA', 'true')
 
 this_env = copy.copy(os.environ)
-fs_dir = '/mnt/scratch/subjects'
+fs_dir = 'D://subjects'
 this_env['SUBJECTS_DIR'] = fs_dir
 
-raw_dir = '/mnt/scratch/NLR_MEG'
+raw_dir = os.path.join("D:\\","NLR_MEG")
 
 os.chdir(raw_dir)
 
@@ -277,8 +277,8 @@ ax.plot(age, c, 'o', markerfacecolor=[.5, .5, .5], markeredgecolor=[1,1,1], mark
 plt.xlabel('Age')
 plt.ylabel('# of rejected trials')
 os.chdir(figureDir)
-plt.savefig('Corr_reject_age.png',dpi=600,papertype='letter',format='png')
-plt.savefig('Corr_reject_age.pdf',dpi=600,papertype='letter',format='pdf')
+# plt.savefig('Corr_reject_age.png',dpi=600,papertype='letter',format='png')
+# plt.savefig('Corr_reject_age.pdf',dpi=600,papertype='letter',format='pdf')
 os.chdir('..')
 
 plt.figure()
@@ -290,8 +290,8 @@ ax.plot(twre_index, c, 'o', markerfacecolor=[.5, .5, .5], markeredgecolor=[1,1,1
 plt.xlabel('Reading skill')
 plt.ylabel('# of rejected trials')
 os.chdir(figureDir)
-plt.savefig('Corr_reject_reading.png',dpi=600,papertype='letter',format='png')
-plt.savefig('Corr_reject_reading.pdf',dpi=600,papertype='letter',format='pdf')
+# plt.savefig('Corr_reject_reading.png',dpi=600,papertype='letter',format='png')
+# plt.savefig('Corr_reject_reading.pdf',dpi=600,papertype='letter',format='pdf')
 os.chdir('..')
 #%%
 """ Read HCP labels """
