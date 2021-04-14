@@ -3,10 +3,10 @@ function roi_timecourse = nf_timecourseInFsRoi(subList)
 
 for ii = 1:length(subList)
     
-    functionalPath = strcat('/mnt/scratch/PREK_Analysis/', subList{ii},'/ses-pre/func');
-    anatPath = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/ses-pre/t1');    
-    denoisedPath = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/ses-pre/func/GLMdenoise');
-    roiPath = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/fsROIs');
+    functionalPath = strcat('/mnt/disks/scratch/PREK_Analysis/data/', subList{ii},'/ses-pre/func');
+    anatPath = strcat('/mnt/disks/scratch/PREK_Analysis/data/',subList{ii},'/ses-pre/t1');    
+    denoisedPath = strcat('/mnt/disks/scratch/PREK_Analysis/data/',subList{ii},'/ses-pre/func/GLMdenoise');
+    roiPath = strcat('/mnt/disks/scratch/PREK_Analysis/data/',subList{ii},'/fsROIs');
     
     % Get betas from results.mat
     cd(functionalPath);

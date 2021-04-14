@@ -1,4 +1,4 @@
-full_sublist = {'PREK_1112','PREK_1676','PREK_1691','PREK_1715','PREK_1762',...
+fsid = {'PREK_1112','PREK_1676','PREK_1691','PREK_1715','PREK_1762',...
     'PREK_1901','PREK_1916','PREK_1951','PREK_1964','PREK_1887','PREK_1939',...
     'PREK_1505','PREK_1868','PREK_1208','PREK_1271','PREK_1372','PREK_1382',...
     'PREK_1673','PREK_1921','PREK_1936','PREK_1869','PREK_1443','PREK_1812',...
@@ -7,15 +7,11 @@ full_sublist = {'PREK_1112','PREK_1676','PREK_1691','PREK_1715','PREK_1762',...
     'PREK_1103','PREK_1184', 'PREK_1798','PREK_1302','PREK_1460','PREK_1110','PREK_1756',...
     'PREK_1966','PREK_1750','PREK_1940','PREK_1262','PREK_1113','PREK_1241'};
 
-preprocessme = [];
-for ii = 1:length(full_sublist)
-    dataDir = strcat('/mnt/disks/scratch/PREK_Analysis/data/',full_sublist{ii},'/ses-post/func/GLMdenoise');
-    if ~exist(dataDir,'dir')
-        preprocessme = [preprocessme full_sublist(ii)];
-    elseif exist(dataDir,'dir')
-        cd(dataDir)
-        if ~exist(fullfile(dataDir,'denoisedGLMrun01.nii'),'file')
-            preprocessme = [preprocessme full_sublist(ii)];
-        end 
-    end 
-end 
+for s=1:length(fsid)
+    % subject = the subject name of the freesurfer directory
+    subject = fsid{s};
+    origPath = ['/mnt/disks/scratch/freesurferRecon/' subject '/mri/orig.mgz'];
+    outFile = ['/mnt/disks/scratch/freesurferRecon/' subject '/surf/register.dat']; %originally went to subject/label/register.dat
+    cmd = ['tkregister2 --mov ' origPath ' --noedit --s ' subject ' --regheader --reg ' outFile];
+    unix(cmd)
+end

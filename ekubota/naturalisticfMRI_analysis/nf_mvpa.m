@@ -7,9 +7,9 @@ roiName = '1007_ctx-lh-fusiform.nii.gz';
 
 c = zeros(3,3,length(subs));
 for si = 1:length(subs)
-    betaPath = strcat('/mnt/scratch/PREK_Analysis/',subs{si},'/ses-pre/func');
-    anatPath = strcat('/mnt/scratch/PREK_Analysis/',subs{si},'/ses-pre/t1'); 
-    roiPath = strcat('/mnt/scratch/PREK_Analysis/',subs{si},'/fsROIs');
+    betaPath = strcat('/mnt/disks/scratch/PREK_Analysis/data/',subs{si},'/ses-pre/func');
+    anatPath = strcat('/mnt/disks/scratch/PREK_Analysis/data/',subs{si},'/ses-pre/t1'); 
+    roiPath = strcat('/mnt/disks/scratch/PREK_Analysis/data/',subs{si},'/fsROIs');
     
     % Get betas from results.mat
     cd(betaPath)
@@ -76,7 +76,7 @@ for si = 1:length(subs)
     clear roidata
 end 
 
-cd /home/ekubota/git/BrainTools/ekubota/naturalisticfMRI_analysis
-filename = strcat(roiName,'_mvpa.mat')
-save(filename,'c')
+%cd /home/ekubota/git/BrainTools/ekubota/naturalisticfMRI_analysis
+%filename = strcat(roiName,'_mvpa.mat')
+%save(filename,'c')
 

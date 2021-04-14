@@ -6,14 +6,16 @@ full_sublist = {'PREK_1112','PREK_1676','PREK_1691','PREK_1715','PREK_1762',...
     'PREK_1706','PREK_1768','PREK_1401','PREK_1490','PREK_1818','PREK_1751',...
     'PREK_1103','PREK_1184', 'PREK_1798','PREK_1302','PREK_1460','PREK_1110','PREK_1756',...
     'PREK_1966','PREK_1750','PREK_1940','PREK_1262','PREK_1113','PREK_1241'};
+% 
+% sublist = {'PREK_1966','PREK_1302','PREK_1262','PREK_1812','PREK_1878','PREK_1756',...
+%     'PREK_1113','PREK_1750','PREK_1940','PREK_1110','PREK_1382','PREK_1401'};
 
-sublist = {'PREK_1966','PREK_1302','PREK_1262','PREK_1812','PREK_1878','PREK_1756',...
-    'PREK_1113','PREK_1750','PREK_1940','PREK_1110','PREK_1382','PREK_1401'};
+sublist =  {'PREK_1372','PREK_1798','PREK_1460'};
 
 session = 'ses-post';    
 nf_organizeData(sublist,session)
 % nf_organizeAnatomy(sublist)
-root_dir = '/mnt/scratch/PREK_Analysis/';
+root_dir = '/mnt/disks/scratch/PREK_Analysis/data/';
 
 %% Preprocess data
 for si = 1:length(sublist)
@@ -60,7 +62,7 @@ nf_saveMeshsubs(sublist);
 nf_alignFunctionaltoVolume(sublist,session);
 nf_writeOutfsROIs(sublist)
 nf_divideFSRois(sublist)
-nf_writeOutContrastAsNifti(full_sublist);
+nf_writeOutContrastAsNifti(sublist);
 nf_reliabilityCorrAsNifti(full_sublist);
 [C,include,exclude] = nf_excludeMotion(sublist,session);
 % nf_MapFmriToFS(include);

@@ -2,7 +2,7 @@ function nf_saveMeshsubs(subList)
 
 
 for ii = 1:length(subList)
-    anat_dir = strcat('/mnt/scratch/PREK_Analysis/',subList{ii},'/ses-pre/t1');
+    anat_dir = strcat('/mnt/disks/scratch/PREK_Analysis/data/',subList{ii},'/ses-post/t1');
     cd(anat_dir)
 
     t1class = 't1_class.nii.gz';

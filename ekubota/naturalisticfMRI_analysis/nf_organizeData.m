@@ -4,7 +4,7 @@ function nf_organizeData(sub_list,session)
 
 
 % Get subject numbers for everyone in PREK_Analysis folder 
-root_dir = '/mnt/scratch/PREK_Analysis/';
+root_dir = '/mnt/disks/scratch/PREK_Analysis/data/';
 
     % For each subject (si = subject index)
     for si = 1:length(sub_list)

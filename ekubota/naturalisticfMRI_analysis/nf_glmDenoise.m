@@ -64,4 +64,4 @@ save results.mat results
 save denoiseddata.mat denoiseddata
 
 %% save denoised files as nifti
-saveDenoisedasNifti(sessDir);
+nf_saveDenoisedasNifti(sessDir);
